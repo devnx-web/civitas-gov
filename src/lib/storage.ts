@@ -1,6 +1,13 @@
 /**
- * Armazenamento de arquivos — S3 (MinIO local em dev).
+ * Armazenamento de arquivos — S3 (Wasabi em produção, MinIO em dev).
+ * Compatível com qualquer provedor S3: Wasabi, AWS S3, MinIO, etc.
  * Server-only: este módulo nunca deve ser importado por client components.
+ *
+ * Suporta duas convenções de variáveis de ambiente:
+ *   • WAS_* (Wasabi-style): WAS_ACCESS_KEY_ID, WAS_SECRET_ACCESS_KEY,
+ *     WAS_URL, WAS_DEFAULT_REGION, WAS_BUCKET, WAS_ENDPOINT (path prefix)
+ *   • S3_* (genérica): S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT,
+ *     S3_REGION, S3_BUCKET, S3_FORCE_PATH_STYLE
  */
 import { randomUUID } from "node:crypto";
 import {
@@ -11,12 +18,33 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const endpoint = process.env.S3_ENDPOINT;
-const region = process.env.S3_REGION ?? "us-east-1";
-const bucket = process.env.S3_BUCKET ?? "civitas-dev";
-const accessKeyId = process.env.S3_ACCESS_KEY ?? "civitas";
-const secretAccessKey = process.env.S3_SECRET_KEY ?? "civitas_dev_secret";
-const forcePathStyle = process.env.S3_FORCE_PATH_STYLE === "true";
+const wasUrl = process.env.WAS_URL;
+const wasEndpoint = process.env.WAS_ENDPOINT;
+
+// Prefer WAS_*; fallback to S3_*; then dev defaults.
+const endpoint =
+  (wasUrl ? `https://${wasUrl}` : undefined) ??
+  process.env.S3_ENDPOINT ??
+  undefined;
+
+const region =
+  process.env.WAS_DEFAULT_REGION ?? process.env.S3_REGION ?? "us-east-1";
+
+const bucket =
+  process.env.WAS_BUCKET ?? process.env.S3_BUCKET ?? "civitas-dev";
+
+const accessKeyId =
+  process.env.WAS_ACCESS_KEY_ID ?? process.env.S3_ACCESS_KEY ?? "civitas";
+
+const secretAccessKey =
+  process.env.WAS_SECRET_ACCESS_KEY ??
+  process.env.S3_SECRET_KEY ??
+  "civitas_dev_secret";
+
+const forcePathStyle =
+  // Wasabi uses virtual-hosted style (forcePathStyle=false)
+  (wasUrl ? false : undefined) ??
+  process.env.S3_FORCE_PATH_STYLE === "true";
 
 const cliente = new S3Client({
   region,
@@ -30,7 +58,11 @@ function gerarObjectKey(prefixo: string, nomeArquivo: string): string {
     ? "." + nomeArquivo.split(".").pop()
     : "";
   const prefixoLimpo = prefixo.replace(/^\/+|\/+$/g, "");
-  return `${prefixoLimpo}/${new Date().getFullYear()}/${randomUUID()}${ext}`;
+  // Se WAS_ENDPOINT estiver definido como path prefix, pré-pend
+  const pathPrefix = (wasEndpoint ?? "").replace(/^\/+|\/+$/g, "");
+  const parts = [pathPrefix, prefixoLimpo, `${new Date().getFullYear()}`, `${randomUUID()}${ext}`]
+    .filter(Boolean);
+  return parts.join("/");
 }
 
 /**

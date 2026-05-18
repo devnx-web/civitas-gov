@@ -81,8 +81,8 @@ export function Sidebar({
           "group relative flex items-center gap-3 rounded-lg text-sm transition-colors duration-150",
           colapsado ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
           ativo
-            ? "bg-brand-50 font-semibold text-brand-700"
-            : "font-medium text-ink-600 hover:bg-ink-50 hover:text-ink-900",
+            ? "bg-brand-50 font-semibold text-brand-700 dark:bg-brand-900/20 dark:text-brand-300"
+            : "font-medium text-ink-600 hover:bg-ink-50 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-100",
         )}
       >
         {ativo && (
@@ -91,7 +91,7 @@ export function Sidebar({
         <Icon
           className={cn(
             "h-[18px] w-[18px] shrink-0",
-            ativo ? "text-brand-600" : "text-ink-400 group-hover:text-ink-600",
+            ativo ? "text-brand-600 dark:text-brand-400" : "text-ink-400 group-hover:text-ink-600 dark:text-ink-500 dark:group-hover:text-ink-300",
           )}
         />
         {!colapsado && item.label}
@@ -100,9 +100,9 @@ export function Sidebar({
   };
 
   return (
-    <div className="flex h-full flex-col border-r border-ink-200 bg-white">
+    <div className="flex h-full flex-col border-r border-ink-200 bg-white dark:border-ink-800 dark:bg-ink-900">
       {/* ── Header ── */}
-      <div className="flex h-16 shrink-0 items-center border-b border-ink-100 px-3">
+      <div className="flex h-16 shrink-0 items-center border-b border-ink-100 px-3 dark:border-ink-800">
         {!colapsado && (
           <div className="flex flex-1 overflow-hidden">
             <Link href="/dashboard" onClick={onNavegar}>
@@ -113,7 +113,7 @@ export function Sidebar({
         <button
           onClick={onToggleColapso}
           className={cn(
-            "shrink-0 rounded-lg p-2 text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-700",
+            "shrink-0 rounded-lg p-2 text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-700 dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-200",
             colapsado && "mx-auto",
           )}
           aria-label={colapsado ? "Expandir menu" : "Recolher menu"}
@@ -142,7 +142,7 @@ export function Sidebar({
 
         {/* Módulos: rótulo → menu → submenu */}
         <div className={cn("mt-5 space-y-5", colapsado ? "px-2" : "px-3")}>
-          {colapsado && <div className="mx-1 h-px bg-ink-100" />}
+          {colapsado && <div className="mx-1 h-px bg-ink-100 dark:bg-ink-800" />}
 
           {modulos.map((modulo) => {
             const emRota =
@@ -162,8 +162,8 @@ export function Sidebar({
                     className={cn(
                       "relative flex items-center justify-center rounded-lg px-2 py-2.5 transition-colors",
                       emRota
-                        ? "bg-brand-50 text-brand-600"
-                        : "text-ink-500 hover:bg-ink-50 hover:text-ink-800",
+                        ? "bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400"
+                        : "text-ink-500 hover:bg-ink-50 hover:text-ink-800 dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-200",
                     )}
                   >
                     {emRota && (
@@ -174,13 +174,13 @@ export function Sidebar({
 
                   {/* Flyout — menu do módulo no hover */}
                   <div className="invisible absolute top-0 left-full z-50 -translate-x-1 pl-2 opacity-0 transition-all duration-150 group-hover/fly:visible group-hover/fly:translate-x-0 group-hover/fly:opacity-100">
-                    <div className="w-60 rounded-xl border border-ink-200 bg-white py-1.5 shadow-xl shadow-ink-900/10">
-                      <p className="border-b border-ink-100 px-3 pb-2 pt-1 text-[11px] font-bold uppercase tracking-[0.1em] text-brand-700">
+                    <div className="w-60 rounded-xl border border-ink-200 bg-white py-1.5 shadow-xl shadow-ink-900/10 dark:border-ink-800 dark:bg-ink-900">
+                      <p className="border-b border-ink-100 px-3 pb-2 pt-1 text-[11px] font-bold uppercase tracking-[0.1em] text-brand-700 dark:border-ink-800 dark:text-brand-300">
                         {modulo.label}
                       </p>
                       {modulo.menus!.map((menu) => (
                         <div key={menu.label} className="px-1.5 pt-1.5">
-                          <p className="px-2 pb-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-400">
+                          <p className="px-2 pb-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-400 dark:text-ink-500">
                             {menu.label}
                           </p>
                           {menu.submenus.map((sub) => {
@@ -193,8 +193,8 @@ export function Sidebar({
                                 className={cn(
                                   "block rounded-md px-2 py-1.5 text-[13px] transition-colors",
                                   subAtivo
-                                    ? "bg-brand-50 font-semibold text-brand-700"
-                                    : "font-medium text-ink-600 hover:bg-ink-50 hover:text-ink-900",
+                                    ? "bg-brand-50 font-semibold text-brand-700 dark:bg-brand-900/20 dark:text-brand-300"
+                                    : "font-medium text-ink-600 hover:bg-ink-50 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-100",
                                 )}
                               >
                                 {sub.label}
@@ -216,13 +216,13 @@ export function Sidebar({
                   <Icon
                     className={cn(
                       "h-3.5 w-3.5 shrink-0",
-                      emRota ? "text-brand-500" : "text-ink-400",
+                      emRota ? "text-brand-500 dark:text-brand-400" : "text-ink-400 dark:text-ink-500",
                     )}
                   />
                   <span
                     className={cn(
                       "text-[10px] font-bold uppercase tracking-[0.12em]",
-                      emRota ? "text-brand-600" : "text-ink-400",
+                      emRota ? "text-brand-600 dark:text-brand-300" : "text-ink-400 dark:text-ink-500",
                     )}
                   >
                     {modulo.label}
@@ -245,15 +245,15 @@ export function Sidebar({
                           className={cn(
                             "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                             menuAtivo
-                              ? "text-brand-700"
-                              : "text-ink-700 hover:bg-ink-50",
+                              ? "text-brand-700 dark:text-brand-300"
+                              : "text-ink-700 hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-ink-800",
                           )}
                         >
                           <ChevronDown
                             className={cn(
                               "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
                               aberto ? "rotate-0" : "-rotate-90",
-                              menuAtivo ? "text-brand-500" : "text-ink-400",
+                              menuAtivo ? "text-brand-500 dark:text-brand-400" : "text-ink-400 dark:text-ink-500",
                             )}
                           />
                           <span className="flex-1 text-left">
@@ -269,7 +269,7 @@ export function Sidebar({
                               animate={{ height: "auto", opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
                               transition={{ duration: 0.2, ease: "easeInOut" }}
-                              className="ml-[19px] space-y-0.5 overflow-hidden border-l border-ink-200 pl-3"
+                              className="ml-[19px] space-y-0.5 overflow-hidden border-l border-ink-200 pl-3 dark:border-ink-800"
                             >
                               {menu.submenus.map((sub) => {
                                 const subAtivo = pathname === sub.href;
@@ -284,8 +284,8 @@ export function Sidebar({
                                       className={cn(
                                         "block rounded-lg px-3 py-1.5 text-[13px] transition-colors",
                                         subAtivo
-                                          ? "bg-brand-50 font-semibold text-brand-700"
-                                          : "font-medium text-ink-500 hover:bg-ink-50 hover:text-ink-900",
+                                          ? "bg-brand-50 font-semibold text-brand-700 dark:bg-brand-900/20 dark:text-brand-300"
+                                          : "font-medium text-ink-500 hover:bg-ink-50 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-100",
                                       )}
                                     >
                                       {sub.label}
@@ -308,7 +308,7 @@ export function Sidebar({
         {/* Configurações */}
         {itemsDepois.length > 0 && (
           <>
-            <div className="mx-3 my-4 h-px bg-ink-100" />
+            <div className="mx-3 my-4 h-px bg-ink-100 dark:bg-ink-800" />
             <ul className={cn("space-y-0.5", colapsado ? "px-2" : "px-3")}>
               {itemsDepois.map((item) => (
                 <li key={item.href}>{navLink(item)}</li>
@@ -320,8 +320,8 @@ export function Sidebar({
 
       {/* ── Footer ── */}
       {!colapsado && (
-        <div className="border-t border-ink-100 px-5 py-4">
-          <p className="text-[10px] leading-relaxed text-ink-400">
+        <div className="border-t border-ink-100 px-5 py-4 dark:border-ink-800">
+          <p className="text-[10px] leading-relaxed text-ink-400 dark:text-ink-500">
             Civitas Gov · POC
             <br />
             Pregão 002/2026 — IPASLI

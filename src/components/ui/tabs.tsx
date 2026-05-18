@@ -47,12 +47,12 @@ export function Tabs({
 
   return (
     <RTabs.Root value={ativo} onValueChange={onChange} className={className}>
-      <RTabs.List className="flex gap-1 overflow-x-auto border-b border-ink-200">
+      <RTabs.List className="flex gap-1 overflow-x-auto border-b border-ink-200 dark:border-ink-800">
         {abas.map((a) => (
           <RTabs.Trigger
             key={a.id}
             value={a.id}
-            className="relative -mb-px shrink-0 border-b-2 border-transparent px-4 py-2.5 text-sm font-medium whitespace-nowrap text-ink-500 transition-colors hover:text-ink-800 data-[state=active]:border-brand-500 data-[state=active]:text-brand-700"
+            className="relative -mb-px shrink-0 border-b-2 border-transparent px-4 py-2.5 text-sm font-medium whitespace-nowrap text-ink-500 transition-colors hover:text-ink-800 data-[state=active]:border-brand-500 data-[state=active]:text-brand-700 dark:text-ink-400 dark:hover:text-ink-200 dark:data-[state=active]:text-brand-300"
           >
             {a.label}
           </RTabs.Trigger>

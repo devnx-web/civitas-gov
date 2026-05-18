@@ -12,7 +12,7 @@ export function Table({ children }: { children: ReactNode }) {
 
 export function THead({ children }: { children: ReactNode }) {
   return (
-    <thead className="border-b border-ink-200 bg-ink-50/70 text-left">
+    <thead className="border-b border-ink-200 bg-ink-50/70 text-left dark:border-ink-800 dark:bg-ink-900/70">
       {children}
     </thead>
   );
@@ -28,7 +28,7 @@ export function TH({
   return (
     <th
       className={cn(
-        "px-5 py-3 text-[11px] font-semibold tracking-wider text-ink-400 uppercase",
+        "px-5 py-3 text-[11px] font-semibold tracking-wider text-ink-400 uppercase dark:text-ink-500",
         className,
       )}
     >
@@ -38,12 +38,12 @@ export function TH({
 }
 
 export function TBody({ children }: { children: ReactNode }) {
-  return <tbody className="divide-y divide-ink-100">{children}</tbody>;
+  return <tbody className="divide-y divide-ink-100 dark:divide-ink-800">{children}</tbody>;
 }
 
 export function TR({ children }: { children: ReactNode }) {
   return (
-    <tr className="transition-colors duration-150 hover:bg-brand-50/50">
+    <tr className="transition-colors duration-150 hover:bg-brand-50/50 dark:hover:bg-brand-900/20">
       {children}
     </tr>
   );
@@ -52,12 +52,20 @@ export function TR({ children }: { children: ReactNode }) {
 export function TD({
   children,
   className,
+  colSpan,
+  rowSpan,
 }: {
   children: ReactNode;
   className?: string;
+  colSpan?: number;
+  rowSpan?: number;
 }) {
   return (
-    <td className={cn("px-5 py-3.5 align-middle text-ink-700", className)}>
+    <td
+      className={cn("px-5 py-3.5 align-middle text-ink-700 dark:text-ink-300", className)}
+      colSpan={colSpan}
+      rowSpan={rowSpan}
+    >
       {children}
     </td>
   );

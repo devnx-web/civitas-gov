@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
+import { PwaRegister } from "@/components/pwa/pwa-register";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,6 +19,11 @@ export const metadata: Metadata = {
   description:
     "ERP integrado de gestão pública: almoxarifado, patrimônio, licitações & contratos e portal da transparência. POC inspirada no Pregão Eletrônico 002/2026 do IPASLI.",
   applicationName: "Civitas Gov",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
@@ -27,10 +34,29 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" className={inter.variable}>
+    <html lang="pt-BR" className={inter.variable} suppressHydrationWarning>
       <body suppressHydrationWarning>
-        {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('civitas-theme') || 'system';
+                  var resolved = theme === 'system'
+                    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                    : theme;
+                  if (resolved === 'dark') document.documentElement.classList.add('dark');
+                  else document.documentElement.classList.remove('dark');
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <Toaster />
+        <PwaRegister />
       </body>
     </html>
   );

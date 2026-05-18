@@ -1,74 +1,53 @@
-# Civitas Gov — infraestrutura de desenvolvimento.
-# Sobe o PostgreSQL e o Adminer (UI web para inspecionar o banco).
-#   docker compose up -d      → inicia em segundo plano
-#   docker compose ps         → status
-#   docker compose down       → para (mantém os dados no volume)
+# Civitas Gov — Docker Compose para produção (EasyPanel, Railway, Coolify)
+# Stack mínimo: apenas a aplicação Next.js.
+# Banco de dados PostgreSQL e Wasabi S3 são serviços externos.
+#
+# INSTRUÇÕES:
+# 1. Copie .env.example para .env e preencha as variáveis
+# 2. Certifique-se de que o PostgreSQL externo está acessível
+# 3. Suba: docker compose up -d --build
+# 4. Acesse: http://localhost:3000
+
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: civitas_db
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: civitas_app
     restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
     environment:
-      POSTGRES_USER: civitas
-      POSTGRES_PASSWORD: civitas_dev
-      POSTGRES_DB: civitas_gov
-    ports:
-      - "5442:5432"
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_REGION: ${S3_REGION}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-false}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CRON_SECRET: ${CRON_SECRET:-}
+      RUN_SEED: ${RUN_SEED:-false}
     volumes:
-      - civitas_pgdata:/var/lib/postgresql/data
+      - civitas_uploads:/app/uploads
+    networks:
+      - civitas_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U civitas -d civitas_gov"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  adminer:
-    image: adminer:latest
-    container_name: civitas_adminer
-    restart: unless-stopped
-    ports:
-      - "8090:8080"
-    depends_on:
-      db:
-        condition: service_healthy
-
-  # MinIO — armazenamento S3-compatível para desenvolvimento.
-  # Console web em http://localhost:9001  (login: civitas / civitas_dev_secret).
-  minio:
-    image: minio/minio:latest
-    container_name: civitas_minio
-    restart: unless-stopped
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: civitas
-      MINIO_ROOT_PASSWORD: civitas_dev_secret
-    ports:
-      - "9000:9000"  # API S3
-      - "9001:9001"  # Console web
-    volumes:
-      - civitas_minio:/data
-    healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  # Cria o bucket padrão automaticamente na primeira subida.
-  minio-init:
-    image: minio/mc:latest
-    container_name: civitas_minio_init
-    depends_on:
-      minio:
-        condition: service_started
-    entrypoint: >
-      /bin/sh -c "
-      sleep 3 &&
-      mc alias set local http://minio:9000 civitas civitas_dev_secret &&
-      mc mb --ignore-existing local/civitas-dev &&
-      echo 'Bucket civitas-dev pronto.'
-      "
-    restart: "no"
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
-  civitas_pgdata:
-  civitas_minio:
+  civitas_uploads:
+    driver: local
+
+networks:
+  civitas_network:
+    driver: bridge

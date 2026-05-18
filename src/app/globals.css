@@ -45,8 +45,15 @@
   --foreground: #161a25;
 }
 
+.dark {
+  --background: #0a0e1a;
+  --surface: #111827;
+  --foreground: #e5e7eb;
+}
+
 * {
   border-color: var(--color-ink-200);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 html,
@@ -74,6 +81,13 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-ink-300);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-ink-700);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-600);
 }
 
 /* Utilitário: gradiente institucional usado no login e marca */

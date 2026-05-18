@@ -24,7 +24,12 @@ model Tenant {
   slug     String   @unique
   criadoEm DateTime @default(now())
 
-  usuarios Usuario[]
+  usuarios      Usuario[]
+  fornecedores  Fornecedor[]
+  materiais     Material[]
+  almoxarifados Almoxarifado[]
+  bensPatrimoniais BemPatrimonial[]
+  estoques      Estoque[]
 
   @@map("tenants")
 }
@@ -148,4 +153,263 @@ model UsuarioPermissao {
 
   @@unique([tenantId, usuarioId, permissaoId])
   @@map("usuario_permissoes")
+}
+
+enum StatusAssinatura {
+  pendente
+  assinada
+  cancelada
+  expirada
+}
+
+enum TipoAssinatura {
+  eletronica
+  digital_icp
+}
+
+enum SituacaoBem {
+  disponivel
+  baixado
+  emprestado
+  cedido
+  locado
+  em_manutencao
+  desuso
+  inservivel
+  transferido
+  ativo
+}
+
+model DocumentoAssinavel {
+  id          String   @id @default(cuid())
+  tenantId    String
+  titulo      String
+  descricao   String?
+  tipo        String
+  entidade    String
+  entidadeId  String
+  arquivoUrl  String
+  hashSha256  String?
+  status      StatusAssinatura @default(pendente)
+  criadoEm    DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  assinaturas Assinatura[]
+
+  @@index([tenantId])
+  @@index([entidade, entidadeId])
+  @@map("documentos_assinaveis")
+}
+
+model Assinatura {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  documentoId         String
+  signatarioId        String
+  tipo                TipoAssinatura
+  nomeSignatario      String
+  cargoSignatario     String?
+  cpfSignatario       String?
+  dataAssinatura      DateTime @default(now())
+  codigoVerificacao   String   @unique
+  ipOrigem            String?
+  userAgent           String?
+  certificadoInfo     Json?
+  valida              Boolean  @default(true)
+  criadoEm            DateTime @default(now())
+
+  documento DocumentoAssinavel @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([documentoId])
+  @@map("assinaturas")
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MODELOS ADICIONAIS PARA IMPORTAÇÃO/EXPORTAÇÃO EXCEL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+enum TipoMaterial {
+  consumo
+  permanente
+  servico
+  obra
+}
+
+enum CategoriaMaterial {
+  perecivel
+  nao_perecivel
+  estocavel
+  combustivel
+}
+
+model UnidadeMedida {
+  id     String @id @default(cuid())
+  tenantId String
+  codigo String
+  nome   String
+  ativo  Boolean @default(true)
+  criadoEm DateTime @default(now())
+  materiais Material[]
+  @@index([tenantId])
+  @@map("unidades_medida")
+}
+
+model Material {
+  id            String   @id @default(cuid())
+  tenantId      String
+  codigo        String   @unique
+  descricao     String
+  descricaoCompleta String?
+  tipo          TipoMaterial
+  categoria     CategoriaMaterial?
+  unidadeMedidaId String
+  catmat        String?
+  catser        String?
+  imagemUrl     String?
+  ativo         Boolean  @default(true)
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
+  tenant        Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unidadeMedida UnidadeMedida   @relation(fields: [unidadeMedidaId], references: [id])
+  estoques      Estoque[]
+  @@index([tenantId])
+  @@index([tenantId, ativo])
+  @@map("materiais")
+}
+
+enum TipoFornecedor {
+  pf
+  pj
+}
+
+model Fornecedor {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tipo         TipoFornecedor
+  nome         String
+  nomeFantasia String?
+  cpfCnpj      String
+  ie           String?
+  im           String?
+  crc          String?
+  email        String?
+  telefone     String?
+  endereco     String?
+  cidade       String?
+  uf           String? @db.VarChar(2)
+  cep          String?
+  banco        String?
+  agencia      String?
+  conta        String?
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  documentos  FornecedorDocumento[]
+  @@index([tenantId])
+  @@index([tenantId, ativo])
+  @@map("fornecedores")
+}
+
+model FornecedorDocumento {
+  id            String   @id @default(cuid())
+  fornecedorId  String
+  tipo          String
+  numero        String?
+  validade      DateTime?
+  arquivoUrl    String?
+  status        String   @default("valido")
+  criadoEm      DateTime @default(now())
+  fornecedor Fornecedor @relation(fields: [fornecedorId], references: [id], onDelete: Cascade)
+  @@index([fornecedorId])
+  @@map("fornecedor_documentos")
+}
+
+model Almoxarifado {
+  id       String @id @default(cuid())
+  tenantId String
+  codigo   String
+  nome     String
+  setor    String?
+  local    String?
+  ativo    Boolean @default(true)
+  criadoEm DateTime @default(now())
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  estoques Estoque[]
+  @@unique([tenantId, codigo])
+  @@index([tenantId])
+  @@map("almoxarifados")
+}
+
+model Estoque {
+  id             String @id @default(cuid())
+  tenantId       String
+  almoxarifadoId String
+  materialId     String
+  quantidade     Decimal @default(0) @db.Decimal(18, 4)
+  precoMedio     Decimal @default(0) @db.Decimal(18, 4)
+  estoqueMinimo  Decimal @default(0) @db.Decimal(18, 4)
+  estoqueMaximo  Decimal @default(0) @db.Decimal(18, 4)
+  pontoReposicao Decimal @default(0) @db.Decimal(18, 4)
+  localizacao    String?
+  bloqueado      Boolean @default(false)
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  almoxarifado Almoxarifado @relation(fields: [almoxarifadoId], references: [id])
+  material     Material     @relation(fields: [materialId], references: [id])
+  @@unique([almoxarifadoId, materialId])
+  @@index([tenantId])
+  @@map("estoques")
+}
+
+enum TipoBem {
+  movel
+  imovel
+  intangivel
+  semovente
+}
+
+enum EstadoConservacao {
+  otimo
+  bom
+  regular
+  ruim
+  pessimo
+  inservivel
+}
+
+model BemPatrimonial {
+  id              String   @id @default(cuid())
+  tenantId        String
+  numeroTombamento String   @unique
+  tipo            TipoBem
+  descricao       String
+  marca           String?
+  modelo          String?
+  numeroSerie     String?
+  cor             String?
+  imagemUrl       String?
+  valorAquisicao  Decimal  @db.Decimal(18, 4)
+  dataAquisicao   DateTime
+  valorResidual   Decimal? @db.Decimal(18, 4)
+  percentualDepreciacaoAnual Decimal? @db.Decimal(5, 2)
+  contaContabilId String?
+  fornecedorId    String?
+  empenho         String?
+  situacao        SituacaoBem @default(ativo)
+  estadoConservacao EstadoConservacao?
+  localizacaoAtual String?
+  responsavelId   String?
+  observacoes     String?
+  ativo           Boolean  @default(true)
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  @@index([tenantId])
+  @@index([tenantId, situacao])
+  @@index([tenantId, tipo])
+  @@map("bens_patrimoniais")
 }

@@ -8,6 +8,7 @@ import { navItemAtual } from "@/lib/navigation";
 import { ROLE_LABELS } from "@/lib/roles";
 import { sair } from "@/lib/actions/auth";
 import { iniciais } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import type { Role } from "@/types/next-auth";
 
 interface UsuarioSessao {
@@ -30,11 +31,11 @@ export function Topbar({
   const atual = navItemAtual(pathname);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-ink-200/80 bg-white/80 px-4 backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-ink-200/80 bg-white/80 px-4 backdrop-blur-md sm:px-6 dark:border-ink-800/80 dark:bg-ink-900/80">
       <div className="flex items-center gap-3">
         <button
           onClick={onAbrirMenu}
-          className="rounded-lg p-2 text-ink-500 transition-colors hover:bg-ink-100 lg:hidden"
+          className="rounded-lg p-2 text-ink-500 transition-colors hover:bg-ink-100 dark:text-ink-400 dark:hover:bg-ink-800 lg:hidden"
           aria-label="Abrir menu"
         >
           <Menu className="h-5 w-5" />
@@ -42,11 +43,11 @@ export function Topbar({
         <div className="flex items-center gap-2.5">
           <span className="hidden h-1.5 w-1.5 rounded-full grad-marca sm:block" />
           <div>
-            <h2 className="text-sm font-semibold tracking-tight text-ink-900">
+            <h2 className="text-sm font-semibold tracking-tight text-ink-900 dark:text-ink-100">
               {atual?.label ?? "Civitas Gov"}
             </h2>
             {atual?.descricao && (
-              <p className="hidden text-xs text-ink-400 sm:block">
+              <p className="hidden text-xs text-ink-400 dark:text-ink-500 sm:block">
                 {atual.descricao}
               </p>
             )}
@@ -56,33 +57,35 @@ export function Topbar({
 
       <div className="flex items-center gap-1.5">
         <button
-          className="relative rounded-lg p-2 text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-700"
+          className="relative rounded-lg p-2 text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-700 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-200"
           aria-label="Notificações"
         >
           <Bell className="h-5 w-5" />
           <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-ink-900" />
           </span>
         </button>
+
+        <ThemeToggle />
 
         <div className="relative">
           <button
             onClick={() => setMenuAberto((v) => !v)}
-            className="flex items-center gap-2 rounded-lg p-1.5 pr-2 transition-colors hover:bg-ink-100"
+            className="flex items-center gap-2 rounded-lg p-1.5 pr-2 transition-colors hover:bg-ink-100 dark:hover:bg-ink-800"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm ring-2 ring-white grad-marca">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm ring-2 ring-white grad-marca dark:ring-ink-900">
               {iniciais(usuario.nome)}
             </span>
             <span className="hidden text-left sm:block">
-              <span className="block text-sm leading-tight font-semibold text-ink-800">
+              <span className="block text-sm leading-tight font-semibold text-ink-800 dark:text-ink-200">
                 {usuario.nome}
               </span>
-              <span className="block text-xs leading-tight text-ink-400">
+              <span className="block text-xs leading-tight text-ink-400 dark:text-ink-500">
                 {ROLE_LABELS[usuario.role]}
               </span>
             </span>
-            <ChevronDown className="hidden h-4 w-4 text-ink-400 sm:block" />
+            <ChevronDown className="hidden h-4 w-4 text-ink-400 dark:text-ink-500 sm:block" />
           </button>
 
           <AnimatePresence>
@@ -97,24 +100,24 @@ export function Topbar({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.96 }}
                   transition={{ duration: 0.16 }}
-                  className="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-ink-200 bg-white shadow-lg"
+                  className="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-ink-200 bg-white shadow-lg dark:border-ink-800 dark:bg-ink-900"
                 >
-                  <div className="border-b border-ink-100 bg-ink-50/60 px-4 py-3">
-                    <p className="flex items-center gap-2 text-sm font-semibold text-ink-800">
-                      <UserCircle2 className="h-4 w-4 text-brand-600" />
+                  <div className="border-b border-ink-100 bg-ink-50/60 px-4 py-3 dark:border-ink-800 dark:bg-ink-800/60">
+                    <p className="flex items-center gap-2 text-sm font-semibold text-ink-800 dark:text-ink-200">
+                      <UserCircle2 className="h-4 w-4 text-brand-600 dark:text-brand-400" />
                       {usuario.nome}
                     </p>
-                    <p className="mt-0.5 text-xs text-ink-500">
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
                       {usuario.email}
                     </p>
-                    <p className="mt-1 text-xs text-ink-400">
+                    <p className="mt-1 text-xs text-ink-400 dark:text-ink-500">
                       {usuario.cargo}
                     </p>
                   </div>
                   <form action={sair}>
                     <button
                       type="submit"
-                      className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50"
+                      className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:hover:bg-rose-900/20"
                     >
                       <LogOut className="h-4 w-4" />
                       Encerrar sessão
