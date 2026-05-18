@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown, Scale, FileText, Download } from "lucide-react";
+import { auth } from "@/auth";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -6,12 +7,14 @@ import { Stagger } from "@/components/motion";
 import { resumoTransparencia } from "@/lib/data/transparencia";
 import { formatBRL } from "@/lib/utils";
 
-export default function TransparenciaLayout({
+export default async function TransparenciaLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const r = resumoTransparencia();
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+  const r = await resumoTransparencia(tenantId);
 
   return (
     <div>
@@ -30,13 +33,13 @@ export default function TransparenciaLayout({
         <StatCard
           icon={<TrendingUp className="h-[18px] w-[18px]" />}
           label="Receita do mês"
-          valor={formatBRL(r.receitaMes)}
+          valor={formatBRL(0)}
           tone="sucesso"
         />
         <StatCard
           icon={<TrendingDown className="h-[18px] w-[18px]" />}
           label="Despesa do mês"
-          valor={formatBRL(r.despesaMes)}
+          valor={formatBRL(r.totalPago)}
           tone="alerta"
         />
         <StatCard
@@ -47,9 +50,8 @@ export default function TransparenciaLayout({
         />
         <StatCard
           icon={<FileText className="h-[18px] w-[18px]" />}
-          label="Despesas publicadas"
-          valor={String(r.despesasPublicadas)}
-          detalhe={`${r.despesasPagas} já pagas`}
+          label="Empenhos"
+          valor={String(0)}
         />
       </Stagger>
 

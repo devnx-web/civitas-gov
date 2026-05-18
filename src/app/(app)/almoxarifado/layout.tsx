@@ -1,4 +1,5 @@
 import { Boxes, PackageX, ClipboardList, Wallet, Plus } from "lucide-react";
+import { auth } from "@/auth";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -6,12 +7,14 @@ import { Stagger } from "@/components/motion";
 import { resumoAlmoxarifado } from "@/lib/data/almoxarifado";
 import { formatBRL } from "@/lib/utils";
 
-export default function AlmoxarifadoLayout({
+export default async function AlmoxarifadoLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const r = resumoAlmoxarifado();
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+  const r = await resumoAlmoxarifado(tenantId);
 
   return (
     <div>

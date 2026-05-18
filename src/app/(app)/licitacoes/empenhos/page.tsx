@@ -1,13 +1,24 @@
 import type { Metadata } from "next";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { Card, CardHeader } from "@/components/ui/card";
 import { FadeIn } from "@/components/motion";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
-import { EMPENHOS } from "@/lib/data/licitacoes";
 import { formatBRL, formatData } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Empenhos" };
 
-export default function EmpenhosPage() {
+export default async function EmpenhosPage() {
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+
+  const empenhos = await prisma.empenho.findMany({
+    where: { tenantId },
+    orderBy: { dataEmpenho: "desc" },
+    include: { contrato: { select: { numero: true, ano: true } } },
+    take: 50,
+  });
+
   return (
     <FadeIn>
       <Card>
@@ -26,14 +37,16 @@ export default function EmpenhosPage() {
             </TR>
           </THead>
           <TBody>
-            {EMPENHOS.map((e) => (
+            {empenhos.map((e) => (
               <TR key={e.id}>
                 <TD className="font-mono text-xs text-ink-600">{e.numero}</TD>
-                <TD className="font-medium text-ink-900">{e.contrato}</TD>
-                <TD className="whitespace-nowrap">{formatData(e.data)}</TD>
+                <TD className="font-medium text-ink-900">
+                  {e.contrato ? `${e.contrato.numero}/${e.contrato.ano}` : "—"}
+                </TD>
+                <TD className="whitespace-nowrap">{formatData(e.dataEmpenho.toISOString())}</TD>
                 <TD className="capitalize">{e.tipo}</TD>
                 <TD className="text-right whitespace-nowrap">
-                  {formatBRL(e.valor)}
+                  {formatBRL(Number(e.valor))}
                 </TD>
               </TR>
             ))}

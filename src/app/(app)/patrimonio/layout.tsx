@@ -1,4 +1,5 @@
 import { Landmark, TrendingDown, Wallet, Trash2, Plus } from "lucide-react";
+import { auth } from "@/auth";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -6,12 +7,14 @@ import { Stagger } from "@/components/motion";
 import { resumoPatrimonio } from "@/lib/data/patrimonio";
 import { formatBRL } from "@/lib/utils";
 
-export default function PatrimonioLayout({
+export default async function PatrimonioLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const r = resumoPatrimonio();
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+  const r = await resumoPatrimonio(tenantId);
 
   return (
     <div>

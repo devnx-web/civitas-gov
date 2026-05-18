@@ -1,4 +1,5 @@
 import { Gavel, FileSignature, Wallet, CalendarClock, Plus } from "lucide-react";
+import { auth } from "@/auth";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -6,12 +7,14 @@ import { Stagger } from "@/components/motion";
 import { resumoLicitacoes } from "@/lib/data/licitacoes";
 import { formatBRL } from "@/lib/utils";
 
-export default function LicitacoesLayout({
+export default async function LicitacoesLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const r = resumoLicitacoes();
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+  const r = await resumoLicitacoes(tenantId);
 
   return (
     <div>
