@@ -68,12 +68,22 @@ multi-tenancy e CI.
 - [x] `Configurações` refatorada: usa `requirePermissao` + `PodeFazer` no botão e coluna.
 - [x] Atende REQ-NF-011, REQ-NF-012 (TR §4.3.3).
 
-### F. Trilha de auditoria (pendente)
+### F. Trilha de auditoria ✅ (concluído)
 
-- [ ] Modelo `Auditoria` (tenantId, usuarioId, acao, entidade, entidadeId, antes, depois, ip, criadoEm).
-- [ ] Middleware/extensão Prisma que grava CREATE/UPDATE/DELETE automaticamente.
-- [ ] Telas de consulta na área de Configurações.
-- [ ] Atende REQ-NF-013, REQ-NF-014, REQ-NF-016.
+- [x] Enum `AcaoAuditoria` (CRIAR, ATUALIZAR, EXCLUIR).
+- [x] Modelo `Auditoria` (tenantId, usuarioId, acao, entidade, entidadeId, antes, depois, ip, userAgent, criadoEm).
+- [x] Índices por `[tenantId, criadoEm DESC]` e `[tenantId, entidade, entidadeId]`.
+- [x] Migração `20260518152655_trilha_auditoria` aplicada.
+- [x] `AsyncLocalStorage<AuditoriaCtx>` para propagação de contexto sem prop drilling.
+- [x] Extensão Prisma `prismaAuditado` — intercepta `create/update/delete/upsert` nos modelos da whitelist.
+- [x] Sanitização de campos sensíveis antes do armazenamento (ex.: `senhaHash` de `Usuario`).
+- [x] Erros de auditoria são logados mas não propagam — operação principal nunca falha por isso.
+- [x] Helper `comAuditoria(ctx, fn)` em `src/lib/auditoria.ts` para ativar contexto.
+- [x] `src/lib/data/auditorias.ts`: `listarAuditorias()` + `listarMatrizPermissoes()`.
+- [x] Configurações refatorada com 4 abas: Usuários, Permissões, Auditoria, Parâmetros.
+- [x] Aba Auditoria: tabela com ação, entidade, usuário, data/hora, IP — estado vazio amigável.
+- [x] Aba Permissões: matriz visual escopo × role com pills de operação por célula.
+- [x] Atende REQ-NF-013, REQ-NF-014, REQ-NF-016.
 
 ### G. Multi-tenancy ✅ (concluído nesta sessão; auto-scoping fica para depois)
 

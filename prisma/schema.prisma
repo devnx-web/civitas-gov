@@ -50,6 +50,34 @@ model Usuario {
   @@map("usuarios")
 }
 
+// ─── Auditoria ────────────────────────────────────────────────────────────────
+
+/// Tipo de operação registrada na trilha de auditoria.
+enum AcaoAuditoria {
+  CRIAR
+  ATUALIZAR
+  EXCLUIR
+}
+
+/// Registro imutável de operação auditável — trilha completa com before/after.
+model Auditoria {
+  id         String        @id @default(cuid())
+  tenantId   String
+  usuarioId  String?
+  acao       AcaoAuditoria
+  entidade   String
+  entidadeId String
+  antes      Json?
+  depois     Json?
+  ip         String?
+  userAgent  String?
+  criadoEm   DateTime      @default(now())
+
+  @@index([tenantId, criadoEm(sort: Desc)])
+  @@index([tenantId, entidade, entidadeId])
+  @@map("auditorias")
+}
+
 // ─── RBAC granular ────────────────────────────────────────────────────────────
 
 /// Módulo/área do sistema ao qual a permissão se aplica.
