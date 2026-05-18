@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Lock, Users, ShieldCheck, SlidersHorizontal, Plus } from "lucide-react";
-import { auth } from "@/auth";
+import { Users, ShieldCheck, SlidersHorizontal, Plus } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageTransition, FadeIn } from "@/components/motion";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
-import { USUARIOS, ROLE_LABELS } from "@/lib/data/usuarios";
+import { listarUsuarios } from "@/lib/data/usuarios";
+import { getTenant } from "@/lib/tenant";
+import { requirePermissao, checarPermissao } from "@/lib/permissoes";
+import { ROLE_LABELS } from "@/lib/roles";
 import { iniciais } from "@/lib/utils";
+import { PodeFazer } from "@/components/auth/pode-fazer";
 import type { Role } from "@/types/next-auth";
 
 export const metadata: Metadata = { title: "Configurações" };
@@ -28,32 +31,16 @@ const PARAMETROS = [
 ];
 
 export default async function ConfiguracoesPage() {
-  const session = await auth();
-  const role = session?.user?.role ?? "operador";
+  // Barreira de acesso — redireciona para /acesso-negado se não autorizado.
+  await requirePermissao("configuracoes", "visualizar");
 
-  // Controle de acesso por papel — apenas administradores.
-  if (role !== "admin") {
-    return (
-      <PageTransition>
-        <FadeIn>
-          <Card className="mx-auto mt-10 max-w-md text-center">
-            <CardBody className="py-12">
-              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 text-rose-600">
-                <Lock className="h-6 w-6" />
-              </span>
-              <h2 className="mt-4 text-lg font-semibold text-ink-900">
-                Acesso restrito
-              </h2>
-              <p className="mt-1 text-sm text-ink-500">
-                Esta área é exclusiva para administradores do sistema. Seu
-                papel atual é <strong>{ROLE_LABELS[role]}</strong>.
-              </p>
-            </CardBody>
-          </Card>
-        </FadeIn>
-      </PageTransition>
-    );
-  }
+  const [tenant, podeCriarUsuario, podeEditarUsuario] = await Promise.all([
+    getTenant(),
+    checarPermissao("usuarios", "criar"),
+    checarPermissao("usuarios", "editar"),
+  ]);
+
+  const usuarios = await listarUsuarios(tenant.id);
 
   return (
     <PageTransition>
@@ -61,10 +48,12 @@ export default async function ConfiguracoesPage() {
         titulo="Configurações"
         descricao="Gestão de usuários, papéis de acesso e parâmetros institucionais."
         acao={
-          <Button>
-            <Plus className="h-4 w-4" />
-            Novo usuário
-          </Button>
+          <PodeFazer pode={podeCriarUsuario}>
+            <Button>
+              <Plus className="h-4 w-4" />
+              Novo usuário
+            </Button>
+          </PodeFazer>
         }
       />
 
@@ -82,10 +71,11 @@ export default async function ConfiguracoesPage() {
                   <TH>Setor</TH>
                   <TH>Cargo</TH>
                   <TH>Papel</TH>
+                  {podeEditarUsuario && <TH className="w-20">Ações</TH>}
                 </TR>
               </THead>
               <TBody>
-                {USUARIOS.map((u) => (
+                {usuarios.map((u) => (
                   <TR key={u.id}>
                     <TD>
                       <div className="flex items-center gap-3">
@@ -109,6 +99,16 @@ export default async function ConfiguracoesPage() {
                         {ROLE_LABELS[u.role]}
                       </Badge>
                     </TD>
+                    {podeEditarUsuario && (
+                      <TD>
+                        <button
+                          type="button"
+                          className="cursor-pointer text-xs font-medium text-brand-600 hover:text-brand-700"
+                        >
+                          Editar
+                        </button>
+                      </TD>
+                    )}
                   </TR>
                 ))}
               </TBody>

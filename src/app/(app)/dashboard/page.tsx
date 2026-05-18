@@ -50,28 +50,28 @@ export default async function DashboardPage() {
       {/* KPIs */}
       <Stagger className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          icon={Wallet}
+          icon={<Wallet className="h-[18px] w-[18px]" />}
           label="Saldo orçamentário do mês"
           valor={formatBRL(tra.saldoMes)}
           detalhe="Receita menos despesa em maio/2026"
           tone={tra.saldoMes >= 0 ? "sucesso" : "perigo"}
         />
         <StatCard
-          icon={Gavel}
+          icon={<Gavel className="h-[18px] w-[18px]" />}
           label="Contratos vigentes"
           valor={String(lic.contratosVigentes)}
           detalhe={`${formatBRL(lic.valorContratado)} sob gestão`}
           tone="marca"
         />
         <StatCard
-          icon={Boxes}
+          icon={<Boxes className="h-[18px] w-[18px]" />}
           label="Valor em estoque"
           valor={formatBRL(alm.valorEstoque)}
           detalhe={`${alm.totalItens} itens cadastrados`}
           tone="marca"
         />
         <StatCard
-          icon={Landmark}
+          icon={<Landmark className="h-[18px] w-[18px]" />}
           label="Patrimônio (valor atual)"
           valor={formatBRL(pat.valorAtual)}
           detalhe={`${pat.totalBens} bens · ${formatBRL(pat.depreciacao)} depreciados`}

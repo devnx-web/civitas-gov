@@ -1,29 +1,39 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
 import { fadeInVariants } from "@/components/motion";
 import { cn } from "@/lib/utils";
 
 type Tone = "marca" | "info" | "sucesso" | "alerta" | "perigo";
 
-const ICON_TONES: Record<Tone, string> = {
-  marca: "bg-brand-50 text-brand-600",
-  info: "bg-sky-50 text-sky-600",
-  sucesso: "bg-emerald-50 text-emerald-600",
-  alerta: "bg-amber-50 text-amber-600",
-  perigo: "bg-rose-50 text-rose-600",
+/** Gradiente do ícone por tom. */
+const GRAD: Record<Tone, string> = {
+  marca: "grad-marca",
+  info: "grad-info",
+  sucesso: "grad-sucesso",
+  alerta: "grad-alerta",
+  perigo: "grad-perigo",
+};
+
+/** Cor de acento (blob decorativo + marcador). */
+const ACENTO: Record<Tone, string> = {
+  marca: "bg-brand-400",
+  info: "bg-sky-400",
+  sucesso: "bg-emerald-400",
+  alerta: "bg-amber-400",
+  perigo: "bg-rose-400",
 };
 
 /** Cartão de indicador (KPI) animado. */
 export function StatCard({
-  icon: Icon,
+  icon,
   label,
   valor,
   detalhe,
   tone = "marca",
 }: {
-  icon: LucideIcon;
+  icon: ReactNode;
   label: string;
   valor: string;
   detalhe?: string;
@@ -32,25 +42,41 @@ export function StatCard({
   return (
     <motion.div
       variants={fadeInVariants}
-      whileHover={{ y: -3 }}
+      whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
-      className="rounded-[var(--radius-card)] border border-ink-200 bg-white p-5 shadow-sm"
+      className="group relative overflow-hidden rounded-2xl border border-ink-200/80 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-lg hover:shadow-ink-900/[0.06]"
     >
-      <div className="flex items-start justify-between">
-        <p className="text-sm font-medium text-ink-500">{label}</p>
+      {/* Blob decorativo */}
+      <div
+        className={cn(
+          "pointer-events-none absolute -top-10 -right-10 h-28 w-28 rounded-full opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-20",
+          ACENTO[tone],
+        )}
+      />
+
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[26px] font-bold leading-none tracking-tight text-ink-900">
+            {valor}
+          </p>
+          <p className="mt-2 text-sm font-medium text-ink-500">{label}</p>
+        </div>
         <span
           className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-lg",
-            ICON_TONES[tone],
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-sm transition-transform duration-300 group-hover:scale-105",
+            GRAD[tone],
           )}
         >
-          <Icon className="h-[18px] w-[18px]" />
+          {icon}
         </span>
       </div>
-      <p className="mt-3 text-2xl font-bold tracking-tight text-ink-900">
-        {valor}
-      </p>
-      {detalhe && <p className="mt-1 text-xs text-ink-400">{detalhe}</p>}
+
+      {detalhe && (
+        <p className="relative mt-3 flex items-center gap-1.5 border-t border-ink-100 pt-3 text-xs text-ink-400">
+          <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", ACENTO[tone])} />
+          {detalhe}
+        </p>
+      )}
     </motion.div>
   );
 }

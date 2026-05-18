@@ -1,73 +1,76 @@
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
 import type { Role } from "@/types/next-auth";
 
 /**
- * Base de usuários (MOCK).
- *
- * Em uma implementação real, este módulo seria substituído por consulta a
- * banco de dados com hash de senha (bcrypt/argon2) e, idealmente, integração
- * com o login único gov.br — conforme exigência de autenticação segura do
- * edital. Para a POC, as senhas são mantidas em texto puro de propósito.
+ * Acesso a usuários — persistido em PostgreSQL via Prisma. Server-only.
+ * As senhas são armazenadas como hash bcrypt (nunca em texto puro).
+ * Os rótulos de papel (client-safe) ficam em `@/lib/roles`.
  */
-export interface Usuario {
+
+/** Usuário sem o hash de senha — formato seguro para uso na aplicação. */
+export interface UsuarioPublico {
   id: string;
   nome: string;
   email: string;
-  senha: string;
   role: Role;
   cargo: string;
   setor: string;
+  tenantId: string;
+  tenantSlug: string;
+  tenantNome: string;
 }
 
-export const USUARIOS: Usuario[] = [
-  {
-    id: "u-001",
-    nome: "Ivan Salvador",
-    email: "admin@civitas.gov.br",
-    senha: "civitas123",
-    role: "admin",
-    cargo: "Administrador do Sistema",
-    setor: "Tecnologia da Informação",
-  },
-  {
-    id: "u-002",
-    nome: "Sávio Pagung",
-    email: "gestor@civitas.gov.br",
-    senha: "civitas123",
-    role: "gestor",
-    cargo: "Fiscal de Contrato",
-    setor: "Diretoria Administrativa Financeira",
-  },
-  {
-    id: "u-003",
-    nome: "Janaína Amaral",
-    email: "operador@civitas.gov.br",
-    senha: "civitas123",
-    role: "operador",
-    cargo: "Escriturária",
-    setor: "Almoxarifado",
-  },
-];
-
-/** Rótulos amigáveis para cada papel de acesso. */
-export const ROLE_LABELS: Record<Role, string> = {
-  admin: "Administrador",
-  gestor: "Gestor / Fiscal",
-  operador: "Operador",
-};
-
 /**
- * Autentica um usuário a partir de e-mail + senha.
- * Retorna o usuário (sem a senha) ou `null` se inválido.
+ * Autentica um usuário por e-mail + senha contra o banco de dados.
+ * Inclui dados do tenant para popular o JWT da sessão.
+ * Retorna o usuário (sem hash) ou `null`.
  */
-export function autenticarUsuario(
+export async function autenticarUsuario(
   email: string,
   senha: string,
-): Omit<Usuario, "senha"> | null {
-  const usuario = USUARIOS.find(
-    (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.senha === senha,
-  );
-  if (!usuario) return null;
-  const { senha: _omit, ...rest } = usuario;
-  void _omit;
-  return rest;
+): Promise<UsuarioPublico | null> {
+  const usuario = await prisma.usuario.findUnique({
+    where: { email: email.trim().toLowerCase() },
+    include: { tenant: true },
+  });
+  if (!usuario || !usuario.ativo) return null;
+
+  const senhaConfere = await bcrypt.compare(senha.trim(), usuario.senhaHash);
+  if (!senhaConfere) return null;
+
+  return {
+    id: usuario.id,
+    nome: usuario.nome,
+    email: usuario.email,
+    role: usuario.role as Role,
+    cargo: usuario.cargo,
+    setor: usuario.setor,
+    tenantId: usuario.tenant.id,
+    tenantSlug: usuario.tenant.slug,
+    tenantNome: usuario.tenant.nome,
+  };
+}
+
+/**
+ * Lista os usuários de um tenant — sem hash de senha.
+ * O caller deve obter o tenantId via `getTenant()` (`@/lib/tenant`).
+ */
+export async function listarUsuarios(tenantId: string): Promise<UsuarioPublico[]> {
+  const usuarios = await prisma.usuario.findMany({
+    where: { tenantId },
+    include: { tenant: true },
+    orderBy: { nome: "asc" },
+  });
+  return usuarios.map((u) => ({
+    id: u.id,
+    nome: u.nome,
+    email: u.email,
+    role: u.role as Role,
+    cargo: u.cargo,
+    setor: u.setor,
+    tenantId: u.tenant.id,
+    tenantSlug: u.tenant.slug,
+    tenantNome: u.tenant.nome,
+  }));
 }

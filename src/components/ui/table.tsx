@@ -12,7 +12,7 @@ export function Table({ children }: { children: ReactNode }) {
 
 export function THead({ children }: { children: ReactNode }) {
   return (
-    <thead className="border-b border-ink-200 bg-ink-50/60 text-left">
+    <thead className="border-b border-ink-200 bg-ink-50/70 text-left">
       {children}
     </thead>
   );
@@ -28,7 +28,7 @@ export function TH({
   return (
     <th
       className={cn(
-        "px-4 py-3 text-xs font-semibold tracking-wide text-ink-500 uppercase",
+        "px-5 py-3 text-[11px] font-semibold tracking-wider text-ink-400 uppercase",
         className,
       )}
     >
@@ -43,7 +43,9 @@ export function TBody({ children }: { children: ReactNode }) {
 
 export function TR({ children }: { children: ReactNode }) {
   return (
-    <tr className="transition-colors hover:bg-brand-50/40">{children}</tr>
+    <tr className="transition-colors duration-150 hover:bg-brand-50/50">
+      {children}
+    </tr>
   );
 }
 
@@ -55,7 +57,7 @@ export function TD({
   className?: string;
 }) {
   return (
-    <td className={cn("px-4 py-3 text-ink-700 align-middle", className)}>
+    <td className={cn("px-5 py-3.5 align-middle text-ink-700", className)}>
       {children}
     </td>
   );

@@ -35,6 +35,9 @@ export const authConfig = {
       if (user) {
         token.role = user.role;
         token.cargo = user.cargo;
+        token.tenantId = user.tenantId;
+        token.tenantSlug = user.tenantSlug;
+        token.tenantNome = user.tenantNome;
       }
       return token;
     },
@@ -43,6 +46,9 @@ export const authConfig = {
         session.user.id = token.sub ?? "";
         session.user.role = (token.role as Role | undefined) ?? "operador";
         session.user.cargo = (token.cargo as string | undefined) ?? "";
+        session.user.tenantId = (token.tenantId as string | undefined) ?? "";
+        session.user.tenantSlug = (token.tenantSlug as string | undefined) ?? "";
+        session.user.tenantNome = (token.tenantNome as string | undefined) ?? "";
       }
       return session;
     },

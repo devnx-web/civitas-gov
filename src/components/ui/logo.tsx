@@ -34,22 +34,29 @@ export function LogoMark({ className }: { className?: string }) {
 /** Marca completa com texto. */
 export function Logo({
   className,
-  textClassName,
+  dark = false,
 }: {
   className?: string;
-  textClassName?: string;
+  dark?: boolean;
 }) {
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
-      <LogoMark className="h-9 w-9 text-brand-600" />
+      <LogoMark
+        className={cn("h-9 w-9", dark ? "text-brand-400" : "text-brand-600")}
+      />
       <div className="leading-tight">
-        <span className={cn("block text-base font-bold tracking-tight", textClassName)}>
+        <span
+          className={cn(
+            "block text-base font-bold tracking-tight",
+            dark ? "text-white" : "text-ink-900",
+          )}
+        >
           Civitas
         </span>
         <span
           className={cn(
-            "block text-[10px] font-medium tracking-[0.18em] text-ink-400 uppercase",
-            textClassName,
+            "block text-[10px] font-medium tracking-[0.18em] uppercase",
+            dark ? "text-brand-500" : "text-ink-400",
           )}
         >
           Gestão Pública

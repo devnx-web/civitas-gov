@@ -1,0 +1,123 @@
+// Civitas Gov — schema do banco de dados (PostgreSQL via Prisma 7).
+// Fase 0 do ROADMAP: fundação técnica. Modelagem multi-tenant.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Papel de acesso do usuário.
+enum Role {
+  admin
+  gestor
+  operador
+}
+
+/// Órgão/entidade cliente — unidade de isolamento multi-tenant.
+model Tenant {
+  id       String   @id @default(cuid())
+  nome     String
+  slug     String   @unique
+  criadoEm DateTime @default(now())
+
+  usuarios Usuario[]
+
+  @@map("tenants")
+}
+
+/// Usuário do sistema, vinculado a um tenant.
+model Usuario {
+  id           String   @id @default(cuid())
+  tenantId     String
+  nome         String
+  email        String   @unique
+  senhaHash    String
+  role         Role     @default(operador)
+  cargo        String
+  setor        String
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  permissoes UsuarioPermissao[]
+
+  @@index([tenantId])
+  @@map("usuarios")
+}
+
+// ─── RBAC granular ────────────────────────────────────────────────────────────
+
+/// Módulo/área do sistema ao qual a permissão se aplica.
+enum Escopo {
+  licitacoes
+  contratos
+  fornecedores
+  almoxarifado
+  patrimonio
+  transparencia
+  configuracoes
+  usuarios
+  auditoria
+  relatorios
+  orcamento
+  financeiro
+}
+
+/// Operação controlada pela permissão.
+enum Operacao {
+  visualizar
+  criar
+  editar
+  excluir
+  aprovar
+  exportar
+}
+
+/// Catálogo de permissões disponíveis no sistema (escopo × operação).
+model Permissao {
+  id        String   @id @default(cuid())
+  escopo    Escopo
+  operacao  Operacao
+  descricao String
+
+  rolePermissoes    RolePermissao[]
+  usuarioPermissoes UsuarioPermissao[]
+
+  @@unique([escopo, operacao])
+  @@map("permissoes")
+}
+
+/// Permissões padrão atribuídas a cada papel (Role). Base do RBAC.
+model RolePermissao {
+  id          String @id @default(cuid())
+  role        Role
+  permissaoId String
+
+  permissao Permissao @relation(fields: [permissaoId], references: [id], onDelete: Cascade)
+
+  @@unique([role, permissaoId])
+  @@map("role_permissoes")
+}
+
+/// Override de permissão por usuário. Prevalece sobre RolePermissao.
+/// concedido=true → garante acesso mesmo que o role não tenha.
+/// concedido=false → bloqueia acesso mesmo que o role tenha.
+model UsuarioPermissao {
+  id          String   @id @default(cuid())
+  tenantId    String
+  usuarioId   String
+  permissaoId String
+  concedido   Boolean
+  criadoEm    DateTime @default(now())
+
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  permissao Permissao @relation(fields: [permissaoId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, usuarioId, permissaoId])
+  @@map("usuario_permissoes")
+}

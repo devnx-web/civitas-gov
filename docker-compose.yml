@@ -1,0 +1,74 @@
+# Civitas Gov — infraestrutura de desenvolvimento.
+# Sobe o PostgreSQL e o Adminer (UI web para inspecionar o banco).
+#   docker compose up -d      → inicia em segundo plano
+#   docker compose ps         → status
+#   docker compose down       → para (mantém os dados no volume)
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: civitas_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: civitas
+      POSTGRES_PASSWORD: civitas_dev
+      POSTGRES_DB: civitas_gov
+    ports:
+      - "5442:5432"
+    volumes:
+      - civitas_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civitas -d civitas_gov"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer:latest
+    container_name: civitas_adminer
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # MinIO — armazenamento S3-compatível para desenvolvimento.
+  # Console web em http://localhost:9001  (login: civitas / civitas_dev_secret).
+  minio:
+    image: minio/minio:latest
+    container_name: civitas_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: civitas
+      MINIO_ROOT_PASSWORD: civitas_dev_secret
+    ports:
+      - "9000:9000"  # API S3
+      - "9001:9001"  # Console web
+    volumes:
+      - civitas_minio:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Cria o bucket padrão automaticamente na primeira subida.
+  minio-init:
+    image: minio/mc:latest
+    container_name: civitas_minio_init
+    depends_on:
+      minio:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3 &&
+      mc alias set local http://minio:9000 civitas civitas_dev_secret &&
+      mc mb --ignore-existing local/civitas-dev &&
+      echo 'Bucket civitas-dev pronto.'
+      "
+    restart: "no"
+
+volumes:
+  civitas_pgdata:
+  civitas_minio:

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, ChevronDown, LogOut, UserCircle2, Bell } from "lucide-react";
 import { navItemAtual } from "@/lib/navigation";
-import { ROLE_LABELS } from "@/lib/data/usuarios";
+import { ROLE_LABELS } from "@/lib/roles";
 import { sair } from "@/lib/actions/auth";
 import { iniciais } from "@/lib/utils";
 import type { Role } from "@/types/next-auth";
@@ -30,34 +30,40 @@ export function Topbar({
   const atual = navItemAtual(pathname);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-ink-200 bg-white/85 px-4 backdrop-blur sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-ink-200/80 bg-white/80 px-4 backdrop-blur-md sm:px-6">
       <div className="flex items-center gap-3">
         <button
           onClick={onAbrirMenu}
-          className="rounded-lg p-2 text-ink-500 hover:bg-ink-100 lg:hidden"
+          className="rounded-lg p-2 text-ink-500 transition-colors hover:bg-ink-100 lg:hidden"
           aria-label="Abrir menu"
         >
           <Menu className="h-5 w-5" />
         </button>
-        <div>
-          <h2 className="text-sm font-semibold text-ink-900">
-            {atual?.label ?? "Civitas Gov"}
-          </h2>
-          {atual?.descricao && (
-            <p className="hidden text-xs text-ink-400 sm:block">
-              {atual.descricao}
-            </p>
-          )}
+        <div className="flex items-center gap-2.5">
+          <span className="hidden h-1.5 w-1.5 rounded-full grad-marca sm:block" />
+          <div>
+            <h2 className="text-sm font-semibold tracking-tight text-ink-900">
+              {atual?.label ?? "Civitas Gov"}
+            </h2>
+            {atual?.descricao && (
+              <p className="hidden text-xs text-ink-400 sm:block">
+                {atual.descricao}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <button
-          className="relative rounded-lg p-2 text-ink-500 hover:bg-ink-100"
+          className="relative rounded-lg p-2 text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-700"
           aria-label="Notificações"
         >
           <Bell className="h-5 w-5" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+          <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+          </span>
         </button>
 
         <div className="relative">
@@ -65,7 +71,7 @@ export function Topbar({
             onClick={() => setMenuAberto((v) => !v)}
             className="flex items-center gap-2 rounded-lg p-1.5 pr-2 transition-colors hover:bg-ink-100"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm ring-2 ring-white grad-marca">
               {iniciais(usuario.nome)}
             </span>
             <span className="hidden text-left sm:block">

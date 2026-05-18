@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import type { Role } from "@/types/next-auth";
+import { cn } from "@/lib/utils";
 
 interface UsuarioSessao {
   nome: string;
@@ -25,13 +26,39 @@ export function AppShell({
   children: ReactNode;
 }) {
   const [mobileAberto, setMobileAberto] = useState(false);
+  const [colapsado, setColapsado] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("civitas-sidebar") === "1") setColapsado(true);
+  }, []);
+
+  const toggleColapso = useCallback(() => {
+    setColapsado((v) => {
+      localStorage.setItem("civitas-sidebar", v ? "0" : "1");
+      return !v;
+    });
+  }, []);
 
   return (
     <div className="flex min-h-screen">
       {/* Sidebar fixa — desktop */}
-      <aside className="hidden w-64 shrink-0 border-r border-ink-200 lg:block">
-        <div className="fixed h-screen w-64">
-          <Sidebar role={usuario.role} />
+      <aside
+        className={cn(
+          "hidden shrink-0 lg:block transition-[width] duration-300 ease-in-out",
+          colapsado ? "w-16" : "w-64",
+        )}
+      >
+        <div
+          className={cn(
+            "fixed h-screen transition-[width] duration-300 ease-in-out",
+            colapsado ? "w-16" : "w-64",
+          )}
+        >
+          <Sidebar
+            role={usuario.role}
+            colapsado={colapsado}
+            onToggleColapso={toggleColapso}
+          />
         </div>
       </aside>
 
@@ -51,10 +78,12 @@ export function AppShell({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed inset-y-0 left-0 z-50 w-64 border-r border-ink-200 shadow-xl lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-64 shadow-xl lg:hidden"
             >
               <Sidebar
                 role={usuario.role}
+                colapsado={false}
+                onToggleColapso={() => {}}
                 onNavegar={() => setMobileAberto(false)}
               />
             </motion.aside>

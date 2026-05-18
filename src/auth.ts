@@ -19,7 +19,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       authorize: async (credentials) => {
         const email = String(credentials?.email ?? "");
         const senha = String(credentials?.password ?? "");
-        const usuario = autenticarUsuario(email, senha);
+        const usuario = await autenticarUsuario(email, senha);
         if (!usuario) return null;
 
         return {
@@ -28,6 +28,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: usuario.email,
           role: usuario.role,
           cargo: usuario.cargo,
+          tenantId: usuario.tenantId,
+          tenantSlug: usuario.tenantSlug,
+          tenantNome: usuario.tenantNome,
         };
       },
     }),

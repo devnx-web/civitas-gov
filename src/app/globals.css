@@ -86,8 +86,43 @@ body {
     );
 }
 
+/* Gradientes dos cartões de indicador (KPI) — por tom */
+.grad-marca {
+  background-image: linear-gradient(135deg, #5996fc 0%, #1f53e0 100%);
+}
+.grad-info {
+  background-image: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+}
+.grad-sucesso {
+  background-image: linear-gradient(135deg, #34d399 0%, #059669 100%);
+}
+.grad-alerta {
+  background-image: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+}
+.grad-perigo {
+  background-image: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+}
+
+/* Animação de brilho deslizante (skeleton / destaque) */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* Foco acessível consistente */
 :where(a, button, input, select, textarea):focus-visible {
   outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;
+}
+
+/* Tailwind v4 removeu o cursor pointer padrão de <button>.
+   Restaurado para todos os elementos clicáveis (exceto desabilitados). */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+label[for] {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
 }

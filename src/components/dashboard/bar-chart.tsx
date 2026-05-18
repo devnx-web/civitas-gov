@@ -64,12 +64,11 @@ function Barra({
 }) {
   const altura = `${Math.max(4, (valor / maximo) * 100)}%`;
   return (
-    <div className="group relative flex w-5 items-end sm:w-7">
+    <div className="group relative flex h-full w-5 items-end sm:w-7">
       <motion.div
         className={`w-full rounded-t-md ${cor}`}
         initial={{ height: 0 }}
-        whileInView={{ height: altura }}
-        viewport={{ once: true }}
+        animate={{ height: altura }}
         transition={{ duration: 0.8, ease: EASE, delay }}
       />
       <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 rounded bg-ink-900 px-1.5 py-0.5 text-[10px] whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100">
