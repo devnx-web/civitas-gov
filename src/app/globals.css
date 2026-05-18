@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* ----------------------------------------------------------------------
+   Civitas Gov — Design System
+   Paleta institucional: azul-profundo (confiança / setor público)
+   + acento esmeralda (eficiência / aprovação).
+   ---------------------------------------------------------------------- */
+
+@theme {
+  --color-brand-50: #eef5ff;
+  --color-brand-100: #d9e8ff;
+  --color-brand-200: #bcd6ff;
+  --color-brand-300: #8ebcff;
+  --color-brand-400: #5996fc;
+  --color-brand-500: #3370f3;
+  --color-brand-600: #1f53e0;
+  --color-brand-700: #1b41c2;
+  --color-brand-800: #1c389d;
+  --color-brand-900: #0d1f4b;
+  --color-brand-950: #08132e;
+
+  --color-accent-400: #2dd4a7;
+  --color-accent-500: #10b981;
+  --color-accent-600: #059669;
+
+  --color-ink-50: #f6f7f9;
+  --color-ink-100: #eceef2;
+  --color-ink-200: #d7dbe3;
+  --color-ink-300: #b3bacb;
+  --color-ink-400: #8089a3;
+  --color-ink-500: #5f6982;
+  --color-ink-600: #49526a;
+  --color-ink-700: #3a4156;
+  --color-ink-800: #262b3a;
+  --color-ink-900: #161a25;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1rem;
+}
+
+:root {
+  --background: #f4f6fb;
+  --surface: #ffffff;
+  --foreground: #161a25;
+}
+
+* {
+  border-color: var(--color-ink-200);
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar discreta */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-200);
+  border-radius: 999px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-300);
+}
+
+/* Utilitário: gradiente institucional usado no login e marca */
+.bg-civitas-gradient {
+  background-image: radial-gradient(
+      120% 120% at 0% 0%,
+      #1b41c2 0%,
+      #0d1f4b 55%,
+      #08132e 100%
+    );
+}
+
+/* Foco acessível consistente */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}

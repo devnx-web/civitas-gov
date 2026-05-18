@@ -1,0 +1,33 @@
+{
+  "name": "civitas-gov",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Civitas — Plataforma de Gestão Pública Integrada (ERP para RPPS e órgãos públicos). POC inspirada no Pregão Eletrônico 002/2026 do IPASLI / Linhares-ES.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.0.6",
+    "lucide-react": "^0.474.0",
+    "next": "^15.5.18",
+    "next-auth": "5.0.0-beta.25",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.1",
+    "@types/node": "^22.10.10",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "eslint": "^9.19.0",
+    "eslint-config-next": "^15.5.18",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^4.0.1",
+    "typescript": "^5.7.3"
+  }
+}
