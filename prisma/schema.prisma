@@ -35,6 +35,10 @@ model Tenant {
   configuracoes Configuracao[]
   dotacoesOrcamentarias DotacaoOrcamentaria[]
   empenhos      Empenho[]
+  titularesDados TitularDados[]
+  planosReversao  PlanoReversao[]
+  ticketsSuporte  TicketSuporte[]
+  artigosBaseConhecimento ArtigoBaseConhecimento[]
 
   @@map("tenants")
 }
@@ -551,6 +555,7 @@ model Contrato {
   aditamentos Aditamento[]
   empenhos    Empenho[]
   publicacoes PublicacaoPNCP[]
+  planosReversao PlanoReversao[]
 
   @@unique([tenantId, numero, ano])
   @@index([tenantId])
@@ -758,4 +763,233 @@ model Pagamento {
   @@index([tenantId, empenhoId])
   @@index([tenantId, status])
   @@map("pagamentos")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 9 — TCE-ES / LGPD / REVERSIBILIDADE / HELP DESK
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── LGPD ─────────────────────────────────────────────────────────────────────
+
+enum TipoAcaoLGPD {
+  coleta
+  armazenamento
+  processamento
+  compartilhamento
+  exclusao
+  anonimizacao
+}
+
+enum BaseLegalLGPD {
+  consentimento
+  cumprimento_obrigacao_legal
+  execucao_politicas_publicas
+  pesquisa
+  exercicio_direitos
+  legítimo_interesse
+  protecao_vida
+  tutela_saude
+  contrato
+}
+
+model TitularDados {
+  id              String   @id @default(cuid())
+  tenantId        String
+  nome            String
+  email           String?
+  cpf             String?
+  telefone        String?
+  endereco        String?
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  consentimentos ConsentimentoLGPD[]
+  registros      RegistroProcessamentoDados[]
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, cpf])
+  @@map("titulares_dados")
+}
+
+model ConsentimentoLGPD {
+  id              String   @id @default(cuid())
+  tenantId        String
+  titularId       String
+  finalidade      String
+  dadosTratados   String   // descrição dos dados
+  baseLegal       BaseLegalLGPD
+  concedido       Boolean  @default(true)
+  dataConsentimento DateTime @default(now())
+  dataRevogacao   DateTime?
+  canalConsentimento String? // web, presencial, telefone
+  ipOrigem        String?
+  userAgent       String?
+  criadoEm        DateTime @default(now())
+
+  titular TitularDados @relation(fields: [titularId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, titularId])
+  @@map("consentimentos_lgpd")
+}
+
+model RegistroProcessamentoDados {
+  id              String   @id @default(cuid())
+  tenantId        String
+  titularId       String?
+  tipoAcao        TipoAcaoLGPD
+  entidade        String   // nome da tabela/entidade
+  entidadeId      String   // ID do registro afetado
+  dadosAfetados   String   // descrição dos campos
+  usuarioId       String?  // quem fez a ação
+  justificativa   String?
+  criadoEm        DateTime @default(now())
+
+  titular TitularDados? @relation(fields: [titularId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, titularId])
+  @@index([tenantId, entidade, entidadeId])
+  @@map("registros_processamento_dados")
+}
+
+// ── Reversibilidade ──────────────────────────────────────────────────────────
+
+enum StatusReversao {
+  planejamento
+  em_execucao
+  concluida
+  cancelada
+}
+
+enum TipoItemReversao {
+  migracao_dados
+  devolucao_bens
+  rescisao_contrato
+  treinamento
+  transferencia_documentos
+  limpeza_ambiente
+}
+
+model PlanoReversao {
+  id              String   @id @default(cuid())
+  tenantId        String
+  contratoId      String?
+  titulo          String
+  descricao       String?
+  responsavel     String?
+  dataInicio      DateTime?
+  dataFimPrevista DateTime?
+  dataFimReal     DateTime?
+  status          StatusReversao @default(planejamento)
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  itens    ItemReversao[]
+  contrato Contrato? @relation(fields: [contratoId], references: [id], onDelete: SetNull)
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("planos_reversao")
+}
+
+model ItemReversao {
+  id              String   @id @default(cuid())
+  planoId         String
+  tipo            TipoItemReversao
+  descricao       String
+  responsavel     String?
+  dataPrevista    DateTime?
+  dataConclusao   DateTime?
+  concluido       Boolean  @default(false)
+  observacao      String?
+  criadoEm        DateTime @default(now())
+
+  plano PlanoReversao @relation(fields: [planoId], references: [id], onDelete: Cascade)
+
+  @@index([planoId])
+  @@map("itens_reversao")
+}
+
+// ── Help Desk ────────────────────────────────────────────────────────────────
+
+enum StatusTicket {
+  aberto
+  em_andamento
+  aguardando_usuario
+  resolvido
+  fechado
+}
+
+enum PrioridadeTicket {
+  baixa
+  media
+  alta
+  critica
+}
+
+enum CategoriaTicket {
+  duvida
+  problema
+  solicitacao
+  reclamacao
+  melhoria
+}
+
+model TicketSuporte {
+  id              String   @id @default(cuid())
+  tenantId        String
+  titulo          String
+  descricao       String
+  categoria       CategoriaTicket
+  prioridade      PrioridadeTicket @default(media)
+  status          StatusTicket @default(aberto)
+  solicitanteId   String
+  responsavelId   String?
+  dataResolucao   DateTime?
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  mensagens MensagemTicket[]
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, solicitanteId])
+  @@map("tickets_suporte")
+}
+
+model MensagemTicket {
+  id              String   @id @default(cuid())
+  ticketId        String
+  autorId         String
+  autorNome       String
+  mensagem        String
+  interna         Boolean  @default(false) // visível apenas para equipe
+  criadoEm        DateTime @default(now())
+
+  ticket TicketSuporte @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("mensagens_ticket")
+}
+
+model ArtigoBaseConhecimento {
+  id              String   @id @default(cuid())
+  tenantId        String
+  titulo          String
+  slug            String   @unique
+  conteudo        String
+  categoria       String
+  tags            String[]
+  publicado       Boolean  @default(false)
+  visualizacoes   Int      @default(0)
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, categoria])
+  @@map("artigos_base_conhecimento")
 }
