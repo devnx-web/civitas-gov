@@ -6,6 +6,7 @@ import {
   Eye,
   Truck,
   Globe,
+  LandmarkIcon,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -189,6 +190,13 @@ export const NAV: NavGroup[] = [
         href: "/pncp",
         icon: Globe,
         descricao: "Publicar contratações e contratos no Portal Nacional",
+        roles: ["admin", "gestor"],
+      },
+      {
+        label: "Orçamento SIAFIC",
+        href: "/siafic",
+        icon: LandmarkIcon,
+        descricao: "Execução orçamentária: dotação, empenho, liquidação e pagamento",
         roles: ["admin", "gestor"],
       },
     ],

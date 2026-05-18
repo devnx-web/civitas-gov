@@ -33,6 +33,8 @@ model Tenant {
   processosLicitatorios ProcessoLicitatorio[]
   contratos     Contrato[]
   configuracoes Configuracao[]
+  dotacoesOrcamentarias DotacaoOrcamentaria[]
+  empenhos      Empenho[]
 
   @@map("tenants")
 }
@@ -312,6 +314,7 @@ model Fornecedor {
   tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   documentos  FornecedorDocumento[]
   contratos   Contrato[]
+  empenhos    Empenho[]
   @@index([tenantId])
   @@index([tenantId, ativo])
   @@map("fornecedores")
@@ -496,6 +499,7 @@ model ProcessoLicitatorio {
   itens     ItemLicitacao[]
   contratos Contrato[]
   publicacoes PublicacaoPNCP[]
+  empenhos  Empenho[]
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, numero, ano])
@@ -574,23 +578,6 @@ model Aditamento {
   @@map("aditamentos")
 }
 
-model Empenho {
-  id              String   @id @default(cuid())
-  tenantId        String
-  numero          String
-  contratoId      String
-  valor           Decimal  @db.Decimal(18, 4)
-  dataEmpenho     DateTime
-  tipo            String   // ordinario, global, estimativo
-  observacao      String?
-  criadoEm        DateTime @default(now())
-
-  contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId, contratoId])
-  @@map("empenhos")
-}
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // FASE 7 — INTEGRAÇÃO PNCP (Portal Nacional de Contratações Públicas)
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -634,4 +621,141 @@ model PublicacaoPNCP {
   @@index([tenantId, status])
   @@index([entidade, entidadeId])
   @@map("publicacoes_pncp")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 6 — SIAFIC / EXECUÇÃO ORÇAMENTÁRIA
+// ═══════════════════════════════════════════════════════════════════════════════
+
+model DotacaoOrcamentaria {
+  id              String   @id @default(cuid())
+  tenantId        String
+  ano             Int
+  unidadeOrcamentaria String // UO (código)
+  funcao          String
+  subfuncao       String
+  programa        String
+  acao            String
+  subtitulo       String?
+  naturezaDespesa String   // 6 dígitos (3.3.90.00)
+  fonteRecurso    String
+  valorInicial    Decimal  @db.Decimal(18, 4)
+  valorAtual      Decimal  @db.Decimal(18, 4)
+  valorBloqueado  Decimal  @default(0) @db.Decimal(18, 4)
+  valorEmpenhado  Decimal  @default(0) @db.Decimal(18, 4)
+  valorLiquidado  Decimal  @default(0) @db.Decimal(18, 4)
+  valorPago       Decimal  @default(0) @db.Decimal(18, 4)
+  ativo           Boolean  @default(true)
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  empenhos Empenho[]
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, ano, unidadeOrcamentaria, funcao, subfuncao, programa, acao, naturezaDespesa, fonteRecurso])
+  @@index([tenantId])
+  @@index([tenantId, ano])
+  @@map("dotacoes_orcamentarias")
+}
+
+enum TipoEmpenhoSIAFIC {
+  ordinario
+  estimativo
+  global
+  avulso
+}
+
+enum StatusEmpenho {
+  ativo
+  anulado
+  estornado
+  liquidado
+  pago
+}
+
+model Empenho {
+  id              String   @id @default(cuid())
+  tenantId        String
+  numero          String
+  ano             Int
+  dotacaoId       String?
+  contratoId      String?
+  processoId      String?
+  fornecedorId    String?
+  valor           Decimal  @db.Decimal(18, 4)
+  valorAnulado    Decimal  @default(0) @db.Decimal(18, 4)
+  valorLiquidado  Decimal  @default(0) @db.Decimal(18, 4)
+  valorPago       Decimal  @default(0) @db.Decimal(18, 4)
+  dataEmpenho     DateTime
+  tipo            TipoEmpenhoSIAFIC @default(ordinario)
+  status          StatusEmpenho @default(ativo)
+  observacao      String?
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  contrato    Contrato? @relation(fields: [contratoId], references: [id], onDelete: SetNull)
+  dotacao     DotacaoOrcamentaria? @relation(fields: [dotacaoId], references: [id], onDelete: SetNull)
+  fornecedor  Fornecedor? @relation(fields: [fornecedorId], references: [id], onDelete: SetNull)
+  processo    ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  liquidacoes Liquidacao[]
+  pagamentos  Pagamento[]
+
+  @@index([tenantId, dotacaoId])
+  @@index([tenantId, contratoId])
+  @@index([tenantId, status])
+  @@map("empenhos")
+}
+
+enum StatusLiquidacao {
+  ativa
+  estornada
+}
+
+model Liquidacao {
+  id              String   @id @default(cuid())
+  tenantId        String
+  empenhoId       String
+  numero          String
+  valor           Decimal  @db.Decimal(18, 4)
+  dataLiquidacao  DateTime
+  status          StatusLiquidacao @default(ativa)
+  documentoFiscal String?  // NF, nota de despesa etc
+  observacao      String?
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  empenho Empenho @relation(fields: [empenhoId], references: [id], onDelete: Cascade)
+  pagamentos Pagamento[]
+
+  @@index([tenantId, empenhoId])
+  @@map("liquidacoes")
+}
+
+enum StatusPagamento {
+  programado
+  efetivado
+  estornado
+}
+
+model Pagamento {
+  id              String   @id @default(cuid())
+  tenantId        String
+  empenhoId       String
+  liquidacaoId    String?
+  numero          String
+  valor           Decimal  @db.Decimal(18, 4)
+  dataPagamento   DateTime
+  status          StatusPagamento @default(programado)
+  formaPagamento  String?  // TED, boleto, etc
+  observacao      String?
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  empenho    Empenho    @relation(fields: [empenhoId], references: [id], onDelete: Cascade)
+  liquidacao Liquidacao? @relation(fields: [liquidacaoId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, empenhoId])
+  @@index([tenantId, status])
+  @@map("pagamentos")
 }
