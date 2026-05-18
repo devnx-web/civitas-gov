@@ -5,6 +5,7 @@ import {
   Gavel,
   Eye,
   Truck,
+  Globe,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -182,6 +183,13 @@ export const NAV: NavGroup[] = [
             ],
           },
         ],
+      },
+      {
+        label: "Integração PNCP",
+        href: "/pncp",
+        icon: Globe,
+        descricao: "Publicar contratações e contratos no Portal Nacional",
+        roles: ["admin", "gestor"],
       },
     ],
   },

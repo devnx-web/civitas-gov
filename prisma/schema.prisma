@@ -30,6 +30,9 @@ model Tenant {
   almoxarifados Almoxarifado[]
   bensPatrimoniais BemPatrimonial[]
   estoques      Estoque[]
+  processosLicitatorios ProcessoLicitatorio[]
+  contratos     Contrato[]
+  configuracoes Configuracao[]
 
   @@map("tenants")
 }
@@ -308,6 +311,7 @@ model Fornecedor {
   atualizadoEm DateTime @updatedAt
   tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   documentos  FornecedorDocumento[]
+  contratos   Contrato[]
   @@index([tenantId])
   @@index([tenantId, ativo])
   @@map("fornecedores")
@@ -412,4 +416,222 @@ model BemPatrimonial {
   @@index([tenantId, situacao])
   @@index([tenantId, tipo])
   @@map("bens_patrimoniais")
+}
+
+model Configuracao {
+  id        String   @id @default(cuid())
+  tenantId  String
+  chave     String
+  valor     String
+  tipo      String   @default("texto") // texto, json, numero, booleano
+  criadoEm  DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, chave])
+  @@index([tenantId])
+  @@map("configuracoes")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 4 — LICITAÇÕES & CONTRATOS (modelos persistentes)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+enum ModalidadeLicitacao {
+  pregao_eletronico
+  pregao_presencial
+  concorrencia
+  tomada_preco
+  convite
+  concurso
+  leilao
+  dispensa
+  inexigibilidade
+}
+
+enum StatusProcesso {
+  planejamento
+  publicado
+  em_disputa
+  homologado
+  deserta
+  fracassada
+  revogada
+  anulada
+}
+
+enum StatusContrato {
+  vigente
+  encerrado
+  a_vencer
+  rescindido
+}
+
+enum TipoAditamento {
+  prorrogacao
+  reajuste
+  acréscimo
+  supressao
+  alteracao
+}
+
+model ProcessoLicitatorio {
+  id              String   @id @default(cuid())
+  tenantId        String
+  numero          String
+  ano             Int
+  modalidade      ModalidadeLicitacao
+  objeto          String
+  valorEstimado   Decimal  @db.Decimal(18, 4)
+  dataAbertura    DateTime?
+  dataHomologacao DateTime?
+  status          StatusProcesso @default(planejamento)
+  srp             Boolean  @default(false) // Registro de Preço
+  cnpjOrgao       String?  // CNPJ do órgão para PNCP
+  unidadeCodigo   String?  // Código unidade administrativa PNCP
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  itens     ItemLicitacao[]
+  contratos Contrato[]
+  publicacoes PublicacaoPNCP[]
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, numero, ano])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("processos_licitatorios")
+}
+
+model ItemLicitacao {
+  id              String   @id @default(cuid())
+  tenantId        String
+  processoId      String
+  numeroItem      Int
+  descricao       String
+  quantidade      Decimal  @db.Decimal(18, 4)
+  valorUnitarioEstimado Decimal @db.Decimal(18, 4)
+  valorTotalEstimado Decimal @db.Decimal(18, 4)
+  unidadeMedida   String?
+  categoria       Int?     // 1=Material, 2=Serviço, 3=Obra (PNCP)
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  processo ProcessoLicitatorio @relation(fields: [processoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, processoId])
+  @@map("itens_licitacao")
+}
+
+model Contrato {
+  id              String   @id @default(cuid())
+  tenantId        String
+  numero          String
+  ano             Int
+  processoId      String?
+  fornecedorId    String
+  objeto          String
+  valorOriginal   Decimal  @db.Decimal(18, 4)
+  valorAtual      Decimal  @db.Decimal(18, 4)
+  dataAssinatura  DateTime
+  dataInicioVigencia DateTime
+  dataFimVigencia DateTime
+  status          StatusContrato @default(vigente)
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  processo   ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  fornecedor Fornecedor @relation(fields: [fornecedorId], references: [id])
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  aditamentos Aditamento[]
+  empenhos    Empenho[]
+  publicacoes PublicacaoPNCP[]
+
+  @@unique([tenantId, numero, ano])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("contratos")
+}
+
+model Aditamento {
+  id              String   @id @default(cuid())
+  tenantId        String
+  contratoId      String
+  numero          String
+  tipo            TipoAditamento
+  descricao       String?
+  valorAcrescimo  Decimal? @db.Decimal(18, 4)
+  valorSupressao  Decimal? @db.Decimal(18, 4)
+  novaDataFim     DateTime?
+  dataAssinatura  DateTime?
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, contratoId])
+  @@map("aditamentos")
+}
+
+model Empenho {
+  id              String   @id @default(cuid())
+  tenantId        String
+  numero          String
+  contratoId      String
+  valor           Decimal  @db.Decimal(18, 4)
+  dataEmpenho     DateTime
+  tipo            String   // ordinario, global, estimativo
+  observacao      String?
+  criadoEm        DateTime @default(now())
+
+  contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, contratoId])
+  @@map("empenhos")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 7 — INTEGRAÇÃO PNCP (Portal Nacional de Contratações Públicas)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+enum TipoPublicacaoPNCP {
+  contratacao
+  contrato
+  termo
+}
+
+enum StatusPublicacaoPNCP {
+  rascunho
+  enviado
+  publicado
+  erro
+  retificado
+}
+
+model PublicacaoPNCP {
+  id              String   @id @default(cuid())
+  tenantId        String
+  tipo            TipoPublicacaoPNCP
+  entidade        String   // nome da entidade local (ProcessoLicitatorio, Contrato, Aditamento)
+  entidadeId      String   // ID local
+  numeroControlePNCP String? // número de controle retornado pelo PNCP
+  status          StatusPublicacaoPNCP @default(rascunho)
+  payloadEnviado  Json?    // JSON enviado ao PNCP
+  respostaPNCP    Json?    // resposta da API PNCP
+  erroMensagem    String?
+  enviadoEm       DateTime?
+  retificadoEm    DateTime?
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  processo ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  processoId String?
+  contrato Contrato? @relation(fields: [contratoId], references: [id], onDelete: SetNull)
+  contratoId String?
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([entidade, entidadeId])
+  @@map("publicacoes_pncp")
 }
