@@ -273,6 +273,18 @@ export const NAV: NavGroup[] = [
         icon: Settings,
         descricao: "Usuários, papéis de acesso e parâmetros",
         roles: ["admin"],
+        menus: [
+          {
+            label: "Cadastros",
+            submenus: [
+              { label: "Centros de Custo", href: "/configuracoes/centros-custo" },
+              { label: "Unidades Gestoras", href: "/configuracoes/unidades-gestoras" },
+              { label: "Setores", href: "/configuracoes/setores" },
+              { label: "Comissões", href: "/configuracoes/comissoes" },
+              { label: "Grupos de Material", href: "/configuracoes/grupos-material" },
+            ],
+          },
+        ],
       },
     ],
   },

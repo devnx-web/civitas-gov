@@ -36,6 +36,8 @@ model Tenant {
   dotacoesOrcamentarias      DotacaoOrcamentaria[]
   empenhos                   Empenho[]
   titularesDados             TitularDados[]
+  incidentesLGPD             IncidenteLGPD[]
+  dpo                        DPO?
   planosReversao             PlanoReversao[]
   ticketsSuporte             TicketSuporte[]
   artigosBaseConhecimento    ArtigoBaseConhecimento[]
@@ -65,6 +67,8 @@ model Tenant {
   fiscalizacoesContrato      FiscalizacaoContrato[]
   ocorrenciasFiscalizacao    OcorrenciaFiscalizacao[]
   medicoes                   MedicaoContrato[]
+  // Wave 4A — hierarquia de material
+  gruposMaterial             GrupoMaterial[]
 
   @@map("tenants")
 }
@@ -304,6 +308,7 @@ model Material {
   tipo               TipoMaterial
   categoria          CategoriaMaterial?
   unidadeMedidaId    String
+  subclasseId        String?
   catmat             String?
   catser             String?
   imagemUrl          String?
@@ -312,6 +317,7 @@ model Material {
   atualizadoEm       DateTime                 @updatedAt
   tenant             Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   unidadeMedida      UnidadeMedida            @relation(fields: [unidadeMedidaId], references: [id])
+  subclasse          SubclasseMaterial?       @relation(fields: [subclasseId], references: [id], onDelete: SetNull)
   estoques           Estoque[]
   movimentacoes      MovimentacaoEstoque[]
   itensRequisicao    ItemRequisicaoMaterial[]
@@ -928,6 +934,66 @@ model RegistroProcessamentoDados {
   @@map("registros_processamento_dados")
 }
 
+// ── Incidentes LGPD ──────────────────────────────────────────────────────────
+
+enum StatusIncidenteLGPD {
+  detectado
+  em_contencao
+  notificado_anpd
+  notificado_titular
+  encerrado
+}
+
+enum GravidadeIncidente {
+  baixa
+  media
+  alta
+  critica
+}
+
+model IncidenteLGPD {
+  id                     String              @id @default(cuid())
+  tenantId               String
+  titulo                 String
+  descricao              String
+  gravidade              GravidadeIncidente
+  status                 StatusIncidenteLGPD @default(detectado)
+  dataDeteccao           DateTime
+  dataContencao          DateTime?
+  dataNotificacaoAnpd    DateTime?
+  dataNotificacaoTitular DateTime?
+  prazoAnpd72h           DateTime
+  numeroProtocoloAnpd    String?
+  titularesAfetados      Int                 @default(0)
+  dadosComprometidos     String
+  medidasAdotadas        String?
+  responsavelId          String?
+  criadoEm               DateTime            @default(now())
+  atualizadoEm           DateTime            @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@map("incidentes_lgpd")
+}
+
+// ── DPO (Encarregado de Dados) ───────────────────────────────────────────────
+
+model DPO {
+  id           String   @id @default(cuid())
+  tenantId     String   @unique
+  nome         String
+  email        String
+  telefone     String?
+  empresa      String?
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("dpos")
+}
+
 // ── Reversibilidade ──────────────────────────────────────────────────────────
 
 enum StatusReversao {
@@ -1199,6 +1265,64 @@ model MembroComissao {
 
   @@index([comissaoId])
   @@map("membros_comissao")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WAVE 4A — HIERARQUIA DE MATERIAL (Portaria STN 448/2002)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Grupo de material — nível 1 da hierarquia STN 448/2002.
+model GrupoMaterial {
+  id           String   @id @default(cuid())
+  tenantId     String
+  codigo       String
+  nome         String
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  tenant  Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  classes ClasseMaterial[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId])
+  @@map("grupos_material")
+}
+
+/// Classe de material — nível 2 da hierarquia STN 448/2002.
+model ClasseMaterial {
+  id           String   @id @default(cuid())
+  grupoId      String
+  codigo       String
+  nome         String
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  grupo      GrupoMaterial     @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+  subclasses SubclasseMaterial[]
+
+  @@unique([grupoId, codigo])
+  @@index([grupoId])
+  @@map("classes_material")
+}
+
+/// Subclasse de material — nível 3 da hierarquia STN 448/2002.
+model SubclasseMaterial {
+  id           String   @id @default(cuid())
+  classeId     String
+  codigo       String
+  nome         String
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  classe    ClasseMaterial @relation(fields: [classeId], references: [id], onDelete: Cascade)
+  materiais Material[]
+
+  @@unique([classeId, codigo])
+  @@index([classeId])
+  @@map("subclasses_material")
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

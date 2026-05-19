@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import {
   listarTitularesAction,
   novoTitular,
@@ -77,6 +78,22 @@ export default function LGPDPage() {
       <PageHeader titulo="LGPD" descricao="Gestão de dados pessoais e privacidade" />
 
       {mensagem && <div className="rounded-lg border bg-muted px-4 py-3 text-sm">{mensagem}</div>}
+
+      {/* Atalhos para subpáginas */}
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href="/lgpd/incidentes"
+          className="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted transition-colors flex items-center gap-1"
+        >
+          <span className="text-red-500">⚠</span> Incidentes ANPD 72h
+        </Link>
+        <Link
+          href="/lgpd/dpo"
+          className="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+        >
+          Encarregado (DPO)
+        </Link>
+      </div>
 
       <div className="flex gap-2 border-b">
         {(["titulares", "consentimentos", "registros"] as const).map((a) => (

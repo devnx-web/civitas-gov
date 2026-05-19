@@ -5,6 +5,66 @@ import { listarPlanosAction, novoPlano, novoItem, concluirItem, mudarStatusPlano
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 
+function ExportarDados() {
+  const [exportando, setExportando] = useState(false);
+
+  async function handleExport(formato: "json" | "csv") {
+    setExportando(true);
+    try {
+      const res = await fetch(`/api/reversibilidade/export-total?formato=${formato}`);
+      if (!res.ok) {
+        alert("Erro ao exportar dados. Verifique sua sessão.");
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const ext = formato === "csv" ? "csv" : "json";
+      a.download = `export-total-${new Date().toISOString().split("T")[0]}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportando(false);
+    }
+  }
+
+  return (
+    <Card className="p-4">
+      <h3 className="font-semibold mb-2">Exportar todos os dados — REQ-NF-091/092</h3>
+      <p className="text-sm text-muted-foreground mb-3">
+        Exporta todos os dados do órgão para portabilidade e reversibilidade do contrato SaaS.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => handleExport("json")}
+          disabled={exportando}
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        >
+          {exportando ? "Exportando..." : "Exportar JSON"}
+        </button>
+        <button
+          onClick={() => handleExport("csv")}
+          disabled={exportando}
+          className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
+        >
+          {exportando ? "Exportando..." : "Exportar CSV"}
+        </button>
+        <a
+          href="/api/reversibilidade/dicionario"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted inline-flex items-center"
+        >
+          Dicionário de dados
+        </a>
+      </div>
+    </Card>
+  );
+}
+
 export default function ReversibilidadePage() {
   const [planos, setPlanos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -75,10 +135,12 @@ export default function ReversibilidadePage() {
     <div className="space-y-6">
       <PageHeader
         titulo="Reversibilidade"
-        descricao="Planos de reversão e encerramento de contratos"
+        descricao="Planos de reversão, exportação de dados e encerramento de contratos"
       />
 
       {mensagem && <div className="rounded-lg border bg-muted px-4 py-3 text-sm">{mensagem}</div>}
+
+      <ExportarDados />
 
       <Card className="p-4">
         <h3 className="font-semibold mb-3">Novo Plano de Reversão</h3>
