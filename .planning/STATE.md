@@ -1,20 +1,16 @@
 ---
-projeto: Civitas Gov
-milestone: v0.4 — Wave 6 (Fase 3 inventário, e-SIC real, Receitas, IA Claude, Backup, 2FA, RoPA, Agentes)
-referencia_externa: Pregão Eletrônico nº 002/2026 — IPASLI / Linhares-ES
-data_bootstrap: 2026-05-19
-data_wave2: 2026-05-19
-data_wave3: 2026-05-19
-data_wave4: 2026-05-19
-data_wave5: 2026-05-19
-data_wave6: 2026-05-19
-modo_planejamento: backfill (código rodou na frente do GSD) + execução paralela com agentes Sonnet
-total_fases: 11
-fases_executadas: 9
-fases_parciais: 2
-fases_pendentes: 0
-fase_corrente: concluída
-proxima_acao: TCE-ES validação XSD formal, WCAG auditoria externa, integração real Sentry/S3
+gsd_state_version: 1.0
+milestone: v0.5
+milestone_name: PoC ready + Diferenciais
+status: planning
+last_updated: "2026-05-19T18:33:48.099Z"
+last_activity: 2026-05-19
+progress:
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # STATE — Civitas Gov
@@ -120,3 +116,10 @@ O projeto atingiu ~95% do TR. Os itens residuais são operacionais/de produção
 5. **Fase 10 — cobertura de testes**: Ampliar Vitest (47 → ~100 testes) com cenários de edge cases das novas features (TOTP, lotes/validade, RoPA).
 
 Veja também [`auditoria/AUDIT-resumo.md`](auditoria/AUDIT-resumo.md).
+
+## Current Position
+
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-19 — Milestone v0.5 started
