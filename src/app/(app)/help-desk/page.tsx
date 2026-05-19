@@ -42,7 +42,6 @@ export default function HelpDeskPage() {
       descricao: fd.get("descricao") as string,
       categoria: fd.get("categoria") as string,
       prioridade: fd.get("prioridade") as string,
-      solicitanteId: "user-id", // TODO: pegar da sessão
     });
     if (res.sucesso) {
       setMensagem("✅ Ticket aberto!");
@@ -54,11 +53,7 @@ export default function HelpDeskPage() {
     e.preventDefault();
     if (!ticketSelecionado) return;
     const fd = new FormData(e.currentTarget);
-    await responderTicket(ticketSelecionado.id, {
-      autorId: "user-id",
-      autorNome: "Usuário",
-      mensagem: fd.get("mensagem") as string,
-    });
+    await responderTicket(ticketSelecionado.id, fd.get("mensagem") as string);
     setMensagem("✅ Resposta enviada!");
     const atualizado = await listarTicketsAction();
     setTickets(atualizado);

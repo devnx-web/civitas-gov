@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getTenant } from "@/lib/tenant";
+import { auth } from "@/auth";
 import { StatusTicket } from "@/generated/prisma/enums";
 import {
   criarTicket,
@@ -18,10 +19,10 @@ export async function abrirTicket(data: {
   descricao: string;
   categoria: string;
   prioridade: string;
-  solicitanteId: string;
 }) {
-  const tenant = await getTenant();
-  const ticket = await criarTicket({ tenantId: tenant.id, ...data });
+  const [tenant, session] = await Promise.all([getTenant(), auth()]);
+  const solicitanteId = session?.user?.id ?? "";
+  const ticket = await criarTicket({ tenantId: tenant.id, solicitanteId, ...data });
   revalidatePath("/(app)/help-desk");
   return { sucesso: true, ticket };
 }
@@ -31,16 +32,11 @@ export async function listarTicketsAction(filtros?: { status?: StatusTicket }) {
   return listarTickets(tenant.id, filtros);
 }
 
-export async function responderTicket(
-  ticketId: string,
-  data: {
-    autorId: string;
-    autorNome: string;
-    mensagem: string;
-    interna?: boolean;
-  }
-) {
-  await adicionarMensagem({ ticketId, ...data });
+export async function responderTicket(ticketId: string, mensagem: string, interna?: boolean) {
+  const session = await auth();
+  const autorId = session?.user?.id ?? "";
+  const autorNome = session?.user?.name ?? "Usuário";
+  await adicionarMensagem({ ticketId, autorId, autorNome, mensagem, interna });
   revalidatePath("/(app)/help-desk");
   return { sucesso: true };
 }

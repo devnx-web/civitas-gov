@@ -29,7 +29,8 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/transparencia") ||
         nextUrl.pathname.startsWith("/api/transparencia") ||
         nextUrl.pathname.startsWith("/api/reversibilidade/dicionario") ||
-        nextUrl.pathname.startsWith("/cotacao-online");
+        nextUrl.pathname.startsWith("/cotacao-online") ||
+        nextUrl.pathname.startsWith("/verificar-assinatura");
 
       if (ePublica) return true;
 

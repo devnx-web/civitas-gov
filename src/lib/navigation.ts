@@ -20,6 +20,8 @@ import {
   BookOpen,
   History,
   Sparkles,
+  FileSignature,
+  Package,
   type LucideIcon,
 } from "lucide-react";
 import type { Role } from "@/types/next-auth";
@@ -110,6 +112,13 @@ export const NAV: NavGroup[] = [
           {
             label: "Validade",
             submenus: [{ label: "Lotes / Validade", href: "/almoxarifado/lotes" }],
+          },
+          {
+            label: "Catálogo",
+            submenus: [
+              { label: "Materiais", href: "/materiais" },
+              { label: "Importar materiais", href: "/materiais/importar" },
+            ],
           },
         ],
       },
@@ -234,6 +243,26 @@ export const NAV: NavGroup[] = [
               { label: "Habilitados", href: "/fornecedores/habilitacao" },
               { label: "Pendências", href: "/fornecedores/pendencias" },
             ],
+          },
+        ],
+      },
+      {
+        label: "Assinaturas digitais",
+        href: "/assinaturas",
+        icon: FileSignature,
+        descricao: "Assinatura eletrônica de editais, contratos, atas e termos",
+        roles: ["admin", "gestor", "operador"],
+        menus: [
+          {
+            label: "Documentos",
+            submenus: [
+              { label: "Todos os documentos", href: "/assinaturas" },
+              { label: "Nova assinatura", href: "/assinaturas/novo" },
+            ],
+          },
+          {
+            label: "Verificação",
+            submenus: [{ label: "Verificar autenticidade", href: "/verificar-assinatura" }],
           },
         ],
       },
