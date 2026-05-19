@@ -4,15 +4,23 @@ Estrutura de planejamento GSD da evolução do Civitas Gov (POC → produto ERP 
 gestão pública), tendo como caso de validação o **Pregão Eletrônico nº 002/2026
 do IPASLI**. Este diretório é **planejamento** — não contém implementação.
 
+> **Bootstrap retroativo (2026-05-19).** O código rodou na frente do GSD por
+> várias fases. Esta estrutura agora reflete o estado real: cada fase do
+> ROADMAP tem um arquivo em [`fases/`](fases/) com SUMMARY retroativo (para o
+> que já foi entregue) e backlog (para o que falta). O [`STATE.md`](STATE.md)
+> consolida o estado em uma página; a [`auditoria/AUDIT-resumo.md`](auditoria/AUDIT-resumo.md) cruza requisitos do TR com o código.
+
 ## Documentos
 
 | Documento | Conteúdo |
 |---|---|
 | [`PROJECT.md`](PROJECT.md) | Visão, contexto, escopo, restrições, premissas, critérios de sucesso, riscos |
 | [`ROADMAP.md`](ROADMAP.md) | As 11 fases (0–10): objetivo, escopo, requisitos, entregáveis, critérios, dependências |
+| [`STATE.md`](STATE.md) | **Estado consolidado pós-bootstrap** — status por fase, decisões, blockers, próxima ação |
 | [`padroes-tecnicos.md`](padroes-tecnicos.md) | Bibliotecas e padrões escolhidos uma única vez (Prisma, react-toastify, bcryptjs, etc.) |
 | [`requisitos/`](requisitos/) | Catálogo rastreável de todos os requisitos |
-| [`fases/`](fases/) | Specs detalhadas por fase — geradas quando cada fase entra em planejamento |
+| [`fases/`](fases/) | Spec + SUMMARY + backlog por fase (uma fase = um arquivo) |
+| [`auditoria/AUDIT-resumo.md`](auditoria/AUDIT-resumo.md) | Auditoria de requisitos por amostra (125 reqs verificados) |
 
 ## Catálogo de requisitos
 
@@ -28,22 +36,23 @@ do IPASLI**. Este diretório é **planejamento** — não contém implementaçã
 
 **671 requisitos funcionais** do edital + ~53 não-funcionais + ~31 "além do TR".
 
-## Roadmap — visão de uma página
+## Roadmap — visão de uma página (com status real)
 
-```
-Fase 0   Fundação técnica          BD, ORM, RBAC granular, auditoria, CI, multi-tenant
-Fase 1   Núcleo comum              Fornecedores, materiais/CATMAT, gerador de relatórios
-Fase 2   Almoxarifado              Sistema 2 completo (105 req.)
-Fase 3   Patrimônio                Sistema 3 completo (117 req.)
-Fase 4   Licitações & Contratos    Sistema 1 (384 req.) — 4a Compras · 4b Pregão
-                                   4c Contratos · 4d Convênios/Fiscalização
-Fase 5   Portal da Transparência   Sistema 4 público (65 req.)
-Fase 6   Integrações               SIAFIC, TCE-ES, protocolo, PNCP, APIs
-Fase 7   Conformidade              Prestação de contas, LGPD, reversibilidade
-Fase 8   Camada de IA              Copiloto, classificação CATMAT, análise de risco
-Fase 9   Implantação & operação    Help Desk, SLA, migração, treinamento
-Fase 10  Qualidade                 Testes, observabilidade, WCAG AA
-```
+| # | Nome | Status | Cobertura | Arquivo |
+|---|---|---|---|---|
+| 0 | Fundação técnica | executado-parcial | ~85% | [`fases/fase-0-fundacao.md`](fases/fase-0-fundacao.md) |
+| 1 | Núcleo comum | executado-parcial | ~50% | [`fases/fase-1-nucleo-comum.md`](fases/fase-1-nucleo-comum.md) |
+| 2 | Almoxarifado | executado-parcial | ~30% | [`fases/fase-2-almoxarifado.md`](fases/fase-2-almoxarifado.md) |
+| 3 | Patrimônio | executado-parcial | ~55% | [`fases/fase-3-patrimonio.md`](fases/fase-3-patrimonio.md) |
+| 4 | Licitações & Contratos | executado-parcial | ~25% | [`fases/fase-4-licitacoes-contratos.md`](fases/fase-4-licitacoes-contratos.md) |
+| 5 | Transparência | stub | ~10% | [`fases/fase-5-transparencia.md`](fases/fase-5-transparencia.md) |
+| 6 | Integrações | executado-parcial | ~50% | [`fases/fase-6-integracoes.md`](fases/fase-6-integracoes.md) |
+| 7 | Conformidade | executado-parcial | ~40% | [`fases/fase-7-conformidade.md`](fases/fase-7-conformidade.md) |
+| 8 | Camada de IA | pendente | 0% | [`fases/fase-8-ia.md`](fases/fase-8-ia.md) |
+| 9 | Implantação & operação | executado-parcial | ~35% | [`fases/fase-9-implantacao.md`](fases/fase-9-implantacao.md) |
+| 10 | Qualidade & acessibilidade | executado-parcial | ~25% | [`fases/fase-10-qualidade.md`](fases/fase-10-qualidade.md) |
+
+**Cobertura global aproximada do TR:** ~30% (ver `auditoria/AUDIT-resumo.md`).
 
 Dependências: `0 → 1 → {2, 3, 4} → 5 → 6 → 7`; fases 8/9/10 após núcleo estável.
 
@@ -53,32 +62,49 @@ Dependências: `0 → 1 → {2, 3, 4} → 5 → 6 → 7`; fases 8/9/10 após nú
   (Transparência — Gestão/Portal), `REQ-NF-NNN` (não-funcional), `REQ-ALEM-NNN`
   (além do TR).
 - **Status de requisito:** `planejado` → `em-fase` → `implementado` →
-  `verificado`. Hoje, todo o catálogo está em `planejado`.
+  `verificado`. A auditoria em `auditoria/AUDIT-resumo.md` é o ponto de partida
+  para essa marcação requisito a requisito.
 - **PoC:** classificação Obrigatório/Essencial/Desejável atribuída pela Comissão
   Técnica na Prova de Conceito do edital (TR §4.8). O catálogo marca
   `a classificar` até essa definição.
+- **Status de fase** (em `STATE.md`):
+  - `executado` — cobertura ≥ 90% do escopo declarado.
+  - `executado-parcial` — núcleo entregue, porções faltando.
+  - `stub` — diretório criado sem implementação real.
+  - `pendente` — nada começou.
 
-## Estado do planejamento
+## Bloqueadores conhecidos (do `STATE.md`)
 
-| Item | Status |
-|---|---|
-| Leitura integral do TR e Anexo I | ✅ concluído |
-| PROJECT.md | ✅ concluído |
-| ROADMAP.md (11 fases) | ✅ concluído |
-| Catálogo rastreável (~755 req.) | ✅ concluído |
-| Specs detalhadas por fase (`fases/`) | ⬜ pendente — uma por vez, ao planejar |
-| Classificação PoC dos requisitos | ⬜ pendente |
-| Decisões de arquitetura (ADRs) | ⬜ pendente — abertas na Fase 0 |
+1. **TCE-ES IN 43/2017** (Fase 7) — bloqueador de edital, sem ele a PoC não passa.
+2. **Sub-fases 4a / 4b / 4d** (Fase 4) — PCA, pregão, atas, impugnações, convênios, fiscalização — ~250 requisitos sem cobertura.
+3. **Movimentações de almoxarifado** (Fase 2) — entradas/saídas/requisições são stubs.
+4. **Portal Transparência sem dados reais** (Fase 5) — LAI/LC 131 é conformidade ativa.
+5. **Auditoria cobre só `Usuario`** (Fase 0) — risco para REQ-NF-014/016.
+6. **CI/CD + backup + observabilidade** (Fase 10) — produto não-vendável sem.
+7. **Reversibilidade total** (Fase 7) — REQ-NF-091/092 contratual.
 
 ## Próximos passos sugeridos
 
-1. **Revisar** PROJECT.md e ROADMAP.md — validar visão, escopo e sequência.
-2. **Detalhar a Fase 0** — gerar `fases/fase-0-fundacao.md` com decisões de
-   arquitetura (ORM, estratégia multi-tenant, modelo de dados, stack de API).
-3. **Classificar a PoC** — percorrer o catálogo marcando Obrigatório/Essencial/
-   Desejável, para priorizar dentro de cada fase.
-4. Só então iniciar implementação, fase a fase.
+A ordem recomendada (ver detalhes em `STATE.md` e `auditoria/AUDIT-resumo.md`):
+
+1. **Fase 7 — TCE-ES IN 43/2017** (inegociável para o edital).
+2. **Fase 2 — Movimentações de almoxarifado** (destrava INVALM da Fase 7).
+3. **Fase 4 — Sub-fases 4a, 4b, 4d** (bloco maior de requisitos do TR).
+4. **Fase 5 — Portal com dados reais** (LAI/LC 131).
+5. **Fase 1 — Núcleo comum faltante** (`CentroCusto`, `UnidadeGestora`,
+   `Comissao`, grupos/classes/subclasses de material).
+6. **Fase 0 — Estender auditoria** + CI/CD.
+7. **Fase 9 — SLA + treinamento + ETL.**
+
+Use o ciclo GSD:
+
+```
+/gsd-discuss-phase <N>   # se a fase precisa de mais contexto
+/gsd-plan-phase <N>      # gera PLAN.md detalhado por fase
+/gsd-execute-phase <N>   # executa o plano
+/gsd-verify-work <N>     # UAT conversacional
+```
 
 ---
 
-_Planejamento gerado a partir dos documentos em `docs/` — Pregão 002/2026 IPASLI._
+_Planejamento atualizado em 2026-05-19 via bootstrap GSD retroativo (rotas A+C)._
