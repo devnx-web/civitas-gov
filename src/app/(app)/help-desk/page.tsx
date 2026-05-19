@@ -80,6 +80,35 @@ export default function HelpDeskPage() {
     fechado: "bg-gray-100 text-gray-700",
   };
 
+  const nivelSLACor: Record<string, string> = {
+    critico: "bg-red-100 text-red-700",
+    alto: "bg-orange-100 text-orange-700",
+    medio: "bg-yellow-100 text-yellow-700",
+    baixo: "bg-blue-100 text-blue-700",
+  };
+
+  const nivelSLALabel: Record<string, string> = {
+    critico: "SLA Crítico",
+    alto: "SLA Alto",
+    medio: "SLA Médio",
+    baixo: "SLA Baixo",
+  };
+
+  function prazoIndicador(
+    prazoResolucao: string | Date | null,
+    statusSLA: string | null
+  ): { cor: string; texto: string } | null {
+    if (!prazoResolucao) return null;
+    const prazo = new Date(prazoResolucao);
+    const agora = new Date();
+    const diffMs = prazo.getTime() - agora.getTime();
+    const diffH = diffMs / (1000 * 60 * 60);
+
+    if (statusSLA === "vencido" || diffMs < 0) return { cor: "text-red-600", texto: `Vencido` };
+    if (diffH <= 2) return { cor: "text-yellow-600", texto: `${Math.ceil(diffH)}h restantes` };
+    return { cor: "text-green-600", texto: `${Math.floor(diffH)}h restantes` };
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader titulo="Help Desk" descricao="Suporte técnico e base de conhecimento" />
@@ -154,32 +183,47 @@ export default function HelpDeskPage() {
               {loading ? (
                 <p>Carregando...</p>
               ) : (
-                tickets.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setTicketSelecionado(t)}
-                    className={`w-full text-left rounded-md border p-3 transition-colors ${ticketSelecionado?.id === t.id ? "border-primary bg-primary/5" : "hover:bg-muted"}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm truncate">{t.titulo}</span>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${prioridadeCor[t.prioridade]}`}
-                      >
-                        {t.prioridade}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusCor[t.status]}`}
-                      >
-                        {t.status.replace(/_/g, " ")}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {t.mensagens.length} mensagens
-                      </span>
-                    </div>
-                  </button>
-                ))
+                tickets.map((t) => {
+                  const indicador = prazoIndicador(t.prazoResolucao, t.statusSLA);
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setTicketSelecionado(t)}
+                      className={`w-full text-left rounded-md border p-3 transition-colors ${ticketSelecionado?.id === t.id ? "border-primary bg-primary/5" : "hover:bg-muted"}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-sm truncate">{t.titulo}</span>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${prioridadeCor[t.prioridade]}`}
+                        >
+                          {t.prioridade}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusCor[t.status]}`}
+                        >
+                          {t.status.replace(/_/g, " ")}
+                        </span>
+                        {t.nivelSLA && (
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${nivelSLACor[t.nivelSLA]}`}
+                          >
+                            {nivelSLALabel[t.nivelSLA]}
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {t.mensagens.length} mensagens
+                        </span>
+                      </div>
+                      {indicador && (
+                        <div className={`mt-1 text-xs font-medium ${indicador.cor}`}>
+                          ⏱ {indicador.texto}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })
               )}
             </div>
           </div>

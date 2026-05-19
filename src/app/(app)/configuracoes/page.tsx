@@ -21,6 +21,7 @@ import { PageTransition, FadeIn } from "@/components/motion";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { listarUsuarios } from "@/lib/data/usuarios";
 import { listarAuditorias, listarMatrizPermissoes } from "@/lib/data/auditorias";
+import { listarConfiguracoes } from "@/lib/data/configuracoes";
 import { getTenant } from "@/lib/tenant";
 import { requirePermissao, checarPermissao } from "@/lib/permissoes";
 import { ROLE_LABELS } from "@/lib/roles";
@@ -29,6 +30,7 @@ import { PodeFazer } from "@/components/auth/pode-fazer";
 import type { Role } from "@/types/next-auth";
 import type { LogAuditoria, MatrizPermissao } from "@/lib/data/auditorias";
 import type { UsuarioPublico } from "@/lib/data/usuarios";
+import { TabParametrosClient } from "./tab-parametros-client";
 
 export const metadata: Metadata = { title: "Configurações" };
 
@@ -74,14 +76,14 @@ const OP_LABEL: Record<string, string> = {
   exportar: "Exportar",
 };
 
-const PARAMETROS = [
-  { nome: "Expiração da sessão", valor: "8 horas" },
-  { nome: "Exercício orçamentário", valor: "2026" },
-  { nome: "Ente", valor: "IPASLI — Linhares/ES" },
-  { nome: "Modelo de hospedagem", valor: "Nuvem (SaaS) · SLA 99,98%" },
-  { nome: "Conformidade LGPD", valor: "Ativa" },
-  { nome: "Retenção de auditoria", valor: "5 anos" },
-  { nome: "Versão do sistema", valor: "0.1.0-poc" },
+const PARAMETROS_PADRAO = [
+  { chave: "expiracao_sessao", nome: "Expiração da sessão", valor: "8 horas" },
+  { chave: "exercicio_orcamentario", nome: "Exercício orçamentário", valor: "2026" },
+  { chave: "ente", nome: "Ente", valor: "IPASLI — Linhares/ES" },
+  { chave: "modelo_hospedagem", nome: "Modelo de hospedagem", valor: "Nuvem (SaaS) · SLA 99,98%" },
+  { chave: "conformidade_lgpd", nome: "Conformidade LGPD", valor: "Ativa" },
+  { chave: "retencao_auditoria", nome: "Retenção de auditoria", valor: "5 anos" },
+  { chave: "versao_sistema", nome: "Versão do sistema", valor: "0.1.0-poc" },
 ];
 
 // ── Sub-componentes das abas ──────────────────────────────────────────────────
@@ -114,9 +116,7 @@ function TabUsuarios({
                     {iniciais(u.nome)}
                   </span>
                   <div>
-                    <span className="block font-medium text-ink-900">
-                      {u.nome}
-                    </span>
+                    <span className="block font-medium text-ink-900">{u.nome}</span>
                     <span className="block text-xs text-ink-400">{u.email}</span>
                   </div>
                 </div>
@@ -145,31 +145,22 @@ function TabUsuarios({
 }
 
 function TabPermissoes({ matriz }: { matriz: MatrizPermissao[] }) {
-  const roles: Array<"admin" | "gestor" | "operador"> = [
-    "admin",
-    "gestor",
-    "operador",
-  ];
+  const roles: Array<"admin" | "gestor" | "operador"> = ["admin", "gestor", "operador"];
 
   return (
     <FadeIn className="space-y-4">
       <p className="text-sm text-ink-500">
-        Permissões padrão por papel. Overrides individuais podem ser aplicados
-        diretamente no cadastro do usuário.
+        Permissões padrão por papel. Overrides individuais podem ser aplicados diretamente no
+        cadastro do usuário.
       </p>
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-ink-200">
-              <th className="py-3 pr-4 text-left font-medium text-ink-700">
-                Módulo
-              </th>
+              <th className="py-3 pr-4 text-left font-medium text-ink-700">Módulo</th>
               {roles.map((r) => (
-                <th
-                  key={r}
-                  className="py-3 px-4 text-center font-medium text-ink-700"
-                >
+                <th key={r} className="py-3 px-4 text-center font-medium text-ink-700">
                   {ROLE_LABELS[r]}
                 </th>
               ))}
@@ -177,10 +168,7 @@ function TabPermissoes({ matriz }: { matriz: MatrizPermissao[] }) {
           </thead>
           <tbody>
             {matriz.map((linha) => (
-              <tr
-                key={linha.escopo}
-                className="border-b border-ink-100 hover:bg-ink-50"
-              >
+              <tr key={linha.escopo} className="border-b border-ink-100 hover:bg-ink-50">
                 <td className="py-2.5 pr-4 font-medium text-ink-800">
                   {ESCOPO_LABEL[linha.escopo] ?? linha.escopo}
                 </td>
@@ -214,24 +202,15 @@ function TabPermissoes({ matriz }: { matriz: MatrizPermissao[] }) {
   );
 }
 
-function TabAuditoria({
-  items,
-  total,
-}: {
-  items: LogAuditoria[];
-  total: number;
-}) {
+function TabAuditoria({ items, total }: { items: LogAuditoria[]; total: number }) {
   if (items.length === 0) {
     return (
       <FadeIn>
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <ClipboardList className="h-10 w-10 text-ink-300" />
-          <p className="mt-3 text-sm font-medium text-ink-700">
-            Nenhum registro de auditoria
-          </p>
+          <p className="mt-3 text-sm font-medium text-ink-700">Nenhum registro de auditoria</p>
           <p className="mt-1 text-xs text-ink-400">
-            Os registros aparecem automaticamente conforme operações são
-            realizadas no sistema.
+            Os registros aparecem automaticamente conforme operações são realizadas no sistema.
           </p>
         </div>
       </FadeIn>
@@ -282,9 +261,7 @@ function TabAuditoria({
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700">
                       {iniciais(log.usuarioNome)}
                     </span>
-                    <span className="text-xs text-ink-700">
-                      {log.usuarioNome}
-                    </span>
+                    <span className="text-xs text-ink-700">{log.usuarioNome}</span>
                   </div>
                 ) : (
                   <span className="text-xs text-ink-400">Sistema</span>
@@ -296,9 +273,7 @@ function TabAuditoria({
                 </Badge>
               </TD>
               <TD>
-                <span className="font-mono text-xs text-ink-700">
-                  {log.entidade}
-                </span>
+                <span className="font-mono text-xs text-ink-700">{log.entidade}</span>
               </TD>
               <TD>
                 <span className="font-mono text-xs text-ink-500">
@@ -316,23 +291,20 @@ function TabAuditoria({
   );
 }
 
-function TabParametros() {
+interface ConfiguracaoItem {
+  id: string;
+  tenantId: string;
+  chave: string;
+  valor: string;
+  tipo: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
+}
+
+function TabParametros({ configuracoes }: { configuracoes: ConfiguracaoItem[] }) {
   return (
     <FadeIn className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-      <Card>
-        <CardHeader title="Parâmetros do sistema" />
-        <CardBody className="space-y-2.5">
-          {PARAMETROS.map((p) => (
-            <div
-              key={p.nome}
-              className="flex items-center justify-between gap-4 text-sm"
-            >
-              <span className="text-ink-500">{p.nome}</span>
-              <span className="font-medium text-ink-800">{p.valor}</span>
-            </div>
-          ))}
-        </CardBody>
-      </Card>
+      <TabParametrosClient configuracoes={configuracoes} parametrosPadrao={PARAMETROS_PADRAO} />
 
       <Card>
         <CardHeader title="Papéis de acesso" />
@@ -395,30 +367,28 @@ function PapelInfo({
 export default async function ConfiguracoesPage() {
   await requirePermissao("configuracoes", "visualizar");
 
-  const [tenant, podeCriarUsuario, podeEditarUsuario, podeVerAuditoria] =
-    await Promise.all([
-      getTenant(),
-      checarPermissao("usuarios", "criar"),
-      checarPermissao("usuarios", "editar"),
-      checarPermissao("auditoria", "visualizar"),
-    ]);
+  const [tenant, podeCriarUsuario, podeEditarUsuario, podeVerAuditoria] = await Promise.all([
+    getTenant(),
+    checarPermissao("usuarios", "criar"),
+    checarPermissao("usuarios", "editar"),
+    checarPermissao("auditoria", "visualizar"),
+  ]);
 
-  const [usuarios, matriz, { items: logAuditoria, total: totalLogs }] =
+  const [usuarios, matriz, { items: logAuditoria, total: totalLogs }, configuracoes] =
     await Promise.all([
       listarUsuarios(tenant.id),
       listarMatrizPermissoes(),
       podeVerAuditoria
         ? listarAuditorias(tenant.id, { limite: 100 })
         : Promise.resolve({ items: [], total: 0 }),
+      listarConfiguracoes(tenant.id),
     ]);
 
   const abas = [
     {
       id: "usuarios",
       label: `Usuários (${usuarios.length})`,
-      conteudo: (
-        <TabUsuarios usuarios={usuarios} podeEditar={podeEditarUsuario} />
-      ),
+      conteudo: <TabUsuarios usuarios={usuarios} podeEditar={podeEditarUsuario} />,
     },
     {
       id: "permissoes",
@@ -430,16 +400,14 @@ export default async function ConfiguracoesPage() {
           {
             id: "auditoria",
             label: "Auditoria",
-            conteudo: (
-              <TabAuditoria items={logAuditoria} total={totalLogs} />
-            ),
+            conteudo: <TabAuditoria items={logAuditoria} total={totalLogs} />,
           },
         ]
       : []),
     {
       id: "parametros",
       label: "Parâmetros",
-      conteudo: <TabParametros />,
+      conteudo: <TabParametros configuracoes={configuracoes} />,
     },
   ];
 

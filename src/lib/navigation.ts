@@ -261,6 +261,16 @@ export const NAV: NavGroup[] = [
         icon: Headphones,
         descricao: "Suporte técnico e base de conhecimento",
         roles: ["admin", "gestor", "operador"],
+        menus: [
+          {
+            label: "Suporte",
+            submenus: [{ label: "Tickets", href: "/help-desk" }],
+          },
+          {
+            label: "Gestão",
+            submenus: [{ label: "SLA", href: "/help-desk/sla" }],
+          },
+        ],
       },
     ],
   },

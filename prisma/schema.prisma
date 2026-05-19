@@ -41,6 +41,7 @@ model Tenant {
   planosReversao             PlanoReversao[]
   ticketsSuporte             TicketSuporte[]
   artigosBaseConhecimento    ArtigoBaseConhecimento[]
+  configuracoesSLA           ConfiguracaoSLA[]
   centrosCusto               CentroCusto[]
   unidadesGestoras           UnidadeGestora[]
   setores                    Setor[]
@@ -50,7 +51,6 @@ model Tenant {
   termosGuarda               TermoGuardaResponsabilidade[]
   transferenciasPatrimoniais TransferenciaPatrimonial[]
   sancoesFornecedor          SancaoFornecedor[]
-  // Fase 4 — novos modelos
   pcas                       PCA[]
   solicitacoesCompra         SolicitacaoCompra[]
   pesquisasPreco             PesquisaPreco[]
@@ -67,7 +67,6 @@ model Tenant {
   fiscalizacoesContrato      FiscalizacaoContrato[]
   ocorrenciasFiscalizacao    OcorrenciaFiscalizacao[]
   medicoes                   MedicaoContrato[]
-  // Wave 4A — hierarquia de material
   gruposMaterial             GrupoMaterial[]
 
   @@map("tenants")
@@ -1055,6 +1054,35 @@ model ItemReversao {
 
 // ── Help Desk ────────────────────────────────────────────────────────────────
 
+// ── SLA ──────────────────────────────────────────────────────────────────────
+
+enum NivelSLA {
+  critico
+  alto
+  medio
+  baixo
+}
+
+enum StatusSLA {
+  dentro_prazo
+  em_risco
+  vencido
+}
+
+model ConfiguracaoSLA {
+  id           String   @id @default(cuid())
+  tenantId     String
+  nivel        NivelSLA
+  prazoHoras   Int
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, nivel])
+  @@map("configuracoes_sla")
+}
+
 enum StatusTicket {
   aberto
   em_andamento
@@ -1079,18 +1107,21 @@ enum CategoriaTicket {
 }
 
 model TicketSuporte {
-  id            String           @id @default(cuid())
-  tenantId      String
-  titulo        String
-  descricao     String
-  categoria     CategoriaTicket
-  prioridade    PrioridadeTicket @default(media)
-  status        StatusTicket     @default(aberto)
-  solicitanteId String
-  responsavelId String?
-  dataResolucao DateTime?
-  criadoEm      DateTime         @default(now())
-  atualizadoEm  DateTime         @updatedAt
+  id             String           @id @default(cuid())
+  tenantId       String
+  titulo         String
+  descricao      String
+  categoria      CategoriaTicket
+  prioridade     PrioridadeTicket @default(media)
+  status         StatusTicket     @default(aberto)
+  nivelSLA       NivelSLA?
+  prazoResolucao DateTime?
+  statusSLA      StatusSLA?
+  solicitanteId  String
+  responsavelId  String?
+  dataResolucao  DateTime?
+  criadoEm       DateTime         @default(now())
+  atualizadoEm   DateTime         @updatedAt
 
   mensagens MensagemTicket[]
   tenant    Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
