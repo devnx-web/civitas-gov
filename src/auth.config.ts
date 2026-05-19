@@ -23,6 +23,13 @@ export const authConfig = {
       const logado = !!auth?.user;
       const naTelaLogin = nextUrl.pathname.startsWith("/login");
 
+      // Rotas públicas — Portal da Transparência (LAI/LC 131) e APIs de dados abertos
+      const ePublica =
+        nextUrl.pathname.startsWith("/transparencia") ||
+        nextUrl.pathname.startsWith("/api/transparencia");
+
+      if (ePublica) return true;
+
       if (naTelaLogin) {
         if (logado) {
           return Response.redirect(new URL("/dashboard", nextUrl));
