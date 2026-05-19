@@ -415,8 +415,13 @@ export async function seedLicitacoes(
     const procId = processoIds[cfg.key];
     if (!procId) continue;
 
-    // Idempotência: apaga e recria
-    await prisma.itemLicitacao.deleteMany({ where: { processoId: procId } });
+    // Idempotência: pula se já existirem itens (evita FK violation com lances)
+    const jaExistem = await prisma.itemLicitacao.count({ where: { processoId: procId } });
+    if (jaExistem > 0) {
+      const existentes = await prisma.itemLicitacao.findMany({ where: { processoId: procId }, select: { id: true }, orderBy: { numeroItem: "asc" } });
+      itemIds[cfg.key] = existentes.map((e) => e.id);
+      continue;
+    }
 
     const criados = await Promise.all(
       cfg.itens.map((it) =>
