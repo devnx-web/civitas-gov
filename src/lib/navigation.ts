@@ -107,6 +107,10 @@ export const NAV: NavGroup[] = [
               { label: "Histórico", href: "/almoxarifado/requisicoes" },
             ],
           },
+          {
+            label: "Validade",
+            submenus: [{ label: "Lotes / Validade", href: "/almoxarifado/lotes" }],
+          },
         ],
       },
       {
@@ -271,6 +275,13 @@ export const NAV: NavGroup[] = [
               { label: "e-SIC", href: "/lgpd/esic" },
             ],
           },
+          {
+            label: "Compliance",
+            submenus: [
+              { label: "Titulares de dados", href: "/lgpd" },
+              { label: "RoPA (Art. 37)", href: "/lgpd/ropa" },
+            ],
+          },
         ],
       },
       {
@@ -324,6 +335,7 @@ export const NAV: NavGroup[] = [
               { label: "Setores", href: "/configuracoes/setores" },
               { label: "Comissões", href: "/configuracoes/comissoes" },
               { label: "Grupos de Material", href: "/configuracoes/grupos-material" },
+              { label: "Agentes de Contratação", href: "/configuracoes/agentes-contratacao" },
             ],
           },
           {
@@ -333,6 +345,10 @@ export const NAV: NavGroup[] = [
               { label: "ETL / Migração", href: "/configuracoes/etl" },
               { label: "Acessibilidade", href: "/configuracoes/acessibilidade" },
             ],
+          },
+          {
+            label: "Conta",
+            submenus: [{ label: "Segurança", href: "/configuracoes/seguranca" }],
           },
         ],
       },

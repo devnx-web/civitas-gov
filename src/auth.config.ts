@@ -21,7 +21,7 @@ export const authConfig = {
     /** Protege todas as rotas internas e gerencia o redirecionamento. */
     authorized({ auth, request: { nextUrl } }) {
       const logado = !!auth?.user;
-      const rotasPublicas = ["/login", "/recuperar-senha", "/nova-senha"];
+      const rotasPublicas = ["/login", "/recuperar-senha", "/nova-senha", "/verificar-totp"];
       const ehPublica = rotasPublicas.some((rota) => nextUrl.pathname.startsWith(rota));
 
       // Portal da Transparência, APIs abertas e cotação online — sem autenticação
@@ -39,6 +39,7 @@ export const authConfig = {
         }
         return true;
       }
+
       return logado;
     },
     jwt({ token, user }) {
