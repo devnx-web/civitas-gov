@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Headphones,
   Settings,
+  FileCheck,
   type LucideIcon,
 } from "lucide-react";
 import type { Role } from "@/types/next-auth";
@@ -217,6 +218,13 @@ export const NAV: NavGroup[] = [
         roles: ["admin", "gestor"],
       },
       {
+        label: "TCE-ES",
+        href: "/tce-es",
+        icon: FileCheck,
+        descricao: "Prestação de contas ao TCE-ES — IN 43/2017",
+        roles: ["admin", "gestor"],
+      },
+      {
         label: "Help Desk",
         href: "/help-desk",
         icon: Headphones,
@@ -242,7 +250,7 @@ export const NAV: NavGroup[] = [
 /** Retorna o NavItem (módulo) correspondente a um pathname. */
 export function navItemAtual(pathname: string): NavItem | undefined {
   return NAV.flatMap((g) => g.itens).find(
-    (i) => pathname === i.href || pathname.startsWith(i.href + "/"),
+    (i) => pathname === i.href || pathname.startsWith(i.href + "/")
   );
 }
 
