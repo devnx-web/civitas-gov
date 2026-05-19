@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { motion } from "framer-motion";
 import { LogIn, Mail, Lock, AlertCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { autenticar } from "@/lib/actions/auth";
 import { EASE } from "@/components/motion";
 
@@ -33,10 +34,7 @@ export function LoginForm() {
 
         <form action={formAction} className="mt-6 space-y-4">
           <div>
-            <label
-              htmlFor="email"
-              className="mb-1.5 block text-sm font-medium text-ink-700"
-            >
+            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-ink-700">
               E-mail
             </label>
             <div className="relative">
@@ -56,10 +54,7 @@ export function LoginForm() {
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="mb-1.5 block text-sm font-medium text-ink-700"
-            >
+            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-ink-700">
               Senha
             </label>
             <div className="relative">
@@ -101,15 +96,22 @@ export function LoginForm() {
             )}
             {pendente ? "Entrando..." : "Entrar"}
           </button>
+
+          <div className="text-center">
+            <Link
+              href="/recuperar-senha"
+              className="text-sm text-ink-500 hover:text-brand-600 hover:underline"
+            >
+              Esqueci minha senha
+            </Link>
+          </div>
         </form>
 
         {/* Atalhos de demonstração */}
         <div className="mt-6 border-t border-ink-100 pt-5">
           <p className="text-xs font-medium text-ink-400">
             Acesso de demonstração — clique para preencher (senha:{" "}
-            <code className="rounded bg-ink-100 px-1 text-ink-600">
-              civitas123
-            </code>
+            <code className="rounded bg-ink-100 px-1 text-ink-600">civitas123</code>
             ):
           </p>
           <div className="mt-2 flex flex-wrap gap-2">

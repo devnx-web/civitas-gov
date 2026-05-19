@@ -21,10 +21,12 @@ export const authConfig = {
     /** Protege todas as rotas internas e gerencia o redirecionamento. */
     authorized({ auth, request: { nextUrl } }) {
       const logado = !!auth?.user;
-      const naTelaLogin = nextUrl.pathname.startsWith("/login");
+      const rotasPublicas = ["/login", "/recuperar-senha", "/nova-senha"];
+      const ehPublica = rotasPublicas.some((rota) => nextUrl.pathname.startsWith(rota));
 
-      if (naTelaLogin) {
-        if (logado) {
+      if (ehPublica) {
+        // Usuários logados que tentam acessar rotas públicas de auth são redirecionados ao painel
+        if (logado && nextUrl.pathname.startsWith("/login")) {
           return Response.redirect(new URL("/dashboard", nextUrl));
         }
         return true;
