@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { ProgressBar, type Tone as ProgressTone } from "@/components/ui/progress-bar";
 import { FadeIn } from "@/components/motion";
@@ -50,43 +50,94 @@ export default async function DepreciacaoPage() {
     };
   });
 
+  const mesAtual = hoje.toISOString().slice(0, 7);
+  const bensCDepreciacao = linhas.filter((l) => l.pct > 0).length;
+
   return (
     <FadeIn>
-      <Card>
-        <CardHeader
-          title="Depreciação dos bens"
-          subtitle="Valor de aquisição, valor atual e perda acumulada"
-        />
-        <Table>
-          <THead>
-            <TR>
-              <TH>Tombamento</TH>
-              <TH>Descrição</TH>
-              <TH className="text-right">Valor de aquisição</TH>
-              <TH className="text-right">Valor atual</TH>
-              <TH className="text-right">Depreciação</TH>
-              <TH>% depreciado</TH>
-            </TR>
-          </THead>
-          <TBody>
-            {linhas.map((b) => (
-              <TR key={b.id}>
-                <TD className="font-mono text-xs text-ink-500">{b.tombamento}</TD>
-                <TD className="font-medium text-ink-900">{b.descricao}</TD>
-                <TD className="text-right whitespace-nowrap">{formatBRL(b.valorAquisicao)}</TD>
-                <TD className="text-right whitespace-nowrap">{formatBRL(b.valorAtual)}</TD>
-                <TD className="text-right whitespace-nowrap">{formatBRL(b.depreciacao)}</TD>
-                <TD>
-                  <div className="flex items-center gap-2">
-                    <ProgressBar valor={b.pct} tone={b.tone} className="w-24" />
-                    <span className="text-xs text-ink-600">{b.pct.toFixed(0)}%</span>
-                  </div>
-                </TD>
+      <div className="flex flex-col gap-4">
+        {/* Aplicar Depreciação */}
+        <Card>
+          <CardHeader
+            title="Calcular e Aplicar Depreciação NBCASP"
+            subtitle="Método linear — atualiza o campo 'Valor Residual' de todos os bens com percentual cadastrado"
+          />
+          <CardBody>
+            <form
+              action={async (fd: FormData) => {
+                "use server";
+                const { aplicarDepreciacaoNBCASPAction } = await import("@/lib/actions/patrimonio");
+                await aplicarDepreciacaoNBCASPAction({
+                  mesReferencia: fd.get("mesReferencia") as string,
+                });
+              }}
+              className="flex items-end gap-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-ink-700 mb-1">
+                  Mês de referência
+                </label>
+                <input
+                  name="mesReferencia"
+                  type="month"
+                  defaultValue={mesAtual}
+                  required
+                  className="rounded-lg border border-ink-200 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-ink-500">
+                  {bensCDepreciacao} {bensCDepreciacao === 1 ? "bem com" : "bens com"} percentual de
+                  depreciação cadastrado
+                </p>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+                >
+                  Aplicar depreciação
+                </button>
+              </div>
+            </form>
+          </CardBody>
+        </Card>
+
+        {/* Tabela de bens */}
+        <Card>
+          <CardHeader
+            title="Depreciação dos bens"
+            subtitle="Valor de aquisição, valor atual e perda acumulada"
+          />
+          <Table>
+            <THead>
+              <TR>
+                <TH>Tombamento</TH>
+                <TH>Descrição</TH>
+                <TH className="text-right">Valor de aquisição</TH>
+                <TH className="text-right">Valor atual</TH>
+                <TH className="text-right">Depreciação</TH>
+                <TH>% depreciado</TH>
               </TR>
-            ))}
-          </TBody>
-        </Table>
-      </Card>
+            </THead>
+            <TBody>
+              {linhas.map((b) => (
+                <TR key={b.id}>
+                  <TD className="font-mono text-xs text-ink-500">{b.tombamento}</TD>
+                  <TD className="font-medium text-ink-900">{b.descricao}</TD>
+                  <TD className="text-right whitespace-nowrap">{formatBRL(b.valorAquisicao)}</TD>
+                  <TD className="text-right whitespace-nowrap">{formatBRL(b.valorAtual)}</TD>
+                  <TD className="text-right whitespace-nowrap">{formatBRL(b.depreciacao)}</TD>
+                  <TD>
+                    <div className="flex items-center gap-2">
+                      <ProgressBar valor={b.pct} tone={b.tone} className="w-24" />
+                      <span className="text-xs text-ink-600">{b.pct.toFixed(0)}%</span>
+                    </div>
+                  </TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        </Card>
+      </div>
     </FadeIn>
   );
 }
