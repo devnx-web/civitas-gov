@@ -23,12 +23,19 @@ export const authConfig = {
       const logado = !!auth?.user;
       const naTelaLogin = nextUrl.pathname.startsWith("/login");
 
+      /** Rotas acessíveis sem autenticação completa. */
+      const rotasPublicas = ["/login", "/verificar-totp", "/verificar-assinatura"];
+      const rotaPublica = rotasPublicas.some((r) => nextUrl.pathname.startsWith(r));
+
       if (naTelaLogin) {
         if (logado) {
           return Response.redirect(new URL("/dashboard", nextUrl));
         }
         return true;
       }
+
+      if (rotaPublica) return true;
+
       return logado;
     },
     jwt({ token, user }) {

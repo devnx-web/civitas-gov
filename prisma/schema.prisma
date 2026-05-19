@@ -39,6 +39,8 @@ model Tenant {
   planosReversao  PlanoReversao[]
   ticketsSuporte  TicketSuporte[]
   artigosBaseConhecimento ArtigoBaseConhecimento[]
+  registrosTratamento RegistroAtividadeTratamento[]
+  agentesContratacao  AgenteContratacao[]
 
   @@map("tenants")
 }
@@ -54,6 +56,8 @@ model Usuario {
   cargo        String
   setor        String
   ativo        Boolean  @default(true)
+  totpSecret   String?
+  totpAtivado  Boolean  @default(false)
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
@@ -371,9 +375,26 @@ model Estoque {
   tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   almoxarifado Almoxarifado @relation(fields: [almoxarifadoId], references: [id])
   material     Material     @relation(fields: [materialId], references: [id])
+  lotes        LoteEstoque[]
   @@unique([almoxarifadoId, materialId])
   @@index([tenantId])
   @@map("estoques")
+}
+
+model LoteEstoque {
+  id              String    @id @default(cuid())
+  estoqueId       String
+  numero          String
+  fabricante      String?
+  dataFabricacao  DateTime?
+  dataValidade    DateTime?
+  quantidadeAtual Decimal   @db.Decimal(18, 4)
+  criadoEm        DateTime  @default(now())
+  atualizadoEm    DateTime  @updatedAt
+  estoque         Estoque   @relation(fields: [estoqueId], references: [id], onDelete: Cascade)
+
+  @@index([estoqueId, dataValidade])
+  @@map("lotes_estoque")
 }
 
 enum TipoBem {
@@ -792,6 +813,12 @@ enum BaseLegalLGPD {
   contrato
 }
 
+enum CategoriasDadosTratados {
+  dados_comuns
+  dados_sensiveis
+  dados_criancas
+}
+
 model TitularDados {
   id              String   @id @default(cuid())
   tenantId        String
@@ -831,6 +858,29 @@ model ConsentimentoLGPD {
 
   @@index([tenantId, titularId])
   @@map("consentimentos_lgpd")
+}
+
+/// RoPA — Registro de Atividades de Tratamento (Art. 37 LGPD).
+model RegistroAtividadeTratamento {
+  id                           String                    @id @default(cuid())
+  tenantId                     String
+  nome                         String
+  finalidade                   String
+  baseLegal                    BaseLegalLGPD
+  categoriasDados              CategoriasDadosTratados[]
+  titulares                    String
+  compartilhamento             String?
+  transferenciasInternacionais String?
+  prazoRetencao                String
+  medidasSeguranca             String
+  dpoId                        String?
+  criadoEm                     DateTime                  @default(now())
+  atualizadoEm                 DateTime                  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("registros_atividade_tratamento")
 }
 
 model RegistroProcessamentoDados {
@@ -992,4 +1042,28 @@ model ArtigoBaseConhecimento {
   @@index([tenantId])
   @@index([tenantId, categoria])
   @@map("artigos_base_conhecimento")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WAVE 6D — Agentes de Contratação (Lei 14.133/2021, Art. 8°)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Agente de contratação designado por portaria (Lei 14.133/2021, Art. 8°).
+model AgenteContratacao {
+  id             String    @id @default(cuid())
+  tenantId       String
+  usuarioId      String?
+  nome           String
+  matricula      String?
+  portaria       String?
+  vigenciaInicio DateTime
+  vigenciaFim    DateTime?
+  ativo          Boolean   @default(true)
+  criadoEm       DateTime  @default(now())
+  atualizadoEm   DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, ativo])
+  @@map("agentes_contratacao")
 }

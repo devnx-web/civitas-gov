@@ -98,6 +98,10 @@ export const NAV: NavGroup[] = [
               { label: "Histórico", href: "/almoxarifado/requisicoes" },
             ],
           },
+          {
+            label: "Validade",
+            submenus: [{ label: "Lotes / Validade", href: "/almoxarifado/lotes" }],
+          },
         ],
       },
       {
@@ -208,6 +212,16 @@ export const NAV: NavGroup[] = [
         icon: Shield,
         descricao: "Gestão de dados pessoais, consentimentos e registros",
         roles: ["admin", "gestor"],
+        menus: [
+          {
+            label: "Dados pessoais",
+            submenus: [{ label: "Titulares de dados", href: "/lgpd" }],
+          },
+          {
+            label: "Compliance",
+            submenus: [{ label: "RoPA", href: "/lgpd/ropa" }],
+          },
+        ],
       },
       {
         label: "Reversibilidade",
@@ -234,6 +248,18 @@ export const NAV: NavGroup[] = [
         icon: Settings,
         descricao: "Usuários, papéis de acesso e parâmetros",
         roles: ["admin"],
+        menus: [
+          {
+            label: "Cadastros",
+            submenus: [
+              { label: "Agentes de Contratação", href: "/configuracoes/agentes-contratacao" },
+            ],
+          },
+          {
+            label: "Conta",
+            submenus: [{ label: "Segurança", href: "/configuracoes/seguranca" }],
+          },
+        ],
       },
     ],
   },
@@ -242,7 +268,7 @@ export const NAV: NavGroup[] = [
 /** Retorna o NavItem (módulo) correspondente a um pathname. */
 export function navItemAtual(pathname: string): NavItem | undefined {
   return NAV.flatMap((g) => g.itens).find(
-    (i) => pathname === i.href || pathname.startsWith(i.href + "/"),
+    (i) => pathname === i.href || pathname.startsWith(i.href + "/")
   );
 }
 
