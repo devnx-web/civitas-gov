@@ -24,21 +24,30 @@ model Tenant {
   slug     String   @unique
   criadoEm DateTime @default(now())
 
-  usuarios      Usuario[]
-  fornecedores  Fornecedor[]
-  materiais     Material[]
-  almoxarifados Almoxarifado[]
-  bensPatrimoniais BemPatrimonial[]
-  estoques      Estoque[]
-  processosLicitatorios ProcessoLicitatorio[]
-  contratos     Contrato[]
-  configuracoes Configuracao[]
-  dotacoesOrcamentarias DotacaoOrcamentaria[]
-  empenhos      Empenho[]
-  titularesDados TitularDados[]
-  planosReversao  PlanoReversao[]
-  ticketsSuporte  TicketSuporte[]
-  artigosBaseConhecimento ArtigoBaseConhecimento[]
+  usuarios                   Usuario[]
+  fornecedores               Fornecedor[]
+  materiais                  Material[]
+  almoxarifados              Almoxarifado[]
+  bensPatrimoniais           BemPatrimonial[]
+  estoques                   Estoque[]
+  processosLicitatorios      ProcessoLicitatorio[]
+  contratos                  Contrato[]
+  configuracoes              Configuracao[]
+  dotacoesOrcamentarias      DotacaoOrcamentaria[]
+  empenhos                   Empenho[]
+  titularesDados             TitularDados[]
+  planosReversao             PlanoReversao[]
+  ticketsSuporte             TicketSuporte[]
+  artigosBaseConhecimento    ArtigoBaseConhecimento[]
+  centrosCusto               CentroCusto[]
+  unidadesGestoras           UnidadeGestora[]
+  setores                    Setor[]
+  comissoes                  Comissao[]
+  movimentacoesEstoque       MovimentacaoEstoque[]
+  requisicoesMateriaisTenant RequisicaoMaterial[]
+  termosGuarda               TermoGuardaResponsabilidade[]
+  transferenciasPatrimoniais TransferenciaPatrimonial[]
+  sancoesFornecedor          SancaoFornecedor[]
 
   @@map("tenants")
 }
@@ -63,6 +72,10 @@ model Usuario {
   @@index([tenantId])
   @@map("usuarios")
 }
+
+// Nota: as relações inversas em Usuario para TermoGuardaResponsabilidade e TransferenciaPatrimonial
+// são gerenciadas via campo String (responsavelId) sem FK explícita — design flexível para
+// acomodar responsáveis externos ao sistema (ex: gestores sem login).
 
 // ─── Auditoria ────────────────────────────────────────────────────────────────
 
@@ -190,18 +203,18 @@ enum SituacaoBem {
 }
 
 model DocumentoAssinavel {
-  id          String   @id @default(cuid())
-  tenantId    String
-  titulo      String
-  descricao   String?
-  tipo        String
-  entidade    String
-  entidadeId  String
-  arquivoUrl  String
-  hashSha256  String?
-  status      StatusAssinatura @default(pendente)
-  criadoEm    DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
+  id           String           @id @default(cuid())
+  tenantId     String
+  titulo       String
+  descricao    String?
+  tipo         String
+  entidade     String
+  entidadeId   String
+  arquivoUrl   String
+  hashSha256   String?
+  status       StatusAssinatura @default(pendente)
+  criadoEm     DateTime         @default(now())
+  atualizadoEm DateTime         @updatedAt
 
   assinaturas Assinatura[]
 
@@ -211,21 +224,21 @@ model DocumentoAssinavel {
 }
 
 model Assinatura {
-  id                  String   @id @default(cuid())
-  tenantId            String
-  documentoId         String
-  signatarioId        String
-  tipo                TipoAssinatura
-  nomeSignatario      String
-  cargoSignatario     String?
-  cpfSignatario       String?
-  dataAssinatura      DateTime @default(now())
-  codigoVerificacao   String   @unique
-  ipOrigem            String?
-  userAgent           String?
-  certificadoInfo     Json?
-  valida              Boolean  @default(true)
-  criadoEm            DateTime @default(now())
+  id                String         @id @default(cuid())
+  tenantId          String
+  documentoId       String
+  signatarioId      String
+  tipo              TipoAssinatura
+  nomeSignatario    String
+  cargoSignatario   String?
+  cpfSignatario     String?
+  dataAssinatura    DateTime       @default(now())
+  codigoVerificacao String         @unique
+  ipOrigem          String?
+  userAgent         String?
+  certificadoInfo   Json?
+  valida            Boolean        @default(true)
+  criadoEm          DateTime       @default(now())
 
   documento DocumentoAssinavel @relation(fields: [documentoId], references: [id], onDelete: Cascade)
 
@@ -233,7 +246,6 @@ model Assinatura {
   @@index([documentoId])
   @@map("assinaturas")
 }
-
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MODELOS ADICIONAIS PARA IMPORTAÇÃO/EXPORTAÇÃO EXCEL
@@ -254,35 +266,39 @@ enum CategoriaMaterial {
 }
 
 model UnidadeMedida {
-  id     String @id @default(cuid())
-  tenantId String
-  codigo String
-  nome   String
-  ativo  Boolean @default(true)
-  criadoEm DateTime @default(now())
+  id        String     @id @default(cuid())
+  tenantId  String
+  codigo    String
+  nome      String
+  ativo     Boolean    @default(true)
+  criadoEm  DateTime   @default(now())
   materiais Material[]
+
   @@index([tenantId])
   @@map("unidades_medida")
 }
 
 model Material {
-  id            String   @id @default(cuid())
-  tenantId      String
-  codigo        String   @unique
-  descricao     String
+  id                String                   @id @default(cuid())
+  tenantId          String
+  codigo            String                   @unique
+  descricao         String
   descricaoCompleta String?
-  tipo          TipoMaterial
-  categoria     CategoriaMaterial?
-  unidadeMedidaId String
-  catmat        String?
-  catser        String?
-  imagemUrl     String?
-  ativo         Boolean  @default(true)
-  criadoEm      DateTime @default(now())
-  atualizadoEm  DateTime @updatedAt
-  tenant        Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  unidadeMedida UnidadeMedida   @relation(fields: [unidadeMedidaId], references: [id])
-  estoques      Estoque[]
+  tipo              TipoMaterial
+  categoria         CategoriaMaterial?
+  unidadeMedidaId   String
+  catmat            String?
+  catser            String?
+  imagemUrl         String?
+  ativo             Boolean                  @default(true)
+  criadoEm          DateTime                 @default(now())
+  atualizadoEm      DateTime                 @updatedAt
+  tenant            Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unidadeMedida     UnidadeMedida            @relation(fields: [unidadeMedidaId], references: [id])
+  estoques          Estoque[]
+  movimentacoes     MovimentacaoEstoque[]
+  itensRequisicao   ItemRequisicaoMaterial[]
+
   @@index([tenantId])
   @@index([tenantId, ativo])
   @@map("materiais")
@@ -294,7 +310,7 @@ enum TipoFornecedor {
 }
 
 model Fornecedor {
-  id           String   @id @default(cuid())
+  id           String                @id @default(cuid())
   tenantId     String
   tipo         TipoFornecedor
   nome         String
@@ -307,70 +323,77 @@ model Fornecedor {
   telefone     String?
   endereco     String?
   cidade       String?
-  uf           String? @db.VarChar(2)
+  uf           String?               @db.VarChar(2)
   cep          String?
   banco        String?
   agencia      String?
   conta        String?
-  ativo        Boolean  @default(true)
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
-  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  documentos  FornecedorDocumento[]
-  contratos   Contrato[]
-  empenhos    Empenho[]
+  ativo        Boolean               @default(true)
+  criadoEm     DateTime              @default(now())
+  atualizadoEm DateTime              @updatedAt
+  tenant       Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  documentos   FornecedorDocumento[]
+  contratos    Contrato[]
+  empenhos     Empenho[]
+  sancoes      SancaoFornecedor[]
+
   @@index([tenantId])
   @@index([tenantId, ativo])
   @@map("fornecedores")
 }
 
 model FornecedorDocumento {
-  id            String   @id @default(cuid())
-  fornecedorId  String
-  tipo          String
-  numero        String?
-  validade      DateTime?
-  arquivoUrl    String?
-  status        String   @default("valido")
-  criadoEm      DateTime @default(now())
-  fornecedor Fornecedor @relation(fields: [fornecedorId], references: [id], onDelete: Cascade)
+  id           String     @id @default(cuid())
+  fornecedorId String
+  tipo         String
+  numero       String?
+  validade     DateTime?
+  arquivoUrl   String?
+  status       String     @default("valido")
+  criadoEm     DateTime   @default(now())
+  fornecedor   Fornecedor @relation(fields: [fornecedorId], references: [id], onDelete: Cascade)
+
   @@index([fornecedorId])
   @@map("fornecedor_documentos")
 }
 
 model Almoxarifado {
-  id       String @id @default(cuid())
-  tenantId String
-  codigo   String
-  nome     String
-  setor    String?
-  local    String?
-  ativo    Boolean @default(true)
-  criadoEm DateTime @default(now())
-  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  estoques Estoque[]
+  id                               String                @id @default(cuid())
+  tenantId                         String
+  codigo                           String
+  nome                             String
+  setor                            String?
+  local                            String?
+  ativo                            Boolean               @default(true)
+  criadoEm                         DateTime              @default(now())
+  tenant                           Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  estoques                         Estoque[]
+  movimentacoes                    MovimentacaoEstoque[]
+  requisicoesMateriaisAlmoxarifado RequisicaoMaterial[]
+
   @@unique([tenantId, codigo])
   @@index([tenantId])
   @@map("almoxarifados")
 }
 
 model Estoque {
-  id             String @id @default(cuid())
+  id             String       @id @default(cuid())
   tenantId       String
   almoxarifadoId String
   materialId     String
-  quantidade     Decimal @default(0) @db.Decimal(18, 4)
-  precoMedio     Decimal @default(0) @db.Decimal(18, 4)
-  estoqueMinimo  Decimal @default(0) @db.Decimal(18, 4)
-  estoqueMaximo  Decimal @default(0) @db.Decimal(18, 4)
-  pontoReposicao Decimal @default(0) @db.Decimal(18, 4)
+  quantidade     Decimal      @default(0) @db.Decimal(18, 4)
+  precoMedio     Decimal      @default(0) @db.Decimal(18, 4)
+  estoqueMinimo  Decimal      @default(0) @db.Decimal(18, 4)
+  estoqueMaximo  Decimal      @default(0) @db.Decimal(18, 4)
+  pontoReposicao Decimal      @default(0) @db.Decimal(18, 4)
   localizacao    String?
-  bloqueado      Boolean @default(false)
-  criadoEm       DateTime @default(now())
-  atualizadoEm   DateTime @updatedAt
-  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  almoxarifado Almoxarifado @relation(fields: [almoxarifadoId], references: [id])
-  material     Material     @relation(fields: [materialId], references: [id])
+  bloqueado      Boolean      @default(false)
+  criadoEm       DateTime     @default(now())
+  atualizadoEm   DateTime     @updatedAt
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  almoxarifado   Almoxarifado @relation(fields: [almoxarifadoId], references: [id])
+  material       Material     @relation(fields: [materialId], references: [id])
+
   @@unique([almoxarifadoId, materialId])
   @@index([tenantId])
   @@map("estoques")
@@ -393,32 +416,35 @@ enum EstadoConservacao {
 }
 
 model BemPatrimonial {
-  id              String   @id @default(cuid())
-  tenantId        String
-  numeroTombamento String   @unique
-  tipo            TipoBem
-  descricao       String
-  marca           String?
-  modelo          String?
-  numeroSerie     String?
-  cor             String?
-  imagemUrl       String?
-  valorAquisicao  Decimal  @db.Decimal(18, 4)
-  dataAquisicao   DateTime
-  valorResidual   Decimal? @db.Decimal(18, 4)
-  percentualDepreciacaoAnual Decimal? @db.Decimal(5, 2)
-  contaContabilId String?
-  fornecedorId    String?
-  empenho         String?
-  situacao        SituacaoBem @default(ativo)
-  estadoConservacao EstadoConservacao?
-  localizacaoAtual String?
-  responsavelId   String?
-  observacoes     String?
-  ativo           Boolean  @default(true)
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                         String                     @id @default(cuid())
+  tenantId                   String
+  numeroTombamento           String                     @unique
+  tipo                       TipoBem
+  descricao                  String
+  marca                      String?
+  modelo                     String?
+  numeroSerie                String?
+  cor                        String?
+  imagemUrl                  String?
+  valorAquisicao             Decimal                    @db.Decimal(18, 4)
+  dataAquisicao              DateTime
+  valorResidual              Decimal?                   @db.Decimal(18, 4)
+  percentualDepreciacaoAnual Decimal?                   @db.Decimal(5, 2)
+  contaContabilId            String?
+  fornecedorId               String?
+  empenho                    String?
+  situacao                   SituacaoBem                @default(ativo)
+  estadoConservacao          EstadoConservacao?
+  localizacaoAtual           String?
+  responsavelId              String?
+  observacoes                String?
+  ativo                      Boolean                    @default(true)
+  criadoEm                   DateTime                   @default(now())
+  atualizadoEm               DateTime                   @updatedAt
+  tenant                     Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  termos                     BemTermo[]
+  transferencias             TransferenciaPatrimonial[]
+
   @@index([tenantId])
   @@index([tenantId, situacao])
   @@index([tenantId, tipo])
@@ -426,12 +452,12 @@ model BemPatrimonial {
 }
 
 model Configuracao {
-  id        String   @id @default(cuid())
-  tenantId  String
-  chave     String
-  valor     String
-  tipo      String   @default("texto") // texto, json, numero, booleano
-  criadoEm  DateTime @default(now())
+  id           String   @id @default(cuid())
+  tenantId     String
+  chave        String
+  valor        String
+  tipo         String   @default("texto") // texto, json, numero, booleano
+  criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -484,27 +510,28 @@ enum TipoAditamento {
 }
 
 model ProcessoLicitatorio {
-  id              String   @id @default(cuid())
+  id              String              @id @default(cuid())
   tenantId        String
   numero          String
   ano             Int
   modalidade      ModalidadeLicitacao
   objeto          String
-  valorEstimado   Decimal  @db.Decimal(18, 4)
+  valorEstimado   Decimal             @db.Decimal(18, 4)
   dataAbertura    DateTime?
   dataHomologacao DateTime?
-  status          StatusProcesso @default(planejamento)
-  srp             Boolean  @default(false) // Registro de Preço
-  cnpjOrgao       String?  // CNPJ do órgão para PNCP
-  unidadeCodigo   String?  // Código unidade administrativa PNCP
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  status          StatusProcesso      @default(planejamento)
+  srp             Boolean             @default(false) // Registro de Preço
+  cnpjOrgao       String? // CNPJ do órgão para PNCP
+  unidadeCodigo   String? // Código unidade administrativa PNCP
+  observacoes     String?
+  criadoEm        DateTime            @default(now())
+  atualizadoEm    DateTime            @updatedAt
 
-  itens     ItemLicitacao[]
-  contratos Contrato[]
+  itens       ItemLicitacao[]
+  contratos   Contrato[]
   publicacoes PublicacaoPNCP[]
-  empenhos  Empenho[]
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  empenhos    Empenho[]
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, numero, ano])
   @@index([tenantId])
@@ -513,18 +540,18 @@ model ProcessoLicitatorio {
 }
 
 model ItemLicitacao {
-  id              String   @id @default(cuid())
-  tenantId        String
-  processoId      String
-  numeroItem      Int
-  descricao       String
-  quantidade      Decimal  @db.Decimal(18, 4)
-  valorUnitarioEstimado Decimal @db.Decimal(18, 4)
-  valorTotalEstimado Decimal @db.Decimal(18, 4)
-  unidadeMedida   String?
-  categoria       Int?     // 1=Material, 2=Serviço, 3=Obra (PNCP)
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  tenantId              String
+  processoId            String
+  numeroItem            Int
+  descricao             String
+  quantidade            Decimal  @db.Decimal(18, 4)
+  valorUnitarioEstimado Decimal  @db.Decimal(18, 4)
+  valorTotalEstimado    Decimal  @db.Decimal(18, 4)
+  unidadeMedida         String?
+  categoria             Int? // 1=Material, 2=Serviço, 3=Obra (PNCP)
+  criadoEm              DateTime @default(now())
+  atualizadoEm          DateTime @updatedAt
 
   processo ProcessoLicitatorio @relation(fields: [processoId], references: [id], onDelete: Cascade)
 
@@ -533,28 +560,29 @@ model ItemLicitacao {
 }
 
 model Contrato {
-  id              String   @id @default(cuid())
-  tenantId        String
-  numero          String
-  ano             Int
-  processoId      String?
-  fornecedorId    String
-  objeto          String
-  valorOriginal   Decimal  @db.Decimal(18, 4)
-  valorAtual      Decimal  @db.Decimal(18, 4)
-  dataAssinatura  DateTime
+  id                 String         @id @default(cuid())
+  tenantId           String
+  numero             String
+  ano                Int
+  processoId         String?
+  fornecedorId       String
+  objeto             String
+  valorOriginal      Decimal        @db.Decimal(18, 4)
+  valorAtual         Decimal        @db.Decimal(18, 4)
+  dataAssinatura     DateTime
   dataInicioVigencia DateTime
-  dataFimVigencia DateTime
-  status          StatusContrato @default(vigente)
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  dataFimVigencia    DateTime
+  status             StatusContrato @default(vigente)
+  observacoes        String?
+  criadoEm           DateTime       @default(now())
+  atualizadoEm       DateTime       @updatedAt
 
-  processo   ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
-  fornecedor Fornecedor @relation(fields: [fornecedorId], references: [id])
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  aditamentos Aditamento[]
-  empenhos    Empenho[]
-  publicacoes PublicacaoPNCP[]
+  processo       ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  fornecedor     Fornecedor           @relation(fields: [fornecedorId], references: [id])
+  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  aditamentos    Aditamento[]
+  empenhos       Empenho[]
+  publicacoes    PublicacaoPNCP[]
   planosReversao PlanoReversao[]
 
   @@unique([tenantId, numero, ano])
@@ -564,18 +592,18 @@ model Contrato {
 }
 
 model Aditamento {
-  id              String   @id @default(cuid())
-  tenantId        String
-  contratoId      String
-  numero          String
-  tipo            TipoAditamento
-  descricao       String?
-  valorAcrescimo  Decimal? @db.Decimal(18, 4)
-  valorSupressao  Decimal? @db.Decimal(18, 4)
-  novaDataFim     DateTime?
-  dataAssinatura  DateTime?
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  id             String         @id @default(cuid())
+  tenantId       String
+  contratoId     String
+  numero         String
+  tipo           TipoAditamento
+  descricao      String?
+  valorAcrescimo Decimal?       @db.Decimal(18, 4)
+  valorSupressao Decimal?       @db.Decimal(18, 4)
+  novaDataFim    DateTime?
+  dataAssinatura DateTime?
+  criadoEm       DateTime       @default(now())
+  atualizadoEm   DateTime       @updatedAt
 
   contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
 
@@ -602,24 +630,24 @@ enum StatusPublicacaoPNCP {
 }
 
 model PublicacaoPNCP {
-  id              String   @id @default(cuid())
-  tenantId        String
-  tipo            TipoPublicacaoPNCP
-  entidade        String   // nome da entidade local (ProcessoLicitatorio, Contrato, Aditamento)
-  entidadeId      String   // ID local
+  id                 String               @id @default(cuid())
+  tenantId           String
+  tipo               TipoPublicacaoPNCP
+  entidade           String // nome da entidade local (ProcessoLicitatorio, Contrato, Aditamento)
+  entidadeId         String // ID local
   numeroControlePNCP String? // número de controle retornado pelo PNCP
-  status          StatusPublicacaoPNCP @default(rascunho)
-  payloadEnviado  Json?    // JSON enviado ao PNCP
-  respostaPNCP    Json?    // resposta da API PNCP
-  erroMensagem    String?
-  enviadoEm       DateTime?
-  retificadoEm    DateTime?
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  status             StatusPublicacaoPNCP @default(rascunho)
+  payloadEnviado     Json? // JSON enviado ao PNCP
+  respostaPNCP       Json? // resposta da API PNCP
+  erroMensagem       String?
+  enviadoEm          DateTime?
+  retificadoEm       DateTime?
+  criadoEm           DateTime             @default(now())
+  atualizadoEm       DateTime             @updatedAt
 
-  processo ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  processo   ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
   processoId String?
-  contrato Contrato? @relation(fields: [contratoId], references: [id], onDelete: SetNull)
+  contrato   Contrato?            @relation(fields: [contratoId], references: [id], onDelete: SetNull)
   contratoId String?
 
   @@index([tenantId])
@@ -633,29 +661,29 @@ model PublicacaoPNCP {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 model DotacaoOrcamentaria {
-  id              String   @id @default(cuid())
-  tenantId        String
-  ano             Int
+  id                  String   @id @default(cuid())
+  tenantId            String
+  ano                 Int
   unidadeOrcamentaria String // UO (código)
-  funcao          String
-  subfuncao       String
-  programa        String
-  acao            String
-  subtitulo       String?
-  naturezaDespesa String   // 6 dígitos (3.3.90.00)
-  fonteRecurso    String
-  valorInicial    Decimal  @db.Decimal(18, 4)
-  valorAtual      Decimal  @db.Decimal(18, 4)
-  valorBloqueado  Decimal  @default(0) @db.Decimal(18, 4)
-  valorEmpenhado  Decimal  @default(0) @db.Decimal(18, 4)
-  valorLiquidado  Decimal  @default(0) @db.Decimal(18, 4)
-  valorPago       Decimal  @default(0) @db.Decimal(18, 4)
-  ativo           Boolean  @default(true)
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  funcao              String
+  subfuncao           String
+  programa            String
+  acao                String
+  subtitulo           String?
+  naturezaDespesa     String // 6 dígitos (3.3.90.00)
+  fonteRecurso        String
+  valorInicial        Decimal  @db.Decimal(18, 4)
+  valorAtual          Decimal  @db.Decimal(18, 4)
+  valorBloqueado      Decimal  @default(0) @db.Decimal(18, 4)
+  valorEmpenhado      Decimal  @default(0) @db.Decimal(18, 4)
+  valorLiquidado      Decimal  @default(0) @db.Decimal(18, 4)
+  valorPago           Decimal  @default(0) @db.Decimal(18, 4)
+  ativo               Boolean  @default(true)
+  criadoEm            DateTime @default(now())
+  atualizadoEm        DateTime @updatedAt
 
   empenhos Empenho[]
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, ano, unidadeOrcamentaria, funcao, subfuncao, programa, acao, naturezaDespesa, fonteRecurso])
   @@index([tenantId])
@@ -679,32 +707,33 @@ enum StatusEmpenho {
 }
 
 model Empenho {
-  id              String   @id @default(cuid())
-  tenantId        String
-  numero          String
-  ano             Int
-  dotacaoId       String?
-  contratoId      String?
-  processoId      String?
-  fornecedorId    String?
-  valor           Decimal  @db.Decimal(18, 4)
-  valorAnulado    Decimal  @default(0) @db.Decimal(18, 4)
-  valorLiquidado  Decimal  @default(0) @db.Decimal(18, 4)
-  valorPago       Decimal  @default(0) @db.Decimal(18, 4)
-  dataEmpenho     DateTime
-  tipo            TipoEmpenhoSIAFIC @default(ordinario)
-  status          StatusEmpenho @default(ativo)
-  observacao      String?
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  id             String            @id @default(cuid())
+  tenantId       String
+  numero         String
+  ano            Int
+  dotacaoId      String?
+  contratoId     String?
+  processoId     String?
+  fornecedorId   String?
+  valor          Decimal           @db.Decimal(18, 4)
+  valorAnulado   Decimal           @default(0) @db.Decimal(18, 4)
+  valorLiquidado Decimal           @default(0) @db.Decimal(18, 4)
+  valorPago      Decimal           @default(0) @db.Decimal(18, 4)
+  dataEmpenho    DateTime
+  tipo           TipoEmpenhoSIAFIC @default(ordinario)
+  status         StatusEmpenho     @default(ativo)
+  observacao     String?
+  criadoEm       DateTime          @default(now())
+  atualizadoEm   DateTime          @updatedAt
 
-  contrato    Contrato? @relation(fields: [contratoId], references: [id], onDelete: SetNull)
-  dotacao     DotacaoOrcamentaria? @relation(fields: [dotacaoId], references: [id], onDelete: SetNull)
-  fornecedor  Fornecedor? @relation(fields: [fornecedorId], references: [id], onDelete: SetNull)
-  processo    ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  liquidacoes Liquidacao[]
-  pagamentos  Pagamento[]
+  contrato      Contrato?             @relation(fields: [contratoId], references: [id], onDelete: SetNull)
+  dotacao       DotacaoOrcamentaria?  @relation(fields: [dotacaoId], references: [id], onDelete: SetNull)
+  fornecedor    Fornecedor?           @relation(fields: [fornecedorId], references: [id], onDelete: SetNull)
+  processo      ProcessoLicitatorio?  @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  tenant        Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  liquidacoes   Liquidacao[]
+  pagamentos    Pagamento[]
+  movimentacoes MovimentacaoEstoque[]
 
   @@index([tenantId, dotacaoId])
   @@index([tenantId, contratoId])
@@ -718,19 +747,19 @@ enum StatusLiquidacao {
 }
 
 model Liquidacao {
-  id              String   @id @default(cuid())
+  id              String           @id @default(cuid())
   tenantId        String
   empenhoId       String
   numero          String
-  valor           Decimal  @db.Decimal(18, 4)
+  valor           Decimal          @db.Decimal(18, 4)
   dataLiquidacao  DateTime
   status          StatusLiquidacao @default(ativa)
-  documentoFiscal String?  // NF, nota de despesa etc
+  documentoFiscal String? // NF, nota de despesa etc
   observacao      String?
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  criadoEm        DateTime         @default(now())
+  atualizadoEm    DateTime         @updatedAt
 
-  empenho Empenho @relation(fields: [empenhoId], references: [id], onDelete: Cascade)
+  empenho    Empenho     @relation(fields: [empenhoId], references: [id], onDelete: Cascade)
   pagamentos Pagamento[]
 
   @@index([tenantId, empenhoId])
@@ -744,20 +773,20 @@ enum StatusPagamento {
 }
 
 model Pagamento {
-  id              String   @id @default(cuid())
-  tenantId        String
-  empenhoId       String
-  liquidacaoId    String?
-  numero          String
-  valor           Decimal  @db.Decimal(18, 4)
-  dataPagamento   DateTime
-  status          StatusPagamento @default(programado)
-  formaPagamento  String?  // TED, boleto, etc
-  observacao      String?
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  id             String          @id @default(cuid())
+  tenantId       String
+  empenhoId      String
+  liquidacaoId   String?
+  numero         String
+  valor          Decimal         @db.Decimal(18, 4)
+  dataPagamento  DateTime
+  status         StatusPagamento @default(programado)
+  formaPagamento String? // TED, boleto, etc
+  observacao     String?
+  criadoEm       DateTime        @default(now())
+  atualizadoEm   DateTime        @updatedAt
 
-  empenho    Empenho    @relation(fields: [empenhoId], references: [id], onDelete: Cascade)
+  empenho    Empenho     @relation(fields: [empenhoId], references: [id], onDelete: Cascade)
   liquidacao Liquidacao? @relation(fields: [liquidacaoId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, empenhoId])
@@ -793,19 +822,19 @@ enum BaseLegalLGPD {
 }
 
 model TitularDados {
-  id              String   @id @default(cuid())
-  tenantId        String
-  nome            String
-  email           String?
-  cpf             String?
-  telefone        String?
-  endereco        String?
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  id           String   @id @default(cuid())
+  tenantId     String
+  nome         String
+  email        String?
+  cpf          String?
+  telefone     String?
+  endereco     String?
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
 
   consentimentos ConsentimentoLGPD[]
   registros      RegistroProcessamentoDados[]
-  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant         Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([tenantId, cpf])
@@ -813,19 +842,19 @@ model TitularDados {
 }
 
 model ConsentimentoLGPD {
-  id              String   @id @default(cuid())
-  tenantId        String
-  titularId       String
-  finalidade      String
-  dadosTratados   String   // descrição dos dados
-  baseLegal       BaseLegalLGPD
-  concedido       Boolean  @default(true)
-  dataConsentimento DateTime @default(now())
-  dataRevogacao   DateTime?
+  id                 String        @id @default(cuid())
+  tenantId           String
+  titularId          String
+  finalidade         String
+  dadosTratados      String // descrição dos dados
+  baseLegal          BaseLegalLGPD
+  concedido          Boolean       @default(true)
+  dataConsentimento  DateTime      @default(now())
+  dataRevogacao      DateTime?
   canalConsentimento String? // web, presencial, telefone
-  ipOrigem        String?
-  userAgent       String?
-  criadoEm        DateTime @default(now())
+  ipOrigem           String?
+  userAgent          String?
+  criadoEm           DateTime      @default(now())
 
   titular TitularDados @relation(fields: [titularId], references: [id], onDelete: Cascade)
 
@@ -834,16 +863,16 @@ model ConsentimentoLGPD {
 }
 
 model RegistroProcessamentoDados {
-  id              String   @id @default(cuid())
-  tenantId        String
-  titularId       String?
-  tipoAcao        TipoAcaoLGPD
-  entidade        String   // nome da tabela/entidade
-  entidadeId      String   // ID do registro afetado
-  dadosAfetados   String   // descrição dos campos
-  usuarioId       String?  // quem fez a ação
-  justificativa   String?
-  criadoEm        DateTime @default(now())
+  id            String       @id @default(cuid())
+  tenantId      String
+  titularId     String?
+  tipoAcao      TipoAcaoLGPD
+  entidade      String // nome da tabela/entidade
+  entidadeId    String // ID do registro afetado
+  dadosAfetados String // descrição dos campos
+  usuarioId     String? // quem fez a ação
+  justificativa String?
+  criadoEm      DateTime     @default(now())
 
   titular TitularDados? @relation(fields: [titularId], references: [id], onDelete: SetNull)
 
@@ -871,7 +900,7 @@ enum TipoItemReversao {
 }
 
 model PlanoReversao {
-  id              String   @id @default(cuid())
+  id              String         @id @default(cuid())
   tenantId        String
   contratoId      String?
   titulo          String
@@ -881,12 +910,12 @@ model PlanoReversao {
   dataFimPrevista DateTime?
   dataFimReal     DateTime?
   status          StatusReversao @default(planejamento)
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  criadoEm        DateTime       @default(now())
+  atualizadoEm    DateTime       @updatedAt
 
   itens    ItemReversao[]
-  contrato Contrato? @relation(fields: [contratoId], references: [id], onDelete: SetNull)
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contrato Contrato?      @relation(fields: [contratoId], references: [id], onDelete: SetNull)
+  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -894,16 +923,16 @@ model PlanoReversao {
 }
 
 model ItemReversao {
-  id              String   @id @default(cuid())
-  planoId         String
-  tipo            TipoItemReversao
-  descricao       String
-  responsavel     String?
-  dataPrevista    DateTime?
-  dataConclusao   DateTime?
-  concluido       Boolean  @default(false)
-  observacao      String?
-  criadoEm        DateTime @default(now())
+  id            String           @id @default(cuid())
+  planoId       String
+  tipo          TipoItemReversao
+  descricao     String
+  responsavel   String?
+  dataPrevista  DateTime?
+  dataConclusao DateTime?
+  concluido     Boolean          @default(false)
+  observacao    String?
+  criadoEm      DateTime         @default(now())
 
   plano PlanoReversao @relation(fields: [planoId], references: [id], onDelete: Cascade)
 
@@ -937,21 +966,21 @@ enum CategoriaTicket {
 }
 
 model TicketSuporte {
-  id              String   @id @default(cuid())
-  tenantId        String
-  titulo          String
-  descricao       String
-  categoria       CategoriaTicket
-  prioridade      PrioridadeTicket @default(media)
-  status          StatusTicket @default(aberto)
-  solicitanteId   String
-  responsavelId   String?
-  dataResolucao   DateTime?
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  id            String           @id @default(cuid())
+  tenantId      String
+  titulo        String
+  descricao     String
+  categoria     CategoriaTicket
+  prioridade    PrioridadeTicket @default(media)
+  status        StatusTicket     @default(aberto)
+  solicitanteId String
+  responsavelId String?
+  dataResolucao DateTime?
+  criadoEm      DateTime         @default(now())
+  atualizadoEm  DateTime         @updatedAt
 
   mensagens MensagemTicket[]
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant    Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -960,13 +989,13 @@ model TicketSuporte {
 }
 
 model MensagemTicket {
-  id              String   @id @default(cuid())
-  ticketId        String
-  autorId         String
-  autorNome       String
-  mensagem        String
-  interna         Boolean  @default(false) // visível apenas para equipe
-  criadoEm        DateTime @default(now())
+  id        String   @id @default(cuid())
+  ticketId  String
+  autorId   String
+  autorNome String
+  mensagem  String
+  interna   Boolean  @default(false) // visível apenas para equipe
+  criadoEm  DateTime @default(now())
 
   ticket TicketSuporte @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
@@ -975,21 +1004,375 @@ model MensagemTicket {
 }
 
 model ArtigoBaseConhecimento {
-  id              String   @id @default(cuid())
-  tenantId        String
-  titulo          String
-  slug            String   @unique
-  conteudo        String
-  categoria       String
-  tags            String[]
-  publicado       Boolean  @default(false)
-  visualizacoes   Int      @default(0)
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  tenantId      String
+  titulo        String
+  slug          String   @unique
+  conteudo      String
+  categoria     String
+  tags          String[]
+  publicado     Boolean  @default(false)
+  visualizacoes Int      @default(0)
+  criadoEm      DateTime @default(now())
+  atualizadoEm  DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([tenantId, categoria])
   @@map("artigos_base_conhecimento")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 1 — NÚCLEO COMUM: CADASTROS ESTRUTURAIS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Tipo de comissão administrativa.
+enum TipoComissao {
+  contratacao
+  licitacao
+  inventario_patrimonio
+  inventario_almoxarifado
+  recebimento
+}
+
+/// Função do membro dentro da comissão.
+enum FuncaoMembroComissao {
+  presidente
+  membro
+  suplente
+  secretario
+}
+
+/// Centro de custo — unidade de controle e alocação de despesas.
+model CentroCusto {
+  id           String   @id @default(cuid())
+  tenantId     String
+  codigo       String
+  nome         String
+  descricao    String?
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  tenant                          Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  setores                         Setor[]
+  requisicoesMateriaisCentroCusto RequisicaoMaterial[]
+  movimentacoesEstoque            MovimentacaoEstoque[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId])
+  @@index([tenantId, ativo])
+  @@map("centros_custo")
+}
+
+/// Unidade gestora — unidade orçamentária e administrativa da entidade.
+model UnidadeGestora {
+  id           String   @id @default(cuid())
+  tenantId     String
+  codigo       String
+  nome         String
+  cnpj         String?
+  gestor       String?
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  setores Setor[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId])
+  @@index([tenantId, ativo])
+  @@map("unidades_gestoras")
+}
+
+/// Setor — divisão interna da entidade, vinculada à unidade gestora e centro de custo.
+model Setor {
+  id               String   @id @default(cuid())
+  tenantId         String
+  codigo           String
+  nome             String
+  unidadeGestoraId String?
+  centroCustoId    String?
+  ativo            Boolean  @default(true)
+  criadoEm         DateTime @default(now())
+  atualizadoEm     DateTime @updatedAt
+
+  tenant                    Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unidadeGestora            UnidadeGestora?               @relation(fields: [unidadeGestoraId], references: [id], onDelete: SetNull)
+  centroCusto               CentroCusto?                  @relation(fields: [centroCustoId], references: [id], onDelete: SetNull)
+  requisicoesMateriaisSetor RequisicaoMaterial[]
+  termosGuardaSetor         TermoGuardaResponsabilidade[]
+  transferenciasDeSetor     TransferenciaPatrimonial[]    @relation("TransferenciaDeSetor")
+  transferenciasParaSetor   TransferenciaPatrimonial[]    @relation("TransferenciaParaSetor")
+
+  @@index([tenantId])
+  @@index([tenantId, ativo])
+  @@map("setores")
+}
+
+/// Comissão administrativa — contratação, licitação, inventário etc.
+model Comissao {
+  id             String       @id @default(cuid())
+  tenantId       String
+  tipo           TipoComissao
+  nome           String
+  decreto        String
+  vigenciaInicio DateTime
+  vigenciaFim    DateTime?
+  ativo          Boolean      @default(true)
+  criadoEm       DateTime     @default(now())
+  atualizadoEm   DateTime     @updatedAt
+
+  tenant  Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membros MembroComissao[]
+
+  @@index([tenantId])
+  @@index([tenantId, ativo])
+  @@index([tenantId, tipo])
+  @@map("comissoes")
+}
+
+/// Membro de comissão administrativa, vinculado opcionalmente a um usuário do sistema.
+model MembroComissao {
+  id           String                @id @default(cuid())
+  comissaoId   String
+  usuarioId    String?
+  nomeCompleto String
+  cargo        String
+  funcao       FuncaoMembroComissao?
+  criadoEm     DateTime              @default(now())
+
+  comissao Comissao @relation(fields: [comissaoId], references: [id], onDelete: Cascade)
+
+  @@index([comissaoId])
+  @@map("membros_comissao")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 2 — ALMOXARIFADO: MOVIMENTAÇÕES E REQUISIÇÕES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Tipo de movimentação de estoque — entradas e saídas.
+enum TipoMovimentacao {
+  entrada_nf
+  entrada_ordem_compra
+  entrada_doacao
+  entrada_devolucao
+  entrada_ajuste
+  saida_requisicao
+  saida_consumo_imediato
+  saida_baixa
+  saida_transferencia
+  saida_ajuste
+}
+
+/// Status do ciclo de vida de uma requisição de material.
+enum StatusRequisicao {
+  rascunho
+  enviada
+  parcialmente_atendida
+  atendida
+  rejeitada
+  cancelada
+}
+
+/// Registro histórico de movimentação no estoque — cada entrada ou saída gera um registro.
+model MovimentacaoEstoque {
+  id                      String           @id @default(cuid())
+  tenantId                String
+  almoxarifadoId          String
+  materialId              String
+  tipo                    TipoMovimentacao
+  quantidade              Decimal          @db.Decimal(18, 4)
+  valorUnitario           Decimal          @db.Decimal(18, 4)
+  valorTotal              Decimal          @db.Decimal(18, 4)
+  precoMedioAposMovimento Decimal          @db.Decimal(18, 4)
+  notaFiscal              String?
+  ordemCompra             String?
+  empenhoId               String?
+  requisicaoId            String?
+  transferenciaPairId     String?
+  responsavelId           String?
+  centroCustoId           String?
+  observacao              String?
+  dataMovimento           DateTime
+  criadoEm                DateTime         @default(now())
+
+  tenant               Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  almoxarifado         Almoxarifado          @relation(fields: [almoxarifadoId], references: [id])
+  material             Material              @relation(fields: [materialId], references: [id])
+  empenho              Empenho?              @relation(fields: [empenhoId], references: [id], onDelete: SetNull)
+  requisicao           RequisicaoMaterial?   @relation(fields: [requisicaoId], references: [id], onDelete: SetNull)
+  centroCusto          CentroCusto?          @relation(fields: [centroCustoId], references: [id], onDelete: SetNull)
+  transferenciaPar     MovimentacaoEstoque?  @relation("TransferenciaPar", fields: [transferenciaPairId], references: [id])
+  transferenciasFilhas MovimentacaoEstoque[] @relation("TransferenciaPar")
+
+  @@index([tenantId, almoxarifadoId, materialId])
+  @@index([tenantId, dataMovimento(sort: Desc)])
+  @@index([tenantId, tipo])
+  @@map("movimentacoes_estoque")
+}
+
+/// Requisição de material ao almoxarifado — ciclo de solicitação e atendimento.
+model RequisicaoMaterial {
+  id                       String           @id @default(cuid())
+  tenantId                 String
+  numero                   String
+  ano                      Int
+  almoxarifadoId           String
+  setorRequisitanteId      String?
+  centroCustoId            String?
+  solicitanteId            String
+  responsavelAtendimentoId String?
+  status                   StatusRequisicao @default(rascunho)
+  justificativa            String
+  criadoEm                 DateTime         @default(now())
+  atualizadoEm             DateTime         @updatedAt
+  atendidaEm               DateTime?
+
+  tenant            Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  almoxarifado      Almoxarifado             @relation(fields: [almoxarifadoId], references: [id])
+  setorRequisitante Setor?                   @relation(fields: [setorRequisitanteId], references: [id], onDelete: SetNull)
+  centroCusto       CentroCusto?             @relation(fields: [centroCustoId], references: [id], onDelete: SetNull)
+  itens             ItemRequisicaoMaterial[]
+  movimentacoes     MovimentacaoEstoque[]
+
+  @@unique([tenantId, numero, ano])
+  @@index([tenantId, status])
+  @@index([tenantId, ano])
+  @@map("requisicoes_materiais")
+}
+
+/// Item de uma requisição de material — detalhe por material solicitado.
+model ItemRequisicaoMaterial {
+  id                   String  @id @default(cuid())
+  requisicaoId         String
+  materialId           String
+  quantidadeSolicitada Decimal @db.Decimal(18, 4)
+  quantidadeAtendida   Decimal @default(0) @db.Decimal(18, 4)
+  observacao           String?
+
+  requisicao RequisicaoMaterial @relation(fields: [requisicaoId], references: [id], onDelete: Cascade)
+  material   Material           @relation(fields: [materialId], references: [id])
+
+  @@index([requisicaoId])
+  @@map("itens_requisicao_material")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 3 — PATRIMÔNIO: TERMOS E TRANSFERÊNCIAS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Status do termo de guarda e responsabilidade.
+enum StatusTermo {
+  emitido
+  aceito
+  substituido
+  cancelado
+}
+
+/// Termo de guarda e responsabilidade — vincula bens patrimoniais a um responsável.
+model TermoGuardaResponsabilidade {
+  id                  String      @id @default(cuid())
+  tenantId            String
+  numero              String
+  ano                 Int
+  responsavelId       String
+  setorId             String?
+  dataEmissao         DateTime
+  dataAceite          DateTime?
+  status              StatusTermo @default(emitido)
+  arquivoDocumentoUrl String?
+  criadoEm            DateTime    @default(now())
+  atualizadoEm        DateTime    @updatedAt
+
+  tenant Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  setor  Setor?     @relation(fields: [setorId], references: [id], onDelete: SetNull)
+  bens   BemTermo[]
+
+  @@unique([tenantId, numero, ano])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, responsavelId])
+  @@map("termos_guarda_responsabilidade")
+}
+
+/// Tabela de junção entre TermoGuardaResponsabilidade e BemPatrimonial.
+model BemTermo {
+  id               String @id @default(cuid())
+  termoId          String
+  bemPatrimonialId String
+
+  termo          TermoGuardaResponsabilidade @relation(fields: [termoId], references: [id], onDelete: Cascade)
+  bemPatrimonial BemPatrimonial              @relation(fields: [bemPatrimonialId], references: [id], onDelete: Cascade)
+
+  @@unique([termoId, bemPatrimonialId])
+  @@index([termoId])
+  @@index([bemPatrimonialId])
+  @@map("bens_termos")
+}
+
+/// Registro de transferência patrimonial — mudança de responsável, setor ou localização de bens.
+model TransferenciaPatrimonial {
+  id                         String   @id @default(cuid())
+  tenantId                   String
+  bemPatrimonialId           String
+  dataTransferencia          DateTime
+  deResponsavelId            String?
+  paraResponsavelId          String?
+  deSetorId                  String?
+  paraSetorId                String?
+  deLocalizacao              String?
+  paraLocalizacao            String?
+  motivo                     String
+  documentoAutorizadorNumero String?
+  criadoEm                   DateTime @default(now())
+
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bemPatrimonial BemPatrimonial @relation(fields: [bemPatrimonialId], references: [id])
+  deSetor        Setor?         @relation("TransferenciaDeSetor", fields: [deSetorId], references: [id], onDelete: SetNull)
+  paraSetor      Setor?         @relation("TransferenciaParaSetor", fields: [paraSetorId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, bemPatrimonialId])
+  @@index([tenantId, dataTransferencia(sort: Desc)])
+  @@map("transferencias_patrimoniais")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 4 — FORNECEDORES: SANÇÕES ADMINISTRATIVAS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Tipo de sanção administrativa aplicável a fornecedor.
+enum TipoSancao {
+  advertencia
+  multa
+  suspensao_temporaria
+  declaracao_inidoneidade
+  impedimento_licitar
+}
+
+/// Sanção administrativa aplicada a fornecedor — art. 156 Lei 14.133/2021.
+model SancaoFornecedor {
+  id                          String     @id @default(cuid())
+  tenantId                    String
+  fornecedorId                String
+  tipo                        TipoSancao
+  processoSancionatorioNumero String?
+  fundamentoLegal             String
+  dataInicio                  DateTime
+  dataFim                     DateTime?
+  descricao                   String
+  ativa                       Boolean    @default(true)
+  criadoEm                    DateTime   @default(now())
+  atualizadoEm                DateTime   @updatedAt
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fornecedor Fornecedor @relation(fields: [fornecedorId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, fornecedorId])
+  @@index([tenantId, ativa])
+  @@index([tenantId, dataFim])
+  @@map("sancoes_fornecedor")
 }
