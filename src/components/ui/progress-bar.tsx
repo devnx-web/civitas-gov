@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { EASE } from "@/components/motion";
 
-type Tone = "marca" | "sucesso" | "alerta" | "perigo";
+export type Tone = "marca" | "sucesso" | "alerta" | "perigo";
 
 const TONES: Record<Tone, string> = {
   marca: "bg-brand-500",

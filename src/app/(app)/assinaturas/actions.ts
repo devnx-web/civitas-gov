@@ -20,26 +20,42 @@ const schemaCriarDocumento = z.object({
   hashSha256: z.string().optional(),
 });
 
-export const criarDocumentoAction = defineFormAction(
-  schemaCriarDocumento,
-  async (input) => {
-    const tenant = await getTenant();
-    const doc = await criarDocumento(
-      {
-        titulo: input.titulo,
-        descricao: input.descricao || null,
-        tipo: input.tipo,
-        entidade: input.entidade,
-        entidadeId: input.entidadeId,
-        arquivoUrl: input.arquivoUrl,
-        hashSha256: input.hashSha256 || null,
-      },
-      tenant.id,
-    );
-    revalidatePath("/assinaturas");
-    return doc;
-  },
-);
+export const criarDocumentoAction = defineFormAction(schemaCriarDocumento, async (input) => {
+  const tenant = await getTenant();
+  const doc = await criarDocumento(
+    {
+      titulo: input.titulo,
+      descricao: input.descricao || null,
+      tipo: input.tipo,
+      entidade: input.entidade,
+      entidadeId: input.entidadeId,
+      arquivoUrl: input.arquivoUrl,
+      hashSha256: input.hashSha256 || null,
+    },
+    tenant.id
+  );
+  revalidatePath("/assinaturas");
+  return doc;
+});
+
+/** Versão para chamada direta (não via FormData) — usada por botões de solicitação. */
+export const criarDocumentoDirectAction = defineAction(schemaCriarDocumento, async (input) => {
+  const tenant = await getTenant();
+  const doc = await criarDocumento(
+    {
+      titulo: input.titulo,
+      descricao: input.descricao || null,
+      tipo: input.tipo,
+      entidade: input.entidade,
+      entidadeId: input.entidadeId,
+      arquivoUrl: input.arquivoUrl,
+      hashSha256: input.hashSha256 || null,
+    },
+    tenant.id
+  );
+  revalidatePath("/assinaturas");
+  return doc;
+});
 
 const schemaAssinarEletronica = z.object({
   documentoId: z.string().cuid(),
@@ -69,7 +85,7 @@ export const assinarEletronicaAction = defineAction(
     revalidatePath("/assinaturas");
     revalidatePath(`/assinaturas/${documentoId}`);
     return assinatura;
-  },
+  }
 );
 
 const schemaCancelarAssinatura = z.object({
@@ -87,5 +103,5 @@ export const cancelarAssinaturaAction = defineAction(
     revalidatePath("/assinaturas");
     revalidatePath(`/assinaturas/${ass.documentoId}`);
     return { id: assinaturaId };
-  },
+  }
 );

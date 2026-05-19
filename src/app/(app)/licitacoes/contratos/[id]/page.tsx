@@ -61,7 +61,10 @@ export default async function ContratoDetalhesPage({
         descricao={`${contrato.numero}/${contrato.ano} · ${contrato.fornecedor?.nome ?? "—"}`}
         acao={
           <div className="flex items-center gap-2">
-            <SolicitarAssinaturaButton contratoId={id} contratoTitulo={`${contrato.numero}/${contrato.ano} — ${contrato.objeto}`} />
+            <SolicitarAssinaturaButton
+              contratoId={id}
+              contratoTitulo={`${contrato.numero}/${contrato.ano} — ${contrato.objeto}`}
+            />
             <Link href={`/licitacoes/contratos/novo?edit=${id}`}>
               <Button variant="secondary">
                 <Edit className="h-4 w-4" />
@@ -77,13 +80,29 @@ export default async function ContratoDetalhesPage({
           <Campo label="Número/Ano" valor={`${contrato.numero}/${contrato.ano}`} />
           <Campo label="Objeto" valor={contrato.objeto} />
           <Campo label="Fornecedor" valor={contrato.fornecedor?.nome ?? "—"} />
-          <Campo label="Processo" valor={contrato.processo ? `${contrato.processo.numero}/${contrato.processo.ano}` : "—"} />
-          <Campo label="Valor inicial" valor={formatBRL(Number(contrato.valorInicial))} />
+          <Campo
+            label="Processo"
+            valor={contrato.processo ? `${contrato.processo.numero}/${contrato.processo.ano}` : "—"}
+          />
+          <Campo label="Valor inicial" valor={formatBRL(Number(contrato.valorOriginal))} />
           <Campo label="Valor atual" valor={formatBRL(Number(contrato.valorAtual))} />
-          <Campo label="Saldo remanescente" valor={formatBRL(Number(contrato.saldoRemanescente))} />
-          <Campo label="Assinatura" valor={new Date(contrato.dataAssinatura).toLocaleDateString("pt-BR")} />
-          <Campo label="Vigência" valor={`${new Date(contrato.dataVigenciaInicio).toLocaleDateString("pt-BR")} — ${new Date(contrato.dataVigenciaFim).toLocaleDateString("pt-BR")}`} />
-          <Campo label="Status" valor={<Badge tone={STATUS_TONE[contrato.status] ?? "neutro"}>{STATUS_LABEL[contrato.status] ?? contrato.status}</Badge>} />
+          <Campo label="Saldo remanescente" valor={formatBRL(Number(contrato.valorAtual))} />
+          <Campo
+            label="Assinatura"
+            valor={new Date(contrato.dataAssinatura).toLocaleDateString("pt-BR")}
+          />
+          <Campo
+            label="Vigência"
+            valor={`${new Date(contrato.dataInicioVigencia).toLocaleDateString("pt-BR")} — ${new Date(contrato.dataFimVigencia).toLocaleDateString("pt-BR")}`}
+          />
+          <Campo
+            label="Status"
+            valor={
+              <Badge tone={STATUS_TONE[contrato.status] ?? "neutro"}>
+                {STATUS_LABEL[contrato.status] ?? contrato.status}
+              </Badge>
+            }
+          />
           <Campo label="Observações" valor={contrato.observacoes ?? "—"} />
         </CardBody>
       </Card>
@@ -94,16 +113,30 @@ export default async function ContratoDetalhesPage({
             <h3 className="mb-3 text-sm font-semibold text-ink-900">Documentos para assinatura</h3>
             <div className="space-y-2">
               {documentosAssinaveis.map((d) => (
-                <div key={d.id} className="flex items-center justify-between rounded-lg border border-ink-100 px-4 py-3">
+                <div
+                  key={d.id}
+                  className="flex items-center justify-between rounded-lg border border-ink-100 px-4 py-3"
+                >
                   <div>
                     <p className="text-sm font-medium text-ink-900">{d.titulo}</p>
                     <p className="text-xs text-ink-500">{d.status}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Badge tone={d.status === "pendente" ? "alerta" : d.status === "assinada" ? "sucesso" : "perigo"}>
+                    <Badge
+                      tone={
+                        d.status === "pendente"
+                          ? "alerta"
+                          : d.status === "assinada"
+                            ? "sucesso"
+                            : "perigo"
+                      }
+                    >
                       {d.status}
                     </Badge>
-                    <Link href={`/assinaturas/${d.id}`} className="text-sm font-medium text-brand-600 hover:text-brand-700">
+                    <Link
+                      href={`/assinaturas/${d.id}`}
+                      className="text-sm font-medium text-brand-600 hover:text-brand-700"
+                    >
                       Abrir
                     </Link>
                   </div>

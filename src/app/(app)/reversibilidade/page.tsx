@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  listarPlanosAction,
-  novoPlano,
-  novoItem,
-  concluirItem,
-  mudarStatusPlano,
-} from "./actions";
+import { listarPlanosAction, novoPlano, novoItem, concluirItem, mudarStatusPlano } from "./actions";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 
@@ -47,7 +41,9 @@ export default function ReversibilidadePage() {
   }
 
   async function handleNovoItem(planoId: string) {
-    const tipo = prompt("Tipo (migracao_dados, devolucao_bens, rescisao_contrato, treinamento, transferencia_documentos, limpeza_ambiente):");
+    const tipo = prompt(
+      "Tipo (migracao_dados, devolucao_bens, rescisao_contrato, treinamento, transferencia_documentos, limpeza_ambiente):"
+    );
     if (!tipo) return;
     const descricao = prompt("Descrição do item:");
     if (!descricao) return;
@@ -77,23 +73,54 @@ export default function ReversibilidadePage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Reversibilidade" subtitle="Planos de reversão e encerramento de contratos" />
+      <PageHeader
+        titulo="Reversibilidade"
+        descricao="Planos de reversão e encerramento de contratos"
+      />
 
       {mensagem && <div className="rounded-lg border bg-muted px-4 py-3 text-sm">{mensagem}</div>}
 
       <Card className="p-4">
         <h3 className="font-semibold mb-3">Novo Plano de Reversão</h3>
         <form onSubmit={handleNovoPlano} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <input name="titulo" placeholder="Título do plano" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-          <input name="responsavel" placeholder="Responsável" className="rounded-md border px-3 py-2 text-sm bg-background" />
-          <input name="dataInicio" type="date" className="rounded-md border px-3 py-2 text-sm bg-background" />
-          <input name="dataFimPrevista" type="date" className="rounded-md border px-3 py-2 text-sm bg-background" />
-          <input name="descricao" placeholder="Descrição" className="rounded-md border px-3 py-2 text-sm bg-background sm:col-span-2" />
-          <button type="submit" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Criar Plano</button>
+          <input
+            name="titulo"
+            placeholder="Título do plano"
+            className="rounded-md border px-3 py-2 text-sm bg-background"
+            required
+          />
+          <input
+            name="responsavel"
+            placeholder="Responsável"
+            className="rounded-md border px-3 py-2 text-sm bg-background"
+          />
+          <input
+            name="dataInicio"
+            type="date"
+            className="rounded-md border px-3 py-2 text-sm bg-background"
+          />
+          <input
+            name="dataFimPrevista"
+            type="date"
+            className="rounded-md border px-3 py-2 text-sm bg-background"
+          />
+          <input
+            name="descricao"
+            placeholder="Descrição"
+            className="rounded-md border px-3 py-2 text-sm bg-background sm:col-span-2"
+          />
+          <button
+            type="submit"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Criar Plano
+          </button>
         </form>
       </Card>
 
-      {loading ? <p>Carregando...</p> : (
+      {loading ? (
+        <p>Carregando...</p>
+      ) : (
         <div className="space-y-4">
           {planos.map((plano) => (
             <Card key={plano.id} className="p-4">
@@ -103,8 +130,15 @@ export default function ReversibilidadePage() {
                   <p className="text-sm text-muted-foreground">{plano.descricao}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusCor[plano.status] ?? "bg-gray-100"}`}>{plano.status.replace(/_/g, " ")}</span>
-                  <select onChange={(e) => handleMudarStatus(plano.id, e.target.value)} className="rounded-md border px-2 py-1 text-xs bg-background">
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusCor[plano.status] ?? "bg-gray-100"}`}
+                  >
+                    {plano.status.replace(/_/g, " ")}
+                  </span>
+                  <select
+                    onChange={(e) => handleMudarStatus(plano.id, e.target.value)}
+                    className="rounded-md border px-2 py-1 text-xs bg-background"
+                  >
                     <option value="">Mudar status</option>
                     <option value="planejamento">Planejamento</option>
                     <option value="em_execucao">Em execução</option>
@@ -117,21 +151,45 @@ export default function ReversibilidadePage() {
               <div className="mt-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium text-muted-foreground">Itens do plano</p>
-                  <button onClick={() => handleNovoItem(plano.id)} className="text-xs text-primary hover:underline">+ Adicionar item</button>
+                  <button
+                    onClick={() => handleNovoItem(plano.id)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    + Adicionar item
+                  </button>
                 </div>
                 {plano.itens.length === 0 ? (
                   <p className="text-xs text-muted-foreground">Nenhum item ainda.</p>
                 ) : (
                   <ul className="space-y-1">
                     {plano.itens.map((item: any) => (
-                      <li key={item.id} className="flex items-center justify-between text-sm border rounded-md px-3 py-2">
+                      <li
+                        key={item.id}
+                        className="flex items-center justify-between text-sm border rounded-md px-3 py-2"
+                      >
                         <div className="flex items-center gap-2">
-                          <input type="checkbox" checked={item.concluido} readOnly className="h-4 w-4" />
-                          <span className={item.concluido ? "line-through text-muted-foreground" : ""}>{item.descricao}</span>
-                          <span className="text-xs text-muted-foreground capitalize">({item.tipo.replace(/_/g, " ")})</span>
+                          <input
+                            type="checkbox"
+                            checked={item.concluido}
+                            readOnly
+                            className="h-4 w-4"
+                          />
+                          <span
+                            className={item.concluido ? "line-through text-muted-foreground" : ""}
+                          >
+                            {item.descricao}
+                          </span>
+                          <span className="text-xs text-muted-foreground capitalize">
+                            ({item.tipo.replace(/_/g, " ")})
+                          </span>
                         </div>
                         {!item.concluido && (
-                          <button onClick={() => handleConcluirItem(item.id)} className="text-xs text-green-600 hover:underline">Concluir</button>
+                          <button
+                            onClick={() => handleConcluirItem(item.id)}
+                            className="text-xs text-green-600 hover:underline"
+                          >
+                            Concluir
+                          </button>
                         )}
                       </li>
                     ))}

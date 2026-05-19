@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { TipoAssinatura } from "@/generated/prisma/enums";
 
 export type { TipoAssinatura };
@@ -39,7 +40,9 @@ export async function registrarAssinatura(dados: DadosAssinatura) {
       codigoVerificacao: dados.codigoVerificacao,
       ipOrigem: dados.ipOrigem ?? null,
       userAgent: dados.userAgent ?? null,
-      certificadoInfo: dados.certificadoInfo ?? null,
+      certificadoInfo: (dados.certificadoInfo ?? Prisma.JsonNull) as
+        | Prisma.InputJsonValue
+        | typeof Prisma.JsonNull,
     },
   });
 }
@@ -53,10 +56,7 @@ export async function verificarAssinatura(codigoVerificacao: string) {
   });
 }
 
-export async function cancelarAssinatura(
-  id: string,
-  tenantId: string,
-) {
+export async function cancelarAssinatura(id: string, tenantId: string) {
   return prisma.assinatura.updateMany({
     where: { id, tenantId },
     data: { valida: false },

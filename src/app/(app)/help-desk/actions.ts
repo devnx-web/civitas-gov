@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getTenant } from "@/lib/tenant";
+import { StatusTicket } from "@/generated/prisma/enums";
 import {
   criarTicket,
   listarTickets,
@@ -25,17 +26,20 @@ export async function abrirTicket(data: {
   return { sucesso: true, ticket };
 }
 
-export async function listarTicketsAction(filtros?: { status?: string }) {
+export async function listarTicketsAction(filtros?: { status?: StatusTicket }) {
   const tenant = await getTenant();
   return listarTickets(tenant.id, filtros);
 }
 
-export async function responderTicket(ticketId: string, data: {
-  autorId: string;
-  autorNome: string;
-  mensagem: string;
-  interna?: boolean;
-}) {
+export async function responderTicket(
+  ticketId: string,
+  data: {
+    autorId: string;
+    autorNome: string;
+    mensagem: string;
+    interna?: boolean;
+  }
+) {
   await adicionarMensagem({ ticketId, ...data });
   revalidatePath("/(app)/help-desk");
   return { sucesso: true };

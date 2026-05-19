@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { criarDocumentoAction } from "@/app/(app)/assinaturas/actions";
+import { criarDocumentoDirectAction } from "@/app/(app)/assinaturas/actions";
 import { FileSignature, Loader2 } from "lucide-react";
 
 export function SolicitarAssinaturaButton({
@@ -17,7 +17,7 @@ export function SolicitarAssinaturaButton({
   const handleClick = () => {
     if (!confirm("Deseja criar um documento assinável para este contrato?")) return;
     startTransition(async () => {
-      const result = await criarDocumentoAction({
+      const result = await criarDocumentoDirectAction({
         titulo: `Contrato: ${contratoTitulo}`,
         descricao: "Documento gerado automaticamente a partir do contrato.",
         tipo: "contrato",
@@ -34,12 +34,7 @@ export function SolicitarAssinaturaButton({
   };
 
   return (
-    <Button
-      onClick={handleClick}
-      disabled={isPending}
-      variant="secondary"
-      size="sm"
-    >
+    <Button onClick={handleClick} disabled={isPending} variant="secondary" size="sm">
       {isPending ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (

@@ -3,6 +3,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
+import { StatusTicket } from "@/generated/prisma/enums";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LGPD
@@ -60,7 +61,10 @@ export async function registrarProcessamento(data: {
   return prisma.registroProcessamentoDados.create({ data: data as any });
 }
 
-export async function listarRegistrosProcessamento(tenantId: string, filtros?: { titularId?: string; entidade?: string }) {
+export async function listarRegistrosProcessamento(
+  tenantId: string,
+  filtros?: { titularId?: string; entidade?: string }
+) {
   return prisma.registroProcessamentoDados.findMany({
     where: { tenantId, ...filtros },
     orderBy: { criadoEm: "desc" },
@@ -176,7 +180,10 @@ export async function criarTicket(data: {
   return prisma.ticketSuporte.create({ data: data as any });
 }
 
-export async function listarTickets(tenantId: string, filtros?: { status?: string; solicitanteId?: string }) {
+export async function listarTickets(
+  tenantId: string,
+  filtros?: { status?: StatusTicket; solicitanteId?: string }
+) {
   return prisma.ticketSuporte.findMany({
     where: { tenantId, ...filtros },
     orderBy: { criadoEm: "desc" },
@@ -194,7 +201,11 @@ export async function adicionarMensagem(data: {
   return prisma.mensagemTicket.create({ data });
 }
 
-export async function atualizarStatusTicket(ticketId: string, status: string, responsavelId?: string) {
+export async function atualizarStatusTicket(
+  ticketId: string,
+  status: string,
+  responsavelId?: string
+) {
   return prisma.ticketSuporte.update({
     where: { id: ticketId },
     data: {

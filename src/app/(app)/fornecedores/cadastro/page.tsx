@@ -58,21 +58,17 @@ export default async function CadastroFornecedoresPage() {
                     ) : (
                       <ShieldAlert className="h-4 w-4 text-amber-500" />
                     )}
-                    <span className="text-xs text-ink-500">
-                      {f._count.documentos} documento(s)
-                    </span>
+                    <span className="text-xs text-ink-500">{f._count.documentos} documento(s)</span>
                   </div>
                 </TD>
                 <TD>
                   <div className="flex items-center gap-2">
                     <ProgressBar
                       valor={f._count.contratos > 0 ? 85 : 0}
-                      tone={f._count.contratos > 0 ? "sucesso" : "neutro"}
+                      tone={f._count.contratos > 0 ? "sucesso" : "marca"}
                       className="w-20"
                     />
-                    <span className="text-xs text-ink-500">
-                      {f._count.contratos} contrato(s)
-                    </span>
+                    <span className="text-xs text-ink-500">{f._count.contratos} contrato(s)</span>
                   </div>
                 </TD>
                 <TD>

@@ -4,40 +4,48 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import { pncpClient, type ConfigPNCP, type PayloadContratacaoPNCP, type PayloadContratoPNCP } from "./pncp-client";
+import { Prisma } from "@/generated/prisma/client";
+import {
+  pncpClient,
+  type ConfigPNCP,
+  type PayloadContratacaoPNCP,
+  type PayloadContratoPNCP,
+} from "./pncp-client";
+
+export type { ConfigPNCP };
 
 // ── Tabelas de domínio PNCP (mapeamento simplificado) ───────────────────────
 
 const MODALIDADE_TO_PNCP: Record<string, number> = {
-  pregao_eletronico: 8,    // Pregão Eletrônico
-  pregao_presencial: 7,    // Pregão Presencial
-  concorrencia: 1,         // Concorrência
-  tomada_preco: 2,         // Tomada de Preços
-  convite: 3,              // Convite
-  concurso: 4,             // Concurso
-  leilao: 5,               // Leilão
-  dispensa: 20,            // Dispensa de Licitação
-  inexigibilidade: 21,     // Inexigibilidade
+  pregao_eletronico: 8, // Pregão Eletrônico
+  pregao_presencial: 7, // Pregão Presencial
+  concorrencia: 1, // Concorrência
+  tomada_preco: 2, // Tomada de Preços
+  convite: 3, // Convite
+  concurso: 4, // Concurso
+  leilao: 5, // Leilão
+  dispensa: 20, // Dispensa de Licitação
+  inexigibilidade: 21, // Inexigibilidade
 };
 
 const TIPO_INSTRUMENTO_TO_PNCP: Record<string, number> = {
-  pregao_eletronico: 2,    // Edital
+  pregao_eletronico: 2, // Edital
   pregao_presencial: 2,
   concorrencia: 2,
   tomada_preco: 2,
-  convite: 4,              // Convite
+  convite: 4, // Convite
   concurso: 2,
   leilao: 2,
-  dispensa: 5,             // Dispensa
-  inexigibilidade: 6,      // Inexigibilidade
+  dispensa: 5, // Dispensa
+  inexigibilidade: 6, // Inexigibilidade
 };
 
 const STATUS_TO_SITUACAO_PNCP: Record<string, number> = {
-  planejamento: 1,   // Em elaboração
-  publicado: 2,      // Publicado
-  em_disputa: 3,     // Em disputa
-  homologado: 4,     // Homologado
-  deserta: 5,        // Deserted/Fracassada
+  planejamento: 1, // Em elaboração
+  publicado: 2, // Publicado
+  em_disputa: 3, // Em disputa
+  homologado: 4, // Homologado
+  deserta: 5, // Deserted/Fracassada
   fracassada: 5,
   revogada: 6,
   anulada: 7,
@@ -45,7 +53,7 @@ const STATUS_TO_SITUACAO_PNCP: Record<string, number> = {
 
 const AMPARO_LEGAL_PADRAO = 1; // Lei 14.133/2021
 const MODO_DISPUTA_PADRAO = 6; // Aberto
-const TIPO_PRAZO_PADRAO = 1;   // Dias
+const TIPO_PRAZO_PADRAO = 1; // Dias
 const TIPO_CONTRATO_PADRAO = 1; // Contrato
 const CATEGORIA_PROCESSO_PADRAO = 1; // Compra/Serviço
 
@@ -86,7 +94,7 @@ export function mapProcessoToContratacao(
     unidadeCodigo: string | null;
   },
   orgaoRazaoSocial: string,
-  unidadeNome: string,
+  unidadeNome: string
 ): PayloadContratacaoPNCP {
   const modalidadeId = MODALIDADE_TO_PNCP[processo.modalidade] ?? 8;
   const tipoInstrumentoId = TIPO_INSTRUMENTO_TO_PNCP[processo.modalidade] ?? 2;
@@ -114,19 +122,17 @@ export function mapProcessoToContratacao(
 
 // ── Mapeamento de Contrato → Contrato PNCP ──────────────────────────────────
 
-export function mapContratoToPNCP(
-  contrato: {
-    numero: string;
-    ano: number;
-    objeto: string;
-    valorOriginal: number;
-    dataAssinatura: Date;
-    dataInicioVigencia: Date;
-    dataFimVigencia: Date;
-    fornecedor: { cpfCnpj: string; nome: string } | null;
-    processo: { numero: string; ano: number } | null;
-  },
-): PayloadContratoPNCP {
+export function mapContratoToPNCP(contrato: {
+  numero: string;
+  ano: number;
+  objeto: string;
+  valorOriginal: number;
+  dataAssinatura: Date;
+  dataInicioVigencia: Date;
+  dataFimVigencia: Date;
+  fornecedor: { cpfCnpj: string; nome: string } | null;
+  processo: { numero: string; ano: number } | null;
+}): PayloadContratoPNCP {
   return {
     numeroContratoEmpenho: contrato.numero,
     anoContrato: contrato.ano,
@@ -152,7 +158,8 @@ export function mapContratoToPNCP(
 
 export async function publicarProcessoNoPNCP(processoId: string, tenantId: string) {
   const config = await obterConfigPNCP(tenantId);
-  if (!config) throw new Error("Configuração PNCP não encontrada. Configure em Configurações → PNCP.");
+  if (!config)
+    throw new Error("Configuração PNCP não encontrada. Configure em Configurações → PNCP.");
 
   const processo = await prisma.processoLicitatorio.findFirst({
     where: { id: processoId, tenantId },
@@ -161,9 +168,9 @@ export async function publicarProcessoNoPNCP(processoId: string, tenantId: strin
   if (!processo) throw new Error("Processo não encontrado.");
 
   const payload = mapProcessoToContratacao(
-    processo,
+    { ...processo, valorEstimado: processo.valorEstimado.toNumber() },
     processo.tenant.nome,
-    processo.tenant.nome,
+    processo.tenant.nome
   );
 
   const res = await pncpClient.publicarContratacao(config, payload);
@@ -176,8 +183,8 @@ export async function publicarProcessoNoPNCP(processoId: string, tenantId: strin
       entidadeId: processoId,
       numeroControlePNCP: res.numeroControlePNCP,
       status: "publicado",
-      payloadEnviado: payload as unknown as Record<string, unknown>,
-      respostaPNCP: res as unknown as Record<string, unknown>,
+      payloadEnviado: payload as unknown as Prisma.InputJsonValue,
+      respostaPNCP: res as unknown as Prisma.InputJsonValue,
       enviadoEm: new Date(),
       processoId,
     },
@@ -192,11 +199,17 @@ export async function publicarContratoNoPNCP(contratoId: string, tenantId: strin
 
   const contrato = await prisma.contrato.findFirst({
     where: { id: contratoId, tenantId },
-    include: { fornecedor: { select: { cpfCnpj: true, nome: true } }, processo: { select: { numero: true, ano: true } } },
+    include: {
+      fornecedor: { select: { cpfCnpj: true, nome: true } },
+      processo: { select: { numero: true, ano: true } },
+    },
   });
   if (!contrato) throw new Error("Contrato não encontrado.");
 
-  const payload = mapContratoToPNCP(contrato);
+  const payload = mapContratoToPNCP({
+    ...contrato,
+    valorOriginal: contrato.valorOriginal.toNumber(),
+  });
   const res = await pncpClient.publicarContrato(config, payload);
 
   await prisma.publicacaoPNCP.create({
@@ -207,8 +220,8 @@ export async function publicarContratoNoPNCP(contratoId: string, tenantId: strin
       entidadeId: contratoId,
       numeroControlePNCP: res.numeroControlePNCP,
       status: "publicado",
-      payloadEnviado: payload as unknown as Record<string, unknown>,
-      respostaPNCP: res as unknown as Record<string, unknown>,
+      payloadEnviado: payload as unknown as Prisma.InputJsonValue,
+      respostaPNCP: res as unknown as Prisma.InputJsonValue,
       enviadoEm: new Date(),
       contratoId,
     },

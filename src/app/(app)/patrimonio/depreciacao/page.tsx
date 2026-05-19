@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
-import { ProgressBar } from "@/components/ui/progress-bar";
+import { ProgressBar, type Tone as ProgressTone } from "@/components/ui/progress-bar";
 import { FadeIn } from "@/components/motion";
 import { formatBRL } from "@/lib/utils";
 
@@ -29,16 +29,14 @@ export default async function DepreciacaoPage() {
       valorAtual = Number(b.valorResidual);
     } else if (b.percentualDepreciacaoAnual != null) {
       const idadeAnos =
-        (hoje.getTime() - new Date(b.dataAquisicao).getTime()) /
-        (1000 * 60 * 60 * 24 * 365.25);
-      const depreciacao =
-        valorAquisicao * (Number(b.percentualDepreciacaoAnual) / 100) * idadeAnos;
+        (hoje.getTime() - new Date(b.dataAquisicao).getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+      const depreciacao = valorAquisicao * (Number(b.percentualDepreciacaoAnual) / 100) * idadeAnos;
       valorAtual = Math.max(0, valorAquisicao - depreciacao);
     }
 
     const depreciacao = valorAquisicao - valorAtual;
     const pct = valorAquisicao > 0 ? (depreciacao / valorAquisicao) * 100 : 0;
-    const tone = pct >= 70 ? "perigo" : pct >= 40 ? "alerta" : "marca";
+    const tone: ProgressTone = pct >= 70 ? "perigo" : pct >= 40 ? "alerta" : "marca";
 
     return {
       id: b.id,
@@ -73,25 +71,15 @@ export default async function DepreciacaoPage() {
           <TBody>
             {linhas.map((b) => (
               <TR key={b.id}>
-                <TD className="font-mono text-xs text-ink-500">
-                  {b.tombamento}
-                </TD>
+                <TD className="font-mono text-xs text-ink-500">{b.tombamento}</TD>
                 <TD className="font-medium text-ink-900">{b.descricao}</TD>
-                <TD className="text-right whitespace-nowrap">
-                  {formatBRL(b.valorAquisicao)}
-                </TD>
-                <TD className="text-right whitespace-nowrap">
-                  {formatBRL(b.valorAtual)}
-                </TD>
-                <TD className="text-right whitespace-nowrap">
-                  {formatBRL(b.depreciacao)}
-                </TD>
+                <TD className="text-right whitespace-nowrap">{formatBRL(b.valorAquisicao)}</TD>
+                <TD className="text-right whitespace-nowrap">{formatBRL(b.valorAtual)}</TD>
+                <TD className="text-right whitespace-nowrap">{formatBRL(b.depreciacao)}</TD>
                 <TD>
                   <div className="flex items-center gap-2">
                     <ProgressBar valor={b.pct} tone={b.tone} className="w-24" />
-                    <span className="text-xs text-ink-600">
-                      {b.pct.toFixed(0)}%
-                    </span>
+                    <span className="text-xs text-ink-600">{b.pct.toFixed(0)}%</span>
                   </div>
                 </TD>
               </TR>

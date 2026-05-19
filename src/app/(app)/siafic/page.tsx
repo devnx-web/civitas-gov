@@ -18,7 +18,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 
 export default function SIAFICPage() {
-  const [aba, setAba] = useState<"resumo" | "dotacoes" | "empenhos" | "liquidacoes" | "pagamentos">("resumo");
+  const [aba, setAba] = useState<"resumo" | "dotacoes" | "empenhos" | "liquidacoes" | "pagamentos">(
+    "resumo"
+  );
   const [ano, setAno] = useState(2026);
   const [resumo, setResumo] = useState<any>(null);
   const [dotacoes, setDotacoes] = useState<any[]>([]);
@@ -112,7 +114,10 @@ export default function SIAFICPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Execução Orçamentária" subtitle="SIAFIC — Dotação → Empenho → Liquidação → Pagamento" />
+      <PageHeader
+        titulo="Execução Orçamentária"
+        descricao="SIAFIC — Dotação → Empenho → Liquidação → Pagamento"
+      />
 
       <div className="flex items-center gap-4">
         <label className="text-sm font-medium">Ano:</label>
@@ -122,14 +127,15 @@ export default function SIAFICPage() {
           onChange={(e) => setAno(Number(e.target.value))}
           className="w-24 rounded-md border px-3 py-1.5 text-sm bg-background"
         />
-        <button onClick={handleExportar} className="ml-auto rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+        <button
+          onClick={handleExportar}
+          className="ml-auto rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
           Exportar SIAFIC (CSV)
         </button>
       </div>
 
-      {mensagem && (
-        <div className="rounded-lg border bg-muted px-4 py-3 text-sm">{mensagem}</div>
-      )}
+      {mensagem && <div className="rounded-lg border bg-muted px-4 py-3 text-sm">{mensagem}</div>}
 
       {aba === "resumo" && resumo && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -139,7 +145,9 @@ export default function SIAFICPage() {
           </Card>
           <Card className="p-4">
             <p className="text-xs text-muted-foreground uppercase">Empenhado</p>
-            <p className="text-2xl font-bold text-amber-600">{formatMoeda(resumo.totalEmpenhado)}</p>
+            <p className="text-2xl font-bold text-amber-600">
+              {formatMoeda(resumo.totalEmpenhado)}
+            </p>
           </Card>
           <Card className="p-4">
             <p className="text-xs text-muted-foreground uppercase">Liquidado</p>
@@ -155,7 +163,9 @@ export default function SIAFICPage() {
             <div className="mt-2 h-3 w-full rounded-full bg-muted overflow-hidden">
               <div
                 className="h-full bg-amber-500 rounded-full"
-                style={{ width: `${Math.min((resumo.totalEmpenhado / resumo.totalAtual) * 100, 100)}%` }}
+                style={{
+                  width: `${Math.min((resumo.totalEmpenhado / resumo.totalAtual) * 100, 100)}%`,
+                }}
               />
             </div>
           </Card>
@@ -168,7 +178,9 @@ export default function SIAFICPage() {
             key={a}
             onClick={() => setAba(a)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              aba === a ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              aba === a
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             {a === "resumo" && "Resumo"}
@@ -186,21 +198,66 @@ export default function SIAFICPage() {
             <h3 className="font-semibold mb-3">Nova Dotação</h3>
             <form onSubmit={handleNovaDotacao} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input name="ano" type="hidden" value={ano} />
-              <input name="uo" placeholder="Unidade Orçamentária" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <input name="funcao" placeholder="Função" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <input name="subfuncao" placeholder="Subfunção" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <input name="programa" placeholder="Programa" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <input name="acao" placeholder="Ação" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <input name="natureza" placeholder="Natureza (ex: 3.3.90.00)" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <input name="fonte" placeholder="Fonte de Recurso" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <input name="valor" placeholder="Valor Inicial" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <button type="submit" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+              <input
+                name="uo"
+                placeholder="Unidade Orçamentária"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <input
+                name="funcao"
+                placeholder="Função"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <input
+                name="subfuncao"
+                placeholder="Subfunção"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <input
+                name="programa"
+                placeholder="Programa"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <input
+                name="acao"
+                placeholder="Ação"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <input
+                name="natureza"
+                placeholder="Natureza (ex: 3.3.90.00)"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <input
+                name="fonte"
+                placeholder="Fonte de Recurso"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <input
+                name="valor"
+                placeholder="Valor Inicial"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <button
+                type="submit"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
                 Criar Dotação
               </button>
             </form>
           </Card>
 
-          {loading ? <p>Carregando...</p> : (
+          {loading ? (
+            <p>Carregando...</p>
+          ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted">
@@ -220,10 +277,16 @@ export default function SIAFICPage() {
                       <td className="px-3 py-2">{d.unidadeOrcamentaria}</td>
                       <td className="px-3 py-2">{d.naturezaDespesa}</td>
                       <td className="px-3 py-2">{d.fonteRecurso}</td>
-                      <td className="px-3 py-2 text-right">{formatMoeda(Number(d.valorInicial))}</td>
+                      <td className="px-3 py-2 text-right">
+                        {formatMoeda(Number(d.valorInicial))}
+                      </td>
                       <td className="px-3 py-2 text-right">{formatMoeda(Number(d.valorAtual))}</td>
-                      <td className="px-3 py-2 text-right">{formatMoeda(Number(d.valorEmpenhado))}</td>
-                      <td className="px-3 py-2 text-right font-medium">{formatMoeda(Number(d.valorAtual) - Number(d.valorEmpenhado))}</td>
+                      <td className="px-3 py-2 text-right">
+                        {formatMoeda(Number(d.valorEmpenhado))}
+                      </td>
+                      <td className="px-3 py-2 text-right font-medium">
+                        {formatMoeda(Number(d.valorAtual) - Number(d.valorEmpenhado))}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -239,29 +302,60 @@ export default function SIAFICPage() {
             <h3 className="font-semibold mb-3">Novo Empenho</h3>
             <form onSubmit={handleNovoEmpenho} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <input name="ano" type="hidden" value={ano} />
-              <input name="numero" placeholder="Número" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <select name="dotacaoId" className="rounded-md border px-3 py-2 text-sm bg-background" required>
+              <input
+                name="numero"
+                placeholder="Número"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <select
+                name="dotacaoId"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              >
                 <option value="">Selecione a dotação</option>
                 {dotacoes.map((d) => (
-                  <option key={d.id} value={d.id}>{d.unidadeOrcamentaria} — {d.naturezaDespesa} (saldo: {formatMoeda(Number(d.valorAtual) - Number(d.valorEmpenhado))})</option>
+                  <option key={d.id} value={d.id}>
+                    {d.unidadeOrcamentaria} — {d.naturezaDespesa} (saldo:{" "}
+                    {formatMoeda(Number(d.valorAtual) - Number(d.valorEmpenhado))})
+                  </option>
                 ))}
               </select>
-              <input name="valor" placeholder="Valor" className="rounded-md border px-3 py-2 text-sm bg-background" required />
-              <input name="data" type="date" className="rounded-md border px-3 py-2 text-sm bg-background" required />
+              <input
+                name="valor"
+                placeholder="Valor"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
+              <input
+                name="data"
+                type="date"
+                className="rounded-md border px-3 py-2 text-sm bg-background"
+                required
+              />
               <select name="tipo" className="rounded-md border px-3 py-2 text-sm bg-background">
                 <option value="ordinario">Ordinário</option>
                 <option value="estimativo">Estimativo</option>
                 <option value="global">Global</option>
                 <option value="avulso">Avulso</option>
               </select>
-              <input name="obs" placeholder="Observação" className="rounded-md border px-3 py-2 text-sm bg-background sm:col-span-2" />
-              <button type="submit" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+              <input
+                name="obs"
+                placeholder="Observação"
+                className="rounded-md border px-3 py-2 text-sm bg-background sm:col-span-2"
+              />
+              <button
+                type="submit"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
                 Criar Empenho
               </button>
             </form>
           </Card>
 
-          {loading ? <p>Carregando...</p> : (
+          {loading ? (
+            <p>Carregando...</p>
+          ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted">
@@ -278,21 +372,31 @@ export default function SIAFICPage() {
                 <tbody>
                   {empenhos.map((e) => (
                     <tr key={e.id} className="border-b">
-                      <td className="px-3 py-2">{e.numero}/{e.ano}</td>
+                      <td className="px-3 py-2">
+                        {e.numero}/{e.ano}
+                      </td>
                       <td className="px-3 py-2">{e.fornecedor?.nome ?? "—"}</td>
                       <td className="px-3 py-2 text-right">{formatMoeda(Number(e.valor))}</td>
-                      <td className="px-3 py-2 text-right">{formatMoeda(Number(e.valorLiquidado))}</td>
+                      <td className="px-3 py-2 text-right">
+                        {formatMoeda(Number(e.valorLiquidado))}
+                      </td>
                       <td className="px-3 py-2 text-right">{formatMoeda(Number(e.valorPago))}</td>
                       <td className="px-3 py-2">
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                          e.status === "ativo" ? "bg-green-100 text-green-700" :
-                          e.status === "anulado" ? "bg-red-100 text-red-700" :
-                          "bg-gray-100 text-gray-700"
-                        }`}>
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            e.status === "ativo"
+                              ? "bg-green-100 text-green-700"
+                              : e.status === "anulado"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
                           {e.status}
                         </span>
                       </td>
-                      <td className="px-3 py-2">{new Date(e.dataEmpenho).toLocaleDateString("pt-BR")}</td>
+                      <td className="px-3 py-2">
+                        {new Date(e.dataEmpenho).toLocaleDateString("pt-BR")}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -304,7 +408,9 @@ export default function SIAFICPage() {
 
       {aba === "liquidacoes" && (
         <div className="space-y-4">
-          {loading ? <p>Carregando...</p> : (
+          {loading ? (
+            <p>Carregando...</p>
+          ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted">
@@ -320,9 +426,13 @@ export default function SIAFICPage() {
                   {liquidacoes.map((l) => (
                     <tr key={l.id} className="border-b">
                       <td className="px-3 py-2">{l.numero}</td>
-                      <td className="px-3 py-2">{l.empenho?.numero}/{l.empenho?.ano}</td>
+                      <td className="px-3 py-2">
+                        {l.empenho?.numero}/{l.empenho?.ano}
+                      </td>
                       <td className="px-3 py-2 text-right">{formatMoeda(Number(l.valor))}</td>
-                      <td className="px-3 py-2">{new Date(l.dataLiquidacao).toLocaleDateString("pt-BR")}</td>
+                      <td className="px-3 py-2">
+                        {new Date(l.dataLiquidacao).toLocaleDateString("pt-BR")}
+                      </td>
                       <td className="px-3 py-2">{l.documentoFiscal ?? "—"}</td>
                     </tr>
                   ))}
@@ -335,7 +445,9 @@ export default function SIAFICPage() {
 
       {aba === "pagamentos" && (
         <div className="space-y-4">
-          {loading ? <p>Carregando...</p> : (
+          {loading ? (
+            <p>Carregando...</p>
+          ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted">
@@ -351,9 +463,13 @@ export default function SIAFICPage() {
                   {pagamentos.map((p) => (
                     <tr key={p.id} className="border-b">
                       <td className="px-3 py-2">{p.numero}</td>
-                      <td className="px-3 py-2">{p.empenho?.numero}/{p.empenho?.ano}</td>
+                      <td className="px-3 py-2">
+                        {p.empenho?.numero}/{p.empenho?.ano}
+                      </td>
                       <td className="px-3 py-2 text-right">{formatMoeda(Number(p.valor))}</td>
-                      <td className="px-3 py-2">{new Date(p.dataPagamento).toLocaleDateString("pt-BR")}</td>
+                      <td className="px-3 py-2">
+                        {new Date(p.dataPagamento).toLocaleDateString("pt-BR")}
+                      </td>
                       <td className="px-3 py-2">{p.formaPagamento ?? "—"}</td>
                     </tr>
                   ))}
