@@ -1,12 +1,43 @@
-import pino from "pino";
+type LogLevel = "debug" | "info" | "warn" | "error";
 
-const isDev = process.env.NODE_ENV !== "production";
+const LEVELS: Record<LogLevel, number> = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+};
 
-export const logger = pino(
-  isDev
-    ? {
-        level: "debug",
-        transport: { target: "pino-pretty", options: { colorize: true } },
-      }
-    : { level: "info" }
-);
+const MIN_LEVEL: LogLevel = process.env.NODE_ENV === "production" ? "info" : "debug";
+
+function log(level: LogLevel, msg: string, meta?: unknown): void {
+  if (LEVELS[level] < LEVELS[MIN_LEVEL]) return;
+
+  const timestamp = new Date().toISOString();
+  const line = meta
+    ? `[${timestamp}] [${level.toUpperCase()}] ${msg} ${JSON.stringify(meta)}`
+    : `[${timestamp}] [${level.toUpperCase()}] ${msg}`;
+
+  if (level === "error") {
+    console.error(line);
+  } else if (level === "warn") {
+    console.warn(line);
+  } else {
+    console.log(line);
+  }
+
+  if (level === "error" && typeof window === "undefined") {
+    try {
+      const Sentry = require("@sentry/nextjs") as typeof import("@sentry/nextjs");
+      Sentry?.captureException(new Error(msg));
+    } catch {
+      // Sentry não deve interromper o fluxo principal
+    }
+  }
+}
+
+export const logger = {
+  debug: (msg: string, meta?: unknown) => log("debug", msg, meta),
+  info: (msg: string, meta?: unknown) => log("info", msg, meta),
+  warn: (msg: string, meta?: unknown) => log("warn", msg, meta),
+  error: (msg: string, meta?: unknown) => log("error", msg, meta),
+};

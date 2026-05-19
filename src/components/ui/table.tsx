@@ -5,7 +5,9 @@ import { cn } from "@/lib/utils";
 export function Table({ children }: { children: ReactNode }) {
   return (
     <div className="w-full overflow-x-auto">
-      <table className="w-full border-collapse text-sm">{children}</table>
+      <table role="table" className="w-full border-collapse text-sm">
+        {children}
+      </table>
     </div>
   );
 }
@@ -21,6 +23,7 @@ export function THead({ children }: { children: ReactNode }) {
 export function TH({ children, className }: { children?: ReactNode; className?: string }) {
   return (
     <th
+      scope="col"
       className={cn(
         "px-5 py-3 text-[11px] font-semibold tracking-wider text-ink-400 uppercase dark:text-ink-500",
         className

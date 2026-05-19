@@ -326,6 +326,14 @@ export const NAV: NavGroup[] = [
               { label: "Grupos de Material", href: "/configuracoes/grupos-material" },
             ],
           },
+          {
+            label: "Sistema",
+            submenus: [
+              { label: "Parâmetros gerais", href: "/configuracoes" },
+              { label: "ETL / Migração", href: "/configuracoes/etl" },
+              { label: "Acessibilidade", href: "/configuracoes/acessibilidade" },
+            ],
+          },
         ],
       },
     ],

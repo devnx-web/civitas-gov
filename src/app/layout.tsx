@@ -30,12 +30,16 @@ export const viewport: Viewport = {
   themeColor: "#0d1f4b",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={inter.variable} suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg focus:outline-none"
+        >
+          Pular para o conteúdo principal
+        </a>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -52,9 +56,7 @@ export default function RootLayout({
             `,
           }}
         />
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
         <Toaster />
         <PwaRegister />
       </body>

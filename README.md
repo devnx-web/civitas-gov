@@ -37,14 +37,14 @@ Veja o roteiro completo — concluído e planejado — em
 
 ## 🧱 Stack
 
-| Camada        | Tecnologia                          |
-| ------------- | ----------------------------------- |
-| Framework     | Next.js 15 (App Router)             |
-| Linguagem     | TypeScript                          |
-| Autenticação  | NextAuth v5 / Auth.js               |
-| Animações     | Framer Motion 12                    |
-| Estilização   | Tailwind CSS v4                     |
-| Ícones        | lucide-react                        |
+| Camada       | Tecnologia              |
+| ------------ | ----------------------- |
+| Framework    | Next.js 15 (App Router) |
+| Linguagem    | TypeScript              |
+| Autenticação | NextAuth v5 / Auth.js   |
+| Animações    | Framer Motion 12        |
+| Estilização  | Tailwind CSS v4         |
+| Ícones       | lucide-react            |
 
 ---
 
@@ -71,11 +71,11 @@ npm run build && npm run start
 
 Senha para todos: **`civitas123`** (atalhos prontos na tela de login).
 
-| Papel              | E-mail                     |
-| ------------------ | -------------------------- |
-| Administrador      | `admin@civitas.gov.br`     |
-| Gestor / Fiscal    | `gestor@civitas.gov.br`    |
-| Operador           | `operador@civitas.gov.br`  |
+| Papel           | E-mail                    |
+| --------------- | ------------------------- |
+| Administrador   | `admin@civitas.gov.br`    |
+| Gestor / Fiscal | `gestor@civitas.gov.br`   |
+| Operador        | `operador@civitas.gov.br` |
 
 ---
 
@@ -119,13 +119,13 @@ civitas-gov/
 
 ## 🗺️ Módulos × Edital
 
-| Módulo (Civitas)         | Objeto do Pregão 002/2026 — IPASLI            |
-| ------------------------ | --------------------------------------------- |
-| Almoxarifado             | Sistema de Almoxarifado                       |
-| Patrimônio               | Sistema de Controle de Bens Patrimoniais      |
-| Licitações & Contratos   | Sistema de Compras, Licitações e Contratos    |
-| Transparência            | Portal da Transparência e Compras             |
-| Fornecedores             | Cadastro de fornecedores (Seção do Anexo I)   |
+| Módulo (Civitas)       | Objeto do Pregão 002/2026 — IPASLI          |
+| ---------------------- | ------------------------------------------- |
+| Almoxarifado           | Sistema de Almoxarifado                     |
+| Patrimônio             | Sistema de Controle de Bens Patrimoniais    |
+| Licitações & Contratos | Sistema de Compras, Licitações e Contratos  |
+| Transparência          | Portal da Transparência e Compras           |
+| Fornecedores           | Cadastro de fornecedores (Seção do Anexo I) |
 
 ---
 
@@ -137,6 +137,44 @@ civitas-gov/
   login único **gov.br**.
 - Não substitui análise jurídica nem vincula qualquer participação em
   certame público.
+
+---
+
+## Backup & Restore
+
+O Civitas Gov possui backup automatizado diário do banco de dados PostgreSQL via GitHub Actions.
+
+### Backup automático
+
+O workflow `.github/workflows/backup.yml` executa às **23:00 BRT** (02:00 UTC) todos os dias, fazendo `pg_dump` e enviando para um bucket S3. Backups com mais de 30 dias são removidos automaticamente.
+
+**Secrets necessários no repositório GitHub:**
+
+| Secret             | Descrição                 |
+| ------------------ | ------------------------- |
+| `DATABASE_URL`     | URL de conexão PostgreSQL |
+| `PGPASSWORD`       | Senha do banco            |
+| `BACKUP_S3_KEY`    | AWS Access Key ID         |
+| `BACKUP_S3_SECRET` | AWS Secret Access Key     |
+| `BACKUP_S3_BUCKET` | Nome do bucket S3         |
+
+### Restaurar um backup
+
+```bash
+# Baixar o dump do S3
+aws s3 cp s3://<bucket>/backups/civitas_backup_YYYYMMDD_HHMMSS.dump ./civitas.dump
+
+# Restaurar
+./scripts/restore-backup.sh ./civitas.dump "$DATABASE_URL"
+```
+
+### Testar integridade do restore
+
+```bash
+./scripts/test-restore.sh "$DATABASE_URL"
+```
+
+Documentação completa em [`docs/backup.md`](docs/backup.md).
 
 ---
 

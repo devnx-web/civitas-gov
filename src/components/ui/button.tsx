@@ -10,8 +10,7 @@ const VARIANTS: Record<Variant, string> = {
   secondary:
     "bg-white text-ink-700 border border-ink-200 shadow-sm hover:bg-ink-50 hover:border-ink-300",
   ghost: "text-ink-600 hover:bg-ink-100",
-  danger:
-    "bg-rose-600 text-white shadow-sm shadow-rose-600/25 hover:bg-rose-700",
+  danger: "bg-rose-600 text-white shadow-sm shadow-rose-600/25 hover:bg-rose-700",
 };
 
 const SIZES: Record<Size, string> = {
@@ -31,16 +30,19 @@ export function Button({
   size = "md",
   className,
   children,
+  disabled,
   ...props
 }: ButtonProps) {
   return (
     <button
+      disabled={disabled}
+      aria-disabled={disabled}
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150",
         "active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100",
         VARIANTS[variant],
         SIZES[size],
-        className,
+        className
       )}
       {...props}
     >
