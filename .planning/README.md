@@ -12,47 +12,47 @@ do IPASLI**. Este diretório é **planejamento** — não contém implementaçã
 
 ## Documentos
 
-| Documento | Conteúdo |
-|---|---|
-| [`PROJECT.md`](PROJECT.md) | Visão, contexto, escopo, restrições, premissas, critérios de sucesso, riscos |
-| [`ROADMAP.md`](ROADMAP.md) | As 11 fases (0–10): objetivo, escopo, requisitos, entregáveis, critérios, dependências |
-| [`STATE.md`](STATE.md) | **Estado consolidado pós-bootstrap** — status por fase, decisões, blockers, próxima ação |
-| [`padroes-tecnicos.md`](padroes-tecnicos.md) | Bibliotecas e padrões escolhidos uma única vez (Prisma, react-toastify, bcryptjs, etc.) |
-| [`requisitos/`](requisitos/) | Catálogo rastreável de todos os requisitos |
-| [`fases/`](fases/) | Spec + SUMMARY + backlog por fase (uma fase = um arquivo) |
-| [`auditoria/AUDIT-resumo.md`](auditoria/AUDIT-resumo.md) | Auditoria de requisitos por amostra (125 reqs verificados) |
+| Documento                                                | Conteúdo                                                                                 |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [`PROJECT.md`](PROJECT.md)                               | Visão, contexto, escopo, restrições, premissas, critérios de sucesso, riscos             |
+| [`ROADMAP.md`](ROADMAP.md)                               | As 11 fases (0–10): objetivo, escopo, requisitos, entregáveis, critérios, dependências   |
+| [`STATE.md`](STATE.md)                                   | **Estado consolidado pós-bootstrap** — status por fase, decisões, blockers, próxima ação |
+| [`padroes-tecnicos.md`](padroes-tecnicos.md)             | Bibliotecas e padrões escolhidos uma única vez (Prisma, react-toastify, bcryptjs, etc.)  |
+| [`requisitos/`](requisitos/)                             | Catálogo rastreável de todos os requisitos                                               |
+| [`fases/`](fases/)                                       | Spec + SUMMARY + backlog por fase (uma fase = um arquivo)                                |
+| [`auditoria/AUDIT-resumo.md`](auditoria/AUDIT-resumo.md) | Auditoria de requisitos por amostra (125 reqs verificados)                               |
 
 ## Catálogo de requisitos
 
-| Arquivo | Requisitos | Origem |
-|---|---|---|
-| [`requisitos/sistema-1-licitacoes.md`](requisitos/sistema-1-licitacoes.md) | 384 | Anexo I — Sistema 1 |
-| [`requisitos/sistema-2-almoxarifado.md`](requisitos/sistema-2-almoxarifado.md) | 105 | Anexo I — Sistema 2 |
-| [`requisitos/sistema-3-patrimonio.md`](requisitos/sistema-3-patrimonio.md) | 117 | Anexo I — Sistema 3 |
-| [`requisitos/sistema-4-transparencia.md`](requisitos/sistema-4-transparencia.md) | 65 | Anexo I — Sistema 4 |
-| [`requisitos/nao-funcionais.md`](requisitos/nao-funcionais.md) | ~53 | TR §3–7 |
-| [`requisitos/alem-do-tr.md`](requisitos/alem-do-tr.md) | ~31 | Estratégia de produto |
-| **Total** | **~755** | |
+| Arquivo                                                                          | Requisitos | Origem                |
+| -------------------------------------------------------------------------------- | ---------- | --------------------- |
+| [`requisitos/sistema-1-licitacoes.md`](requisitos/sistema-1-licitacoes.md)       | 384        | Anexo I — Sistema 1   |
+| [`requisitos/sistema-2-almoxarifado.md`](requisitos/sistema-2-almoxarifado.md)   | 105        | Anexo I — Sistema 2   |
+| [`requisitos/sistema-3-patrimonio.md`](requisitos/sistema-3-patrimonio.md)       | 117        | Anexo I — Sistema 3   |
+| [`requisitos/sistema-4-transparencia.md`](requisitos/sistema-4-transparencia.md) | 65         | Anexo I — Sistema 4   |
+| [`requisitos/nao-funcionais.md`](requisitos/nao-funcionais.md)                   | ~53        | TR §3–7               |
+| [`requisitos/alem-do-tr.md`](requisitos/alem-do-tr.md)                           | ~31        | Estratégia de produto |
+| **Total**                                                                        | **~755**   |                       |
 
 **671 requisitos funcionais** do edital + ~53 não-funcionais + ~31 "além do TR".
 
-## Roadmap — visão de uma página (com status real)
+## Roadmap — visão de uma página (com status real pós-Wave 2)
 
-| # | Nome | Status | Cobertura | Arquivo |
-|---|---|---|---|---|
-| 0 | Fundação técnica | executado-parcial | ~85% | [`fases/fase-0-fundacao.md`](fases/fase-0-fundacao.md) |
-| 1 | Núcleo comum | executado-parcial | ~50% | [`fases/fase-1-nucleo-comum.md`](fases/fase-1-nucleo-comum.md) |
-| 2 | Almoxarifado | executado-parcial | ~30% | [`fases/fase-2-almoxarifado.md`](fases/fase-2-almoxarifado.md) |
-| 3 | Patrimônio | executado-parcial | ~55% | [`fases/fase-3-patrimonio.md`](fases/fase-3-patrimonio.md) |
-| 4 | Licitações & Contratos | executado-parcial | ~25% | [`fases/fase-4-licitacoes-contratos.md`](fases/fase-4-licitacoes-contratos.md) |
-| 5 | Transparência | stub | ~10% | [`fases/fase-5-transparencia.md`](fases/fase-5-transparencia.md) |
-| 6 | Integrações | executado-parcial | ~50% | [`fases/fase-6-integracoes.md`](fases/fase-6-integracoes.md) |
-| 7 | Conformidade | executado-parcial | ~40% | [`fases/fase-7-conformidade.md`](fases/fase-7-conformidade.md) |
-| 8 | Camada de IA | pendente | 0% | [`fases/fase-8-ia.md`](fases/fase-8-ia.md) |
-| 9 | Implantação & operação | executado-parcial | ~35% | [`fases/fase-9-implantacao.md`](fases/fase-9-implantacao.md) |
-| 10 | Qualidade & acessibilidade | executado-parcial | ~25% | [`fases/fase-10-qualidade.md`](fases/fase-10-qualidade.md) |
+| #   | Nome                       | Status            | Cobertura | Arquivo                                                                        |
+| --- | -------------------------- | ----------------- | --------- | ------------------------------------------------------------------------------ |
+| 0   | Fundação técnica           | **executado**     | **~95%**  | [`fases/fase-0-fundacao.md`](fases/fase-0-fundacao.md)                         |
+| 1   | Núcleo comum               | executado-parcial | ~60%      | [`fases/fase-1-nucleo-comum.md`](fases/fase-1-nucleo-comum.md)                 |
+| 2   | Almoxarifado               | executado-parcial | **~70%**  | [`fases/fase-2-almoxarifado.md`](fases/fase-2-almoxarifado.md)                 |
+| 3   | Patrimônio                 | executado-parcial | ~60%      | [`fases/fase-3-patrimonio.md`](fases/fase-3-patrimonio.md)                     |
+| 4   | Licitações & Contratos     | executado-parcial | ~25%      | [`fases/fase-4-licitacoes-contratos.md`](fases/fase-4-licitacoes-contratos.md) |
+| 5   | Transparência              | executado-parcial | **~70%**  | [`fases/fase-5-transparencia.md`](fases/fase-5-transparencia.md)               |
+| 6   | Integrações                | executado-parcial | ~50%      | [`fases/fase-6-integracoes.md`](fases/fase-6-integracoes.md)                   |
+| 7   | Conformidade               | executado-parcial | **~75%**  | [`fases/fase-7-conformidade.md`](fases/fase-7-conformidade.md)                 |
+| 8   | Camada de IA               | pendente          | 0%        | [`fases/fase-8-ia.md`](fases/fase-8-ia.md)                                     |
+| 9   | Implantação & operação     | executado-parcial | ~35%      | [`fases/fase-9-implantacao.md`](fases/fase-9-implantacao.md)                   |
+| 10  | Qualidade & acessibilidade | executado-parcial | **~45%**  | [`fases/fase-10-qualidade.md`](fases/fase-10-qualidade.md)                     |
 
-**Cobertura global aproximada do TR:** ~30% (ver `auditoria/AUDIT-resumo.md`).
+**Cobertura global aproximada do TR:** ~55% (era ~30% no bootstrap). Ver `auditoria/AUDIT-resumo.md` para detalhes.
 
 Dependências: `0 → 1 → {2, 3, 4} → 5 → 6 → 7`; fases 8/9/10 após núcleo estável.
 
@@ -73,28 +73,36 @@ Dependências: `0 → 1 → {2, 3, 4} → 5 → 6 → 7`; fases 8/9/10 após nú
   - `stub` — diretório criado sem implementação real.
   - `pendente` — nada começou.
 
-## Bloqueadores conhecidos (do `STATE.md`)
+## Bloqueadores conhecidos (atualizado pós-Wave 2)
 
-1. **TCE-ES IN 43/2017** (Fase 7) — bloqueador de edital, sem ele a PoC não passa.
-2. **Sub-fases 4a / 4b / 4d** (Fase 4) — PCA, pregão, atas, impugnações, convênios, fiscalização — ~250 requisitos sem cobertura.
-3. **Movimentações de almoxarifado** (Fase 2) — entradas/saídas/requisições são stubs.
-4. **Portal Transparência sem dados reais** (Fase 5) — LAI/LC 131 é conformidade ativa.
-5. **Auditoria cobre só `Usuario`** (Fase 0) — risco para REQ-NF-014/016.
-6. **CI/CD + backup + observabilidade** (Fase 10) — produto não-vendável sem.
-7. **Reversibilidade total** (Fase 7) — REQ-NF-091/092 contratual.
+**Resolvidos na Wave 2 (2026-05-19):**
+
+- ✅ TCE-ES IN 43/2017 — implementado (INVIMO/INVMOV/INVINT/INVALM + tabelas 14-17, 39)
+- ✅ Movimentações de almoxarifado — entradas/saídas/requisições com preço médio ponderado
+- ✅ Portal Transparência — dados reais + 11 endpoints REST + acessibilidade
+- ✅ Auditoria limitada — agora cobre 14 entidades
+- ✅ CI/CD — GitHub Actions workflow + Prettier + husky pre-commit
+
+**Ainda em aberto:**
+
+1. **Sub-fases 4a / 4b / 4d** (Fase 4) — PCA, pregão, atas, impugnações, convênios, fiscalização — ~250 requisitos sem cobertura. **Maior bloqueador remanescente do edital.**
+2. **Reversibilidade total** (Fase 7) — REQ-NF-091/092: export completo da base em formato aberto + dicionário de dados.
+3. **UI dos cadastros novos** (Fase 1) — schema OK, mas CentroCusto/UnidadeGestora/Setor/Comissao precisam de CRUD UI.
+4. **GrupoMaterial/ClasseMaterial/SubclasseMaterial** (Fase 1) — Portaria STN 448/2002.
+5. **Vitest + observabilidade + backup** (Fase 10) — produto não-vendável sem.
+6. **SLA 3h/12h/24h/48h** (Fase 9) — REQ-NF-080..085.
+7. **Endurecimento auth** (Fase 0) — 2FA, rate limit, recuperação de senha.
 
 ## Próximos passos sugeridos
 
 A ordem recomendada (ver detalhes em `STATE.md` e `auditoria/AUDIT-resumo.md`):
 
-1. **Fase 7 — TCE-ES IN 43/2017** (inegociável para o edital).
-2. **Fase 2 — Movimentações de almoxarifado** (destrava INVALM da Fase 7).
-3. **Fase 4 — Sub-fases 4a, 4b, 4d** (bloco maior de requisitos do TR).
-4. **Fase 5 — Portal com dados reais** (LAI/LC 131).
-5. **Fase 1 — Núcleo comum faltante** (`CentroCusto`, `UnidadeGestora`,
-   `Comissao`, grupos/classes/subclasses de material).
-6. **Fase 0 — Estender auditoria** + CI/CD.
-7. **Fase 9 — SLA + treinamento + ETL.**
+1. **Fase 4 — Sub-fases 4a (PCA), 4b (pregão/atas/impugnações), 4d (convênios/fiscalização).** Maior bloco de requisitos remanescente.
+2. **Fase 1 — UI dos cadastros novos** (CentroCusto, UnidadeGestora, Setor, Comissao) + GrupoMaterial/ClasseMaterial/SubclasseMaterial.
+3. **Fase 7 — Reversibilidade total** + workflow ANPD 72h (`IncidenteLGPD`).
+4. **Fase 10 — Vitest + observabilidade (Sentry/Pino) + backup automatizado.**
+5. **Fase 9 — SLA + treinamento + ETL de migração.**
+6. **Fase 0 — Endurecimento auth** (2FA, rate limit, recuperação).
 
 Use o ciclo GSD:
 
