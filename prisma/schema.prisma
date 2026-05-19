@@ -48,6 +48,23 @@ model Tenant {
   termosGuarda               TermoGuardaResponsabilidade[]
   transferenciasPatrimoniais TransferenciaPatrimonial[]
   sancoesFornecedor          SancaoFornecedor[]
+  // Fase 4 — novos modelos
+  pcas                       PCA[]
+  solicitacoesCompra         SolicitacaoCompra[]
+  pesquisasPreco             PesquisaPreco[]
+  editais                    Edital[]
+  atas                       Ata[]
+  impugnacoes                Impugnacao[]
+  recursos                   Recurso[]
+  sessoesPregao              SessaoPregao[]
+  garantias                  Garantia[]
+  clausulasModelo            ClausulaModelo[]
+  cronogramasFinanceiros     CronogramaFisicoFinanceiro[]
+  restosPagar                RestoPagar[]
+  convenios                  Convenio[]
+  fiscalizacoesContrato      FiscalizacaoContrato[]
+  ocorrenciasFiscalizacao    OcorrenciaFiscalizacao[]
+  medicoes                   MedicaoContrato[]
 
   @@map("tenants")
 }
@@ -279,25 +296,30 @@ model UnidadeMedida {
 }
 
 model Material {
-  id                String                   @id @default(cuid())
-  tenantId          String
-  codigo            String                   @unique
-  descricao         String
-  descricaoCompleta String?
-  tipo              TipoMaterial
-  categoria         CategoriaMaterial?
-  unidadeMedidaId   String
-  catmat            String?
-  catser            String?
-  imagemUrl         String?
-  ativo             Boolean                  @default(true)
-  criadoEm          DateTime                 @default(now())
-  atualizadoEm      DateTime                 @updatedAt
-  tenant            Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  unidadeMedida     UnidadeMedida            @relation(fields: [unidadeMedidaId], references: [id])
-  estoques          Estoque[]
-  movimentacoes     MovimentacaoEstoque[]
-  itensRequisicao   ItemRequisicaoMaterial[]
+  id                 String                   @id @default(cuid())
+  tenantId           String
+  codigo             String                   @unique
+  descricao          String
+  descricaoCompleta  String?
+  tipo               TipoMaterial
+  categoria          CategoriaMaterial?
+  unidadeMedidaId    String
+  catmat             String?
+  catser             String?
+  imagemUrl          String?
+  ativo              Boolean                  @default(true)
+  criadoEm           DateTime                 @default(now())
+  atualizadoEm       DateTime                 @updatedAt
+  tenant             Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unidadeMedida      UnidadeMedida            @relation(fields: [unidadeMedidaId], references: [id])
+  estoques           Estoque[]
+  movimentacoes      MovimentacaoEstoque[]
+  itensRequisicao    ItemRequisicaoMaterial[]
+  // Fase 4
+  itensPCA           ItemPCA[]
+  itensSolicitacao   ItemSolicitacaoCompra[]
+  itensPesquisaPreco ItemPesquisaPreco[]
+  itensAtaRP         ItemAtaRegistroPreco[]
 
   @@index([tenantId])
   @@index([tenantId, ativo])
@@ -310,7 +332,7 @@ enum TipoFornecedor {
 }
 
 model Fornecedor {
-  id           String                @id @default(cuid())
+  id           String                  @id @default(cuid())
   tenantId     String
   tipo         TipoFornecedor
   nome         String
@@ -323,19 +345,25 @@ model Fornecedor {
   telefone     String?
   endereco     String?
   cidade       String?
-  uf           String?               @db.VarChar(2)
+  uf           String?                 @db.VarChar(2)
   cep          String?
   banco        String?
   agencia      String?
   conta        String?
-  ativo        Boolean               @default(true)
-  criadoEm     DateTime              @default(now())
-  atualizadoEm DateTime              @updatedAt
-  tenant       Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ativo        Boolean                 @default(true)
+  criadoEm     DateTime                @default(now())
+  atualizadoEm DateTime                @updatedAt
+  tenant       Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   documentos   FornecedorDocumento[]
   contratos    Contrato[]
   empenhos     Empenho[]
   sancoes      SancaoFornecedor[]
+  // Fase 4
+  cotacoes     Cotacao[]
+  lances       Lance[]
+  habilitacoes HabilitacaoFornecedor[]
+  recursos     Recurso[]
+  itensAtaRP   ItemAtaRegistroPreco[]
 
   @@index([tenantId])
   @@index([tenantId, ativo])
@@ -527,11 +555,20 @@ model ProcessoLicitatorio {
   criadoEm        DateTime            @default(now())
   atualizadoEm    DateTime            @updatedAt
 
-  itens       ItemLicitacao[]
-  contratos   Contrato[]
-  publicacoes PublicacaoPNCP[]
-  empenhos    Empenho[]
-  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  itens              ItemLicitacao[]
+  contratos          Contrato[]
+  publicacoes        PublicacaoPNCP[]
+  empenhos           Empenho[]
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // Fase 4
+  editais            Edital[]
+  atas               Ata[]
+  impugnacoes        Impugnacao[]
+  recursos           Recurso[]
+  sessoesPregao      SessaoPregao[]
+  pesquisasPreco     PesquisaPreco[]
+  solicitacoesCompra SolicitacaoCompra[]
+  convenios          Convenio[]
 
   @@unique([tenantId, numero, ano])
   @@index([tenantId])
@@ -554,6 +591,8 @@ model ItemLicitacao {
   atualizadoEm          DateTime @updatedAt
 
   processo ProcessoLicitatorio @relation(fields: [processoId], references: [id], onDelete: Cascade)
+  // Fase 4
+  lances   Lance[]
 
   @@index([tenantId, processoId])
   @@map("itens_licitacao")
@@ -577,13 +616,19 @@ model Contrato {
   criadoEm           DateTime       @default(now())
   atualizadoEm       DateTime       @updatedAt
 
-  processo       ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
-  fornecedor     Fornecedor           @relation(fields: [fornecedorId], references: [id])
-  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  aditamentos    Aditamento[]
-  empenhos       Empenho[]
-  publicacoes    PublicacaoPNCP[]
-  planosReversao PlanoReversao[]
+  processo                ProcessoLicitatorio?         @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  fornecedor              Fornecedor                   @relation(fields: [fornecedorId], references: [id])
+  tenant                  Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  aditamentos             Aditamento[]
+  empenhos                Empenho[]
+  publicacoes             PublicacaoPNCP[]
+  planosReversao          PlanoReversao[]
+  // Fase 4
+  garantias               Garantia[]
+  cronograma              CronogramaFisicoFinanceiro[]
+  fiscalizacoes           FiscalizacaoContrato[]
+  ocorrenciasFiscalizacao OcorrenciaFiscalizacao[]
+  medicoes                MedicaoContrato[]
 
   @@unique([tenantId, numero, ano])
   @@index([tenantId])
@@ -734,6 +779,8 @@ model Empenho {
   liquidacoes   Liquidacao[]
   pagamentos    Pagamento[]
   movimentacoes MovimentacaoEstoque[]
+  // Fase 4
+  restoPagar    RestoPagar?
 
   @@index([tenantId, dotacaoId])
   @@index([tenantId, contratoId])
@@ -1059,6 +1106,8 @@ model CentroCusto {
   setores                         Setor[]
   requisicoesMateriaisCentroCusto RequisicaoMaterial[]
   movimentacoesEstoque            MovimentacaoEstoque[]
+  // Fase 4
+  solicitacoesCompra              SolicitacaoCompra[]
 
   @@unique([tenantId, codigo])
   @@index([tenantId])
@@ -1106,6 +1155,8 @@ model Setor {
   termosGuardaSetor         TermoGuardaResponsabilidade[]
   transferenciasDeSetor     TransferenciaPatrimonial[]    @relation("TransferenciaDeSetor")
   transferenciasParaSetor   TransferenciaPatrimonial[]    @relation("TransferenciaParaSetor")
+  // Fase 4
+  solicitacoesCompra        SolicitacaoCompra[]
 
   @@index([tenantId])
   @@index([tenantId, ativo])
@@ -1375,4 +1426,773 @@ model SancaoFornecedor {
   @@index([tenantId, ativa])
   @@index([tenantId, dataFim])
   @@map("sancoes_fornecedor")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 4a — COMPRAS / PCA
+// ═══════════════════════════════════════════════════════════════════════════════
+
+enum StatusPCA {
+  rascunho
+  em_elaboracao
+  aprovado
+  publicado
+  encerrado
+}
+
+enum StatusSolicitacaoCompra {
+  rascunho
+  pre_autorizada
+  autorizada
+  negada
+  convertida_processo
+  cancelada
+}
+
+/// Plano de Contratações Anual — instrumento de planejamento de compras (Lei 14.133/2021 art. 12).
+model PCA {
+  id             String    @id @default(cuid())
+  tenantId       String
+  ano            Int
+  titulo         String
+  status         StatusPCA @default(rascunho)
+  dataAprovacao  DateTime?
+  dataPublicacao DateTime?
+  observacoes    String?
+  criadoEm       DateTime  @default(now())
+  atualizadoEm   DateTime  @updatedAt
+
+  tenant Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  itens  ItemPCA[]
+
+  @@unique([tenantId, ano])
+  @@index([tenantId, status])
+  @@map("pcas")
+}
+
+/// Item do PCA — cada contratação planejada para o exercício.
+model ItemPCA {
+  id                    String   @id @default(cuid())
+  pcaId                 String
+  materialId            String?
+  descricao             String
+  quantidadeEstimada    Decimal  @db.Decimal(18, 4)
+  valorUnitarioEstimado Decimal  @db.Decimal(18, 2)
+  valorTotalEstimado    Decimal  @db.Decimal(18, 2)
+  mesPretendido         Int
+  categoria             String
+  justificativa         String?
+  criadoEm              DateTime @default(now())
+
+  pca      PCA       @relation(fields: [pcaId], references: [id], onDelete: Cascade)
+  material Material? @relation(fields: [materialId], references: [id], onDelete: SetNull)
+
+  @@index([pcaId])
+  @@map("itens_pca")
+}
+
+/// Solicitação de compra — pedido interno originado em setor requisitante.
+model SolicitacaoCompra {
+  id                    String                  @id @default(cuid())
+  tenantId              String
+  numero                String
+  ano                   Int
+  solicitanteId         String
+  centroCustoId         String?
+  setorId               String?
+  justificativa         String
+  status                StatusSolicitacaoCompra @default(rascunho)
+  preAutorizadorId      String?
+  autorizadorId         String?
+  processoLicitatorioId String?
+  motivoRecusa          String?
+  criadoEm              DateTime                @default(now())
+  atualizadoEm          DateTime                @updatedAt
+
+  tenant              Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  centroCusto         CentroCusto?            @relation(fields: [centroCustoId], references: [id], onDelete: SetNull)
+  setor               Setor?                  @relation(fields: [setorId], references: [id], onDelete: SetNull)
+  processoLicitatorio ProcessoLicitatorio?    @relation(fields: [processoLicitatorioId], references: [id], onDelete: SetNull)
+  itens               ItemSolicitacaoCompra[]
+
+  @@unique([tenantId, numero, ano])
+  @@index([tenantId, status])
+  @@index([tenantId, solicitanteId])
+  @@map("solicitacoes_compra")
+}
+
+/// Item de solicitação de compra.
+model ItemSolicitacaoCompra {
+  id                    String   @id @default(cuid())
+  solicitacaoId         String
+  materialId            String?
+  descricao             String
+  quantidade            Decimal  @db.Decimal(18, 4)
+  valorUnitarioEstimado Decimal  @db.Decimal(18, 2)
+  valorTotalEstimado    Decimal  @db.Decimal(18, 2)
+  unidadeMedida         String?
+  criadoEm              DateTime @default(now())
+
+  solicitacao SolicitacaoCompra @relation(fields: [solicitacaoId], references: [id], onDelete: Cascade)
+  material    Material?         @relation(fields: [materialId], references: [id], onDelete: SetNull)
+
+  @@index([solicitacaoId])
+  @@map("itens_solicitacao_compra")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 4b — PESQUISA DE PREÇOS, PREGÃO, ATAS, IMPUGNAÇÕES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+enum StatusPesquisaPreco {
+  aberta
+  encerrada
+  cancelada
+}
+
+enum StatusCotacao {
+  rascunho
+  enviada
+  respondida
+  expirada
+  recusada
+}
+
+enum StatusEdital {
+  rascunho
+  publicado
+  substituido
+}
+
+enum TipoAta {
+  registro_precos
+  sessao_pregao
+  abertura_envelope
+  julgamento_propostas
+  adjudicacao
+  homologacao
+  outro
+}
+
+enum StatusImpugnacao {
+  recebida
+  em_analise
+  deferida
+  indeferida
+  prejudicada
+}
+
+enum StatusRecurso {
+  recebido
+  em_contrarrazoes
+  em_analise
+  deferido
+  indeferido
+  prejudicado
+}
+
+enum TipoPregao {
+  eletronico
+  presencial
+}
+
+enum StatusSessaoPregao {
+  agendada
+  aberta
+  em_lance
+  em_negociacao
+  suspensa
+  encerrada
+  fracassada
+  deserta
+}
+
+enum TipoLance {
+  lance
+  lance_intermediario
+  negociacao
+}
+
+enum StatusHabilitacao {
+  pendente
+  habilitado
+  inabilitado
+  em_analise
+}
+
+/// Pesquisa de preços — instrumento para estimativa de valor antes do processo licitatório.
+model PesquisaPreco {
+  id           String              @id @default(cuid())
+  tenantId     String
+  numero       String
+  ano          Int
+  objeto       String
+  dataInicio   DateTime
+  dataFim      DateTime?
+  status       StatusPesquisaPreco @default(aberta)
+  processoId   String?
+  criadoPorId  String
+  criadoEm     DateTime            @default(now())
+  atualizadoEm DateTime            @updatedAt
+
+  tenant   Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  processo ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  itens    ItemPesquisaPreco[]
+  cotacoes Cotacao[]
+
+  @@unique([tenantId, numero, ano])
+  @@index([tenantId, status])
+  @@map("pesquisas_preco")
+}
+
+/// Item de pesquisa de preço.
+model ItemPesquisaPreco {
+  id            String  @id @default(cuid())
+  pesquisaId    String
+  materialId    String?
+  descricao     String
+  quantidade    Decimal @db.Decimal(18, 4)
+  unidadeMedida String?
+
+  pesquisa     PesquisaPreco @relation(fields: [pesquisaId], references: [id], onDelete: Cascade)
+  material     Material?     @relation(fields: [materialId], references: [id], onDelete: SetNull)
+  itensCotacao ItemCotacao[]
+
+  @@index([pesquisaId])
+  @@map("itens_pesquisa_preco")
+}
+
+/// Cotação — proposta de um fornecedor vinculada à pesquisa de preços.
+model Cotacao {
+  id                String        @id @default(cuid())
+  pesquisaId        String
+  fornecedorId      String
+  tokenAcessoOnline String?       @unique
+  dataEnvio         DateTime?
+  dataResposta      DateTime?
+  valorTotal        Decimal?      @db.Decimal(18, 2)
+  validadeProposta  DateTime?
+  observacao        String?
+  status            StatusCotacao @default(rascunho)
+
+  pesquisa   PesquisaPreco @relation(fields: [pesquisaId], references: [id], onDelete: Cascade)
+  fornecedor Fornecedor    @relation(fields: [fornecedorId], references: [id])
+  itens      ItemCotacao[]
+
+  @@unique([pesquisaId, fornecedorId])
+  @@map("cotacoes")
+}
+
+/// Item da cotação — resposta do fornecedor por item da pesquisa.
+model ItemCotacao {
+  id               String  @id @default(cuid())
+  cotacaoId        String
+  itemPesquisaId   String
+  valorUnitario    Decimal @db.Decimal(18, 2)
+  marca            String?
+  prazoEntregaDias Int?
+  observacao       String?
+
+  cotacao      Cotacao           @relation(fields: [cotacaoId], references: [id], onDelete: Cascade)
+  itemPesquisa ItemPesquisaPreco @relation(fields: [itemPesquisaId], references: [id])
+
+  @@index([cotacaoId])
+  @@map("itens_cotacao")
+}
+
+/// Edital — documento base do processo licitatório com versionamento.
+model Edital {
+  id               String       @id @default(cuid())
+  tenantId         String
+  processoId       String
+  versao           Int          @default(1)
+  titulo           String
+  conteudoHtml     String?
+  arquivoUrl       String?
+  status           StatusEdital @default(rascunho)
+  publicadoEm      DateTime?
+  publicadoPorId   String?
+  substituidoPorId String?
+
+  tenant         Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  processo       ProcessoLicitatorio @relation(fields: [processoId], references: [id], onDelete: Cascade)
+  substituidoPor Edital?             @relation("EditalSubstituicao", fields: [substituidoPorId], references: [id])
+  substitui      Edital[]            @relation("EditalSubstituicao")
+
+  @@index([tenantId, processoId, versao])
+  @@map("editais")
+}
+
+/// Ata — lavrada em sessões, licitações, ARP e outros atos formais.
+model Ata {
+  id             String    @id @default(cuid())
+  tenantId       String
+  processoId     String?
+  tipo           TipoAta
+  numero         String
+  ano            Int
+  conteudoHtml   String?
+  arquivoUrl     String?
+  dataLavratura  DateTime
+  dataAssinatura DateTime?
+  criadoPorId    String
+  validadeInicio DateTime?
+  validadeFim    DateTime?
+
+  tenant   Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  processo ProcessoLicitatorio?   @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  itensARP ItemAtaRegistroPreco[]
+
+  @@index([tenantId, numero, ano, tipo])
+  @@map("atas")
+}
+
+/// Item de Ata de Registro de Preços — saldo gerenciado durante a vigência da ARP.
+model ItemAtaRegistroPreco {
+  id                      String   @id @default(cuid())
+  ataId                   String
+  materialId              String?
+  descricao               String
+  quantidadeRegistrada    Decimal  @db.Decimal(18, 4)
+  saldoDisponivel         Decimal  @db.Decimal(18, 4)
+  valorUnitarioRegistrado Decimal  @db.Decimal(18, 2)
+  fornecedorId            String
+  criadoEm                DateTime @default(now())
+
+  ata        Ata        @relation(fields: [ataId], references: [id], onDelete: Cascade)
+  material   Material?  @relation(fields: [materialId], references: [id], onDelete: SetNull)
+  fornecedor Fornecedor @relation(fields: [fornecedorId], references: [id])
+
+  @@index([ataId])
+  @@map("itens_ata_registro_preco")
+}
+
+/// Impugnação ao edital — contestação de licitante ou cidadão (art. 164 Lei 14.133/2021).
+model Impugnacao {
+  id                      String           @id @default(cuid())
+  tenantId                String
+  processoId              String
+  impugnanteNome          String
+  impugnanteIdentificador String
+  impugnanteEmail         String?
+  dataImpugnacao          DateTime
+  conteudo                String
+  fundamentoLegal         String?
+  status                  StatusImpugnacao @default(recebida)
+  parecerJulgamento       String?
+  julgadoPorId            String?
+  dataJulgamento          DateTime?
+  criadoEm                DateTime         @default(now())
+
+  tenant   Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  processo ProcessoLicitatorio @relation(fields: [processoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, processoId])
+  @@map("impugnacoes")
+}
+
+/// Recurso administrativo — interposto por licitante após decisão (art. 165 Lei 14.133/2021).
+model Recurso {
+  id                      String        @id @default(cuid())
+  tenantId                String
+  processoId              String
+  recorrenteFornecedorId  String?
+  recorrenteIdentificador String
+  dataInterposicao        DateTime
+  dataLimitContrarrazoes  DateTime?
+  conteudo                String
+  status                  StatusRecurso @default(recebido)
+  contrarrazoes           String?
+  parecerJulgamento       String?
+  dataJulgamento          DateTime?
+  julgadoPorId            String?
+
+  tenant     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  processo   ProcessoLicitatorio @relation(fields: [processoId], references: [id], onDelete: Cascade)
+  fornecedor Fornecedor?         @relation(fields: [recorrenteFornecedorId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, processoId])
+  @@map("recursos")
+}
+
+/// Sessão de pregão — controla o andamento da disputa eletrônica ou presencial.
+model SessaoPregao {
+  id           String             @id @default(cuid())
+  tenantId     String
+  processoId   String
+  dataAbertura DateTime
+  tipo         TipoPregao
+  status       StatusSessaoPregao @default(agendada)
+  pregoeiroId  String
+  atasInternas Json?
+  criadoEm     DateTime           @default(now())
+  encerradoEm  DateTime?
+
+  tenant       Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  processo     ProcessoLicitatorio     @relation(fields: [processoId], references: [id], onDelete: Cascade)
+  lances       Lance[]
+  habilitacoes HabilitacaoFornecedor[]
+
+  @@index([tenantId, processoId])
+  @@map("sessoes_pregao")
+}
+
+/// Lance em sessão de pregão — histórico imutável de lances por item.
+model Lance {
+  id              String    @id @default(cuid())
+  sessaoId        String
+  itemLicitacaoId String
+  fornecedorId    String
+  valor           Decimal   @db.Decimal(18, 2)
+  ordem           Int
+  tipo            TipoLance @default(lance)
+  criadoEm        DateTime  @default(now())
+
+  sessao        SessaoPregao  @relation(fields: [sessaoId], references: [id], onDelete: Cascade)
+  itemLicitacao ItemLicitacao @relation(fields: [itemLicitacaoId], references: [id])
+  fornecedor    Fornecedor    @relation(fields: [fornecedorId], references: [id])
+
+  @@index([sessaoId, itemLicitacaoId, ordem])
+  @@map("lances")
+}
+
+/// Habilitação de fornecedor em sessão de pregão.
+model HabilitacaoFornecedor {
+  id             String            @id @default(cuid())
+  sessaoId       String
+  fornecedorId   String
+  status         StatusHabilitacao @default(pendente)
+  motivo         String?
+  documentos     Json?
+  julgadoPorId   String?
+  dataJulgamento DateTime?
+
+  sessao     SessaoPregao @relation(fields: [sessaoId], references: [id], onDelete: Cascade)
+  fornecedor Fornecedor   @relation(fields: [fornecedorId], references: [id])
+
+  @@unique([sessaoId, fornecedorId])
+  @@map("habilitacoes_fornecedor")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 4c bis — GARANTIAS, CLÁUSULAS-MODELO, CRONOGRAMA, RESTOS A PAGAR
+// ═══════════════════════════════════════════════════════════════════════════════
+
+enum TipoGarantia {
+  caucao_dinheiro
+  seguro_garantia
+  fianca_bancaria
+  titulos_divida_publica
+}
+
+enum SituacaoGarantia {
+  vigente
+  liberada
+  executada
+  vencida
+  substituida
+}
+
+enum CategoriaClausula {
+  geral
+  sancao
+  reajuste
+  garantia
+  prazo
+  pagamento
+  rescisao
+  alteracao
+  fiscalizacao
+}
+
+enum SituacaoRestoPagar {
+  processado
+  nao_processado
+  prescrito
+  cancelado
+  pago
+}
+
+/// Garantia contratual — caução, seguro ou fiança vinculada a contrato (art. 96 Lei 14.133/2021).
+model Garantia {
+  id              String           @id @default(cuid())
+  tenantId        String
+  contratoId      String
+  tipo            TipoGarantia
+  valor           Decimal          @db.Decimal(18, 2)
+  dataInicio      DateTime
+  dataFim         DateTime
+  situacao        SituacaoGarantia @default(vigente)
+  beneficiario    String?
+  numeroDocumento String?
+  arquivoUrl      String?
+  observacao      String?
+  criadoEm        DateTime         @default(now())
+  atualizadoEm    DateTime         @updatedAt
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, contratoId])
+  @@index([tenantId, situacao])
+  @@index([tenantId, dataFim])
+  @@map("garantias")
+}
+
+/// Cláusula-modelo — biblioteca de cláusulas reutilizáveis em contratos e editais.
+model ClausulaModelo {
+  id           String            @id @default(cuid())
+  tenantId     String
+  codigo       String
+  titulo       String
+  conteudoMd   String
+  categoria    CategoriaClausula
+  ordem        Int               @default(0)
+  ativo        Boolean           @default(true)
+  criadoEm     DateTime          @default(now())
+  atualizadoEm DateTime          @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId, categoria, ordem])
+  @@map("clausulas_modelo")
+}
+
+/// Cronograma físico-financeiro — parcelas previstas e realizadas do contrato.
+model CronogramaFisicoFinanceiro {
+  id                   String    @id @default(cuid())
+  tenantId             String
+  contratoId           String
+  parcela              Int
+  descricao            String
+  dataPrevista         DateTime
+  valorPrevisto        Decimal   @db.Decimal(18, 2)
+  dataRealizada        DateTime?
+  valorRealizado       Decimal?  @db.Decimal(18, 2)
+  percentualFisico     Decimal?  @db.Decimal(5, 2)
+  percentualFinanceiro Decimal?  @db.Decimal(5, 2)
+  observacao           String?
+  criadoEm             DateTime  @default(now())
+  atualizadoEm         DateTime  @updatedAt
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  @@unique([contratoId, parcela])
+  @@map("cronogramas_fisico_financeiros")
+}
+
+/// Resto a pagar — empenho não liquidado/pago até o encerramento do exercício.
+model RestoPagar {
+  id             String             @id @default(cuid())
+  tenantId       String
+  exercicio      Int
+  empenhoId      String             @unique
+  valorInscrito  Decimal            @db.Decimal(18, 2)
+  valorPago      Decimal            @default(0) @db.Decimal(18, 2)
+  valorCancelado Decimal            @default(0) @db.Decimal(18, 2)
+  saldo          Decimal            @db.Decimal(18, 2)
+  situacao       SituacaoRestoPagar @default(nao_processado)
+  dataInscricao  DateTime
+  dataPrescricao DateTime?
+  criadoEm       DateTime           @default(now())
+  atualizadoEm   DateTime           @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  empenho Empenho @relation(fields: [empenhoId], references: [id])
+
+  @@index([tenantId, exercicio])
+  @@map("restos_pagar")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 4d — CONVÊNIOS + FISCALIZAÇÃO DE CONTRATOS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+enum TipoConvenio {
+  concedido
+  recebido
+  termo_cooperacao
+  termo_fomento
+}
+
+enum StatusConvenio {
+  ativo
+  encerrado
+  rescindido
+  prestacao_pendente
+  prestacao_aprovada
+  prestacao_rejeitada
+}
+
+enum StatusParcelaConvenio {
+  prevista
+  liberada
+  prestacao_pendente
+  prestacao_aprovada
+  prestacao_rejeitada
+}
+
+enum TipoFiscal {
+  fiscal_titular
+  fiscal_substituto
+  gestor
+}
+
+enum TipoOcorrencia {
+  medicao
+  reclamacao
+  nao_conformidade
+  elogio
+  alerta
+  infracao
+  atestado_recebimento
+}
+
+enum GravidadeOcorrencia {
+  baixa
+  media
+  alta
+  critica
+}
+
+enum StatusOcorrencia {
+  aberta
+  em_tratamento
+  resolvida
+  escalada
+  arquivada
+}
+
+enum StatusMedicao {
+  rascunho
+  aprovada
+  paga
+  glosada
+}
+
+/// Convênio — instrumento de cooperação entre entes públicos e privados (Lei 13.019/2014).
+model Convenio {
+  id                        String         @id @default(cuid())
+  tenantId                  String
+  numero                    String
+  ano                       Int
+  tipo                      TipoConvenio
+  concedenteNome            String
+  concedenteIdentificador   String
+  beneficiarioNome          String
+  beneficiarioIdentificador String
+  objeto                    String
+  valorTotal                Decimal        @db.Decimal(18, 2)
+  valorRepasse              Decimal        @db.Decimal(18, 2)
+  valorContrapartida        Decimal        @db.Decimal(18, 2)
+  dataAssinatura            DateTime
+  vigenciaInicio            DateTime
+  vigenciaFim               DateTime
+  status                    StatusConvenio @default(ativo)
+  gestorId                  String?
+  processoId                String?
+  arquivoUrl                String?
+  criadoEm                  DateTime       @default(now())
+  atualizadoEm              DateTime       @updatedAt
+
+  tenant   Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  processo ProcessoLicitatorio? @relation(fields: [processoId], references: [id], onDelete: SetNull)
+  parcelas ParcelaConvenio[]
+
+  @@unique([tenantId, numero, ano])
+  @@index([tenantId, status])
+  @@index([tenantId, vigenciaFim])
+  @@map("convenios")
+}
+
+/// Parcela de convênio — liberação programada de recursos com prestação de contas.
+model ParcelaConvenio {
+  id                  String                @id @default(cuid())
+  convenioId          String
+  numero              Int
+  dataPrevista        DateTime
+  valor               Decimal               @db.Decimal(18, 2)
+  dataLiberacao       DateTime?
+  dataPrestacaoContas DateTime?
+  status              StatusParcelaConvenio @default(prevista)
+  observacao          String?
+  criadoEm            DateTime              @default(now())
+
+  convenio Convenio @relation(fields: [convenioId], references: [id], onDelete: Cascade)
+
+  @@unique([convenioId, numero])
+  @@map("parcelas_convenio")
+}
+
+/// Designação de fiscal de contrato — obrigatória pela Lei 14.133/2021 art. 117.
+model FiscalizacaoContrato {
+  id               String     @id @default(cuid())
+  tenantId         String
+  contratoId       String
+  fiscalId         String
+  tipo             TipoFiscal
+  dataDesignacao   DateTime
+  dataEncerramento DateTime?
+  decretoPortaria  String?
+  observacao       String?
+  criadoEm         DateTime   @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, contratoId])
+  @@index([fiscalId])
+  @@map("fiscalizacoes_contrato")
+}
+
+/// Ocorrência de fiscalização — registro de fatos durante a execução contratual.
+model OcorrenciaFiscalizacao {
+  id             String              @id @default(cuid())
+  tenantId       String
+  contratoId     String
+  fiscalId       String
+  dataOcorrencia DateTime
+  tipo           TipoOcorrencia
+  gravidade      GravidadeOcorrencia
+  descricao      String
+  evidenciaUrl   String?
+  tratamento     String?
+  dataTratamento DateTime?
+  status         StatusOcorrencia    @default(aberta)
+  criadoEm       DateTime            @default(now())
+  atualizadoEm   DateTime            @updatedAt
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, contratoId])
+  @@index([tenantId, status])
+  @@index([tenantId, dataOcorrencia])
+  @@map("ocorrencias_fiscalizacao")
+}
+
+/// Medição de contrato — ateste de execução física e financeira por período.
+model MedicaoContrato {
+  id                  String        @id @default(cuid())
+  tenantId            String
+  contratoId          String
+  fiscalId            String
+  numero              Int
+  periodoInicio       DateTime
+  periodoFim          DateTime
+  valorMedido         Decimal       @db.Decimal(18, 2)
+  percentualExecutado Decimal?      @db.Decimal(5, 2)
+  status              StatusMedicao @default(rascunho)
+  observacao          String?
+  criadoEm            DateTime      @default(now())
+  atualizadoEm        DateTime      @updatedAt
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  @@unique([contratoId, numero])
+  @@index([tenantId, contratoId])
+  @@map("medicoes_contrato")
 }

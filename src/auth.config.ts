@@ -23,10 +23,12 @@ export const authConfig = {
       const logado = !!auth?.user;
       const naTelaLogin = nextUrl.pathname.startsWith("/login");
 
-      // Rotas públicas — Portal da Transparência (LAI/LC 131) e APIs de dados abertos
+      // Rotas públicas — Portal da Transparência (LAI/LC 131), APIs de dados abertos
+      // e cotação online de fornecedores (sem login — acessada via token UUID)
       const ePublica =
         nextUrl.pathname.startsWith("/transparencia") ||
-        nextUrl.pathname.startsWith("/api/transparencia");
+        nextUrl.pathname.startsWith("/api/transparencia") ||
+        nextUrl.pathname.startsWith("/cotacao-online");
 
       if (ePublica) return true;
 

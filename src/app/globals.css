@@ -6,6 +6,13 @@
    + acento esmeralda (eficiência / aprovação).
    ---------------------------------------------------------------------- */
 
+/* Tailwind v4: por padrão, a variante `dark:` é ativada por
+   @media (prefers-color-scheme: dark) — ignora a classe `.dark`.
+   Aqui forçamos a variante a observar a classe `.dark` no <html>
+   (gerenciada pelo ThemeProvider). Sem isso, o tema claro fica
+   "preso no escuro" sempre que o SO do usuário estiver em dark mode. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-brand-50: #eef5ff;
   --color-brand-100: #d9e8ff;
@@ -53,7 +60,10 @@
 
 * {
   border-color: var(--color-ink-200);
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 html,
@@ -92,12 +102,7 @@ body {
 
 /* Utilitário: gradiente institucional usado no login e marca */
 .bg-civitas-gradient {
-  background-image: radial-gradient(
-      120% 120% at 0% 0%,
-      #1b41c2 0%,
-      #0d1f4b 55%,
-      #08132e 100%
-    );
+  background-image: radial-gradient(120% 120% at 0% 0%, #1b41c2 0%, #0d1f4b 55%, #08132e 100%);
 }
 
 /* Gradientes dos cartões de indicador (KPI) — por tom */

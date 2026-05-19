@@ -3,7 +3,14 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient, Role, Escopo, Operacao } from "../src/generated/prisma/client";
+import {
+  PrismaClient,
+  Role,
+  Escopo,
+  Operacao,
+  CategoriaClausula,
+  StatusPCA,
+} from "../src/generated/prisma/client";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -362,6 +369,46 @@ async function main() {
   });
 
   console.log("Seed concluído — cadastros estruturais (CentroCusto, UnidadeGestora) criados.");
+
+  // ── Fase 4 — ClausulaModelo e PCA ─────────────────────────────────────────
+
+  await prisma.clausulaModelo.upsert({
+    where: { tenantId_codigo: { tenantId: tenant.id, codigo: "C001" } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      codigo: "C001",
+      titulo: "Cláusula geral de aplicabilidade",
+      conteudoMd: [
+        "## Cláusula Geral de Aplicabilidade",
+        "",
+        "O presente instrumento é regido pela **Lei nº 14.133/2021** (Nova Lei de Licitações e Contratos Administrativos),",
+        "bem como pelas normas complementares aplicáveis, e pelas condições estabelecidas no edital e seus anexos.",
+        "",
+        "Aplica-se subsidiariamente a **Lei Complementar nº 123/2006** (Estatuto da Microempresa e Empresa de Pequeno Porte)",
+        "no que couber, e demais legislações pertinentes à espécie.",
+      ].join("\n"),
+      categoria: CategoriaClausula.geral,
+      ordem: 1,
+      ativo: true,
+    },
+  });
+
+  const anoAtual = new Date().getFullYear();
+
+  await prisma.pCA.upsert({
+    where: { tenantId_ano: { tenantId: tenant.id, ano: anoAtual } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      ano: anoAtual,
+      titulo: `Plano de Contratações Anual ${anoAtual} — IPASLI`,
+      status: StatusPCA.rascunho,
+      observacoes: "PCA gerado automaticamente pelo seed de demonstração.",
+    },
+  });
+
+  console.log(`Seed concluído — ClausulaModelo C001 e PCA ${anoAtual} criados.`);
 }
 
 main()

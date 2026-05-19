@@ -12,6 +12,13 @@ import {
   Headphones,
   Settings,
   FileCheck,
+  ListChecks,
+  Send,
+  Link2,
+  ShieldCheck,
+  AlertOctagon,
+  BookOpen,
+  History,
   type LucideIcon,
 } from "lucide-react";
 import type { Role } from "@/types/next-auth";
@@ -130,10 +137,23 @@ export const NAV: NavGroup[] = [
         descricao: "Processos licitatórios, contratos e empenhos",
         menus: [
           {
+            label: "Planejamento",
+            submenus: [
+              { label: "PCA", href: "/licitacoes/pca" },
+              { label: "Solicitações", href: "/licitacoes/solicitacoes" },
+              { label: "Pesquisa de preços", href: "/licitacoes/pesquisa-precos" },
+            ],
+          },
+          {
             label: "Licitações",
             submenus: [
               { label: "Processos", href: "/licitacoes/processos" },
+              { label: "Editais", href: "/licitacoes/editais" },
               { label: "Em disputa", href: "/licitacoes/disputa" },
+              { label: "Sessões de pregão", href: "/licitacoes/sessoes-pregao" },
+              { label: "Impugnações", href: "/licitacoes/impugnacoes" },
+              { label: "Recursos", href: "/licitacoes/recursos" },
+              { label: "Atas", href: "/licitacoes/atas" },
             ],
           },
           {
@@ -141,6 +161,17 @@ export const NAV: NavGroup[] = [
             submenus: [
               { label: "Vigentes", href: "/licitacoes/contratos" },
               { label: "Empenhos", href: "/licitacoes/empenhos" },
+              { label: "Garantias", href: "/licitacoes/garantias" },
+              { label: "Cláusulas-modelo", href: "/licitacoes/clausulas" },
+              { label: "Restos a pagar", href: "/licitacoes/restos-pagar" },
+            ],
+          },
+          {
+            label: "Convênios & Fiscalização",
+            submenus: [
+              { label: "Convênios", href: "/licitacoes/convenios" },
+              { label: "Fiscalização", href: "/licitacoes/fiscalizacao" },
+              { label: "Sanções", href: "/licitacoes/sancoes" },
             ],
           },
         ],
