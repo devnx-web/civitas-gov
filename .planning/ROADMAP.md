@@ -387,14 +387,28 @@ solicitação do Client ID gov.br via processo SGD e do XSD oficial do TCE-ES �
 ambos têm timeline externa de até 30 dias úteis. Registrado como risco nas
 Fases 15 e 14 respectivamente.
 
+## Phases
+
+- [ ] **Phase 11: Fundação v0.5 + Infra cruzada** — pg-boss, sino de notificações, LogAcesso, hash chain, auditoria estendida
+- [ ] **Phase 12: Verticais de negócio PoC** — ajuda contextual, gerador de relatórios, pré-validador TCE-ES, homologação de chamado
+- [ ] **Phase 13: Polimento UX** — loading/error/skeletons, breadcrumbs, acessibilidade global, filtros de dashboard, E2E ampliada
+- [ ] **Phase 14: Operacional para produção** — secrets, Sentry, XSD oficial, deploy HTTPS, monitor de uptime
+- [ ] **Phase 15: Diferenciais competitivos** — gov.br, ICP-Brasil, PWA, webhooks/API, BI, IA, dark mode, sandbox
+
+## Phase Details
+
 ---
 
-## Fase 11 — Fundação v0.5 + Infra cruzada
+### Phase 11: Fundação v0.5 + Infra cruzada
 
-**Objetivo:** estabelecer a infraestrutura transversal que destrava todas as
+**Goal:** estabelecer a infraestrutura transversal que destrava todas as
 features do milestone — fila de jobs, central de notificações e trilha de
 auditoria endurecida — entregue de forma sequencial porque cada peça é
 pré-requisito da seguinte.
+
+**Depends on:** Phase 10 (produto estável pós-Wave 6)
+
+**Requirements:** AUDIT-01, AUDIT-02, AUDIT-03, AUDIT-04, AUDIT-05, NOTIF-01, NOTIF-02, NOTIF-03, NOTIF-04, NOTIF-05
 
 **Escopo:**
 
@@ -415,14 +429,11 @@ pré-requisito da seguinte.
 - **B10** — extensão da auditoria para Empenho, Liquidação, Pagamento,
   Aditamento, Ata e Contrato — executada **após** o hash chain estar ativo.
 
-**Requisitos cobertos:** AUDIT-01, AUDIT-02, AUDIT-03, AUDIT-04, AUDIT-05,
-NOTIF-01, NOTIF-02, NOTIF-03, NOTIF-04, NOTIF-05.
-
 **Entregáveis:** migração `v05_fundacao` aplicada; pg-boss + worker rodando;
 `LogAcesso` gravando e consultável; sino de notificações funcional; hash chain
 ativo com verificação de integridade; auditoria estendida a 6 novas entidades.
 
-**Critérios de sucesso (o que deve ser VERDADE):**
+**Success Criteria** (what must be TRUE):
 
 1. Cada login/logout gera um registro em `LogAcesso` com IP e user-agent, e o
    administrador consegue filtrar o log por usuário, período e tipo de evento.
@@ -445,15 +456,21 @@ ativo com verificação de integridade; auditoria estendida a 6 novas entidades.
 - Worker pg-boss embutido no processo Next.js é anti-pattern — worker roda em
   container/processo separado, com heartbeat de monitoramento.
 
-**Dependências:** Fase 10 (produto estável pós-Wave 6).
+Plans:
+
+- [ ] 11-01: TBD (definido no planejamento da fase)
 
 ---
 
-## Fase 12 — Verticais de negócio PoC
+### Phase 12: Verticais de negócio PoC
 
-**Objetivo:** entregar os bloqueadores obrigatórios do TR que dependem da
+**Goal:** entregar os bloqueadores obrigatórios do TR que dependem da
 infra da Fase 11 — cada feature é um vertical independente, paralelizável em
 quatro lanes após a fila de jobs e o sino existirem.
+
+**Depends on:** Phase 11 (pg-boss para B2/B7/HELPDESK-03; sino para B9)
+
+**Requirements:** HELP-01, HELP-02, HELP-03, HELP-04, HELP-05, HELP-06, HELP-07, REPORT-01, REPORT-02, REPORT-03, REPORT-04, REPORT-05, TCEVAL-01, TCEVAL-02, TCEVAL-03, TCEVAL-04, HELPDESK-01, HELPDESK-02, HELPDESK-03
 
 **Escopo:**
 
@@ -474,16 +491,12 @@ quatro lanes após a fila de jobs e o sino existirem.
   solicitante para fechar chamado, notificação ao solicitante quando resolvido,
   encerramento automático por inatividade após N dias.
 
-**Requisitos cobertos:** HELP-01, HELP-02, HELP-03, HELP-04, HELP-05, HELP-06,
-HELP-07, REPORT-01, REPORT-02, REPORT-03, REPORT-04, REPORT-05, TCEVAL-01,
-TCEVAL-02, TCEVAL-03, TCEVAL-04, HELPDESK-01, HELPDESK-02, HELPDESK-03.
-
 **Entregáveis:** painel de ajuda contextual + base pesquisável; trilhas de
 treinamento com certificados PDF; gerenciador de relatórios agendados;
 pré-validador TCE-ES com relatório de inconsistências; workflow de homologação
 de chamados.
 
-**Critérios de sucesso (o que deve ser VERDADE):**
+**Success Criteria** (what must be TRUE):
 
 1. De qualquer tela, o usuário abre um painel de ajuda com os artigos da rota
    atual e pesquisa a base por palavra-chave.
@@ -504,17 +517,23 @@ de chamados.
   oficial é concluída na Fase 14 (OPS-03).
 - HELPDESK-03 (encerramento automático) depende da fila de jobs da Fase 11.
 
-**Dependências:** Fase 11 (pg-boss para B2/B7/HELPDESK-03; sino para B9).
-
 **UI hint**: yes
+
+Plans:
+
+- [ ] 12-01: TBD (definido no planejamento da fase)
 
 ---
 
-## Fase 13 — Polimento UX
+### Phase 13: Polimento UX
 
-**Objetivo:** elevar a interface ao padrão de mercado 2026 — estados de
+**Goal:** elevar a interface ao padrão de mercado 2026 — estados de
 carregamento, tratamento de erro, navegação contextual, acessibilidade global
 e cobertura de testes — features sem dependência entre si, em paralelo total.
+
+**Depends on:** Phase 12 (módulos de negócio finalizados para receber loading/error)
+
+**Requirements:** UX-01, UX-02, UX-03, UX-04, UX-05, UX-06
 
 **Escopo:**
 
@@ -530,13 +549,11 @@ e cobertura de testes — features sem dependência entre si, em paralelo total.
 - **U7** — suíte E2E ampliada de 16 para ~40 specs, com fluxos completos e
   caminhos negativos, executando no CI.
 
-**Requisitos cobertos:** UX-01, UX-02, UX-03, UX-04, UX-05, UX-06.
-
 **Entregáveis:** loading/error/skeletons por rota; breadcrumbs automáticos;
 controles de acessibilidade globais; filtros de dashboard URL-state; ~40 specs
 Playwright no CI.
 
-**Critérios de sucesso (o que deve ser VERDADE):**
+**Success Criteria** (what must be TRUE):
 
 1. Ao navegar para qualquer módulo, o usuário vê um skeleton enquanto os dados
    carregam, sem tela em branco; erros de renderização mostram tela amigável
@@ -555,18 +572,25 @@ Playwright no CI.
 - Hidratação inconsistente com `nuqs` — usar `<NuqsAdapter>` no layout e
   parsers tipados; testar SSR/CSR.
 
-**Dependências:** Fase 12 (módulos de negócio finalizados para receber
-loading/error). Pode correr em paralelo com a Fase 14.
+Pode correr em paralelo com a Fase 14.
 
 **UI hint**: yes
 
+Plans:
+
+- [ ] 13-01: TBD (definido no planejamento da fase)
+
 ---
 
-## Fase 14 — Operacional para produção
+### Phase 14: Operacional para produção
 
-**Objetivo:** levar o produto a produção real — secrets, telemetria, validação
+**Goal:** levar o produto a produção real — secrets, telemetria, validação
 fiscal oficial, deploy HTTPS e monitoramento — sequência DevOps interna em que
 cada passo habilita o seguinte.
+
+**Depends on:** Phase 12 (O3 conclui o pré-validador TCEVAL); pode correr em paralelo com a Phase 13
+
+**Requirements:** OPS-01, OPS-02, OPS-03, OPS-04, OPS-05, OPS-06
 
 **Escopo:**
 
@@ -581,13 +605,11 @@ cada passo habilita o seguinte.
 - **O5** — monitor de uptime (BetterStack/UptimeRobot) com página de status
   pública e relatório mensal de disponibilidade e atendimento de SLA.
 
-**Requisitos cobertos:** OPS-01, OPS-02, OPS-03, OPS-04, OPS-05, OPS-06.
-
 **Entregáveis:** backup automático ativo em produção; Sentry capturando erros
 de produção; validação TCE-ES contra XSD oficial; aplicação no ar com HTTPS e
 domínio próprio; monitor de uptime + página de status + relatório mensal.
 
-**Critérios de sucesso (o que deve ser VERDADE):**
+**Success Criteria** (what must be TRUE):
 
 1. O backup pg_dump → S3 executa em produção com os secrets configurados, e um
    restore de teste é validado.
@@ -608,17 +630,22 @@ domínio próprio; monitor de uptime + página de status + relatório mensal.
 - Secrets logados acidentalmente — redaction no logger; nunca ecoar secrets em
   steps do CI.
 
-**Dependências:** Fase 12 (O3 conclui o pré-validador TCEVAL). Pode correr em
-paralelo com a Fase 13.
+Plans:
+
+- [ ] 14-01: TBD (definido no planejamento da fase)
 
 ---
 
-## Fase 15 — Diferenciais competitivos
+### Phase 15: Diferenciais competitivos
 
-**Objetivo:** entregar os diferenciais que separam o Civitas Gov dos
+**Goal:** entregar os diferenciais que separam o Civitas Gov dos
 concorrentes desktop-legado — login gov.br, assinatura ICP-Brasil, PWA mobile,
 API pública, BI, IA e personalização — agrupados em 4 waves por afinidade
 técnica para maximizar paralelismo. **Não bloqueia a aprovação da PoC.**
+
+**Depends on:** Phase 11 (pg-boss + sino + AUDIT-05) e Phase 13 (UX-05 para BI)
+
+**Requirements:** AUTH-GOVBR-01, AUTH-GOVBR-02, AUTH-GOVBR-03, SIGN-01, SIGN-02, SIGN-03, PWA-01, PWA-02, PWA-03, PWA-04, PWA-05, API-01, API-02, API-03, API-04, API-05, BI-01, BI-02, BI-03, AICHAT-01, AICHAT-02, AICHAT-03, AICHAT-04, EMAIL-01, EMAIL-02, EMAIL-03, THEME-01, THEME-02, SANDBOX-01, SANDBOX-02, SANDBOX-03
 
 **Escopo:**
 
@@ -662,18 +689,12 @@ técnica para maximizar paralelismo. **Não bloqueia a aprovação da PoC.**
 - **★8** — detecção de inconsistências: análise de empenhos/liquidações
   sinalizando valores divergentes, datas incoerentes e dotação insuficiente.
 
-**Requisitos cobertos:** AUTH-GOVBR-01, AUTH-GOVBR-02, AUTH-GOVBR-03, SIGN-01,
-SIGN-02, SIGN-03, PWA-01, PWA-02, PWA-03, PWA-04, PWA-05, API-01, API-02,
-API-03, API-04, API-05, BI-01, BI-02, BI-03, AICHAT-01, AICHAT-02, AICHAT-03,
-AICHAT-04, EMAIL-01, EMAIL-02, EMAIL-03, THEME-01, THEME-02, SANDBOX-01,
-SANDBOX-02, SANDBOX-03.
-
 **Entregáveis:** login gov.br operacional; dark mode persistido; sandbox por
 tenant com expiração; webhooks + API v1 documentada; e-mail transacional;
 assinatura ICP-Brasil A1; PWA de inventário offline; dashboard BI com
 drill-down; chat IA legal; detector de inconsistências em empenhos.
 
-**Critérios de sucesso (o que deve ser VERDADE):**
+**Success Criteria** (what must be TRUE):
 
 1. O usuário faz login via gov.br (PKCE), tem a conta vinculada ao seu usuário
    do tenant por CPF, e o administrador vê o selo de confiabilidade.
@@ -705,9 +726,11 @@ drill-down; chat IA legal; detector de inconsistências em empenhos.
 - PWA + Service Worker tem comportamento errático em iOS Safari — testar em
   dispositivo real ao fim da Wave C.
 
-**Dependências:** Fase 11 (pg-boss + sino + AUDIT-05) e Fase 13 (UX-05 para BI).
-
 **UI hint**: yes
+
+Plans:
+
+- [ ] 15-01: TBD (definido no planejamento da fase)
 
 ---
 
