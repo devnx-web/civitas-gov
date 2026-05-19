@@ -1,14 +1,57 @@
 import type { Metadata } from "next";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { FadeIn } from "@/components/motion";
-import { BENS } from "@/lib/data/patrimonio";
 import { formatBRL } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Depreciação" };
 
-export default function DepreciacaoPage() {
+export default async function DepreciacaoPage() {
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+
+  const bens = await prisma.bemPatrimonial.findMany({
+    where: { tenantId, ativo: true },
+    orderBy: { dataAquisicao: "desc" },
+    take: 50,
+  });
+
+  const hoje = new Date();
+
+  const linhas = bens.map((b) => {
+    const valorAquisicao = Number(b.valorAquisicao);
+    let valorAtual = valorAquisicao;
+
+    if (b.valorResidual != null) {
+      valorAtual = Number(b.valorResidual);
+    } else if (b.percentualDepreciacaoAnual != null) {
+      const idadeAnos =
+        (hoje.getTime() - new Date(b.dataAquisicao).getTime()) /
+        (1000 * 60 * 60 * 24 * 365.25);
+      const depreciacao =
+        valorAquisicao * (Number(b.percentualDepreciacaoAnual) / 100) * idadeAnos;
+      valorAtual = Math.max(0, valorAquisicao - depreciacao);
+    }
+
+    const depreciacao = valorAquisicao - valorAtual;
+    const pct = valorAquisicao > 0 ? (depreciacao / valorAquisicao) * 100 : 0;
+    const tone = pct >= 70 ? "perigo" : pct >= 40 ? "alerta" : "marca";
+
+    return {
+      id: b.id,
+      tombamento: b.numeroTombamento,
+      descricao: b.descricao,
+      valorAquisicao,
+      valorAtual,
+      depreciacao,
+      pct,
+      tone,
+    };
+  });
+
   return (
     <FadeIn>
       <Card>
@@ -28,37 +71,31 @@ export default function DepreciacaoPage() {
             </TR>
           </THead>
           <TBody>
-            {BENS.map((b) => {
-              const depreciacao = b.valorAquisicao - b.valorAtual;
-              const pct = (depreciacao / b.valorAquisicao) * 100;
-              const tone =
-                pct >= 70 ? "perigo" : pct >= 40 ? "alerta" : "marca";
-              return (
-                <TR key={b.id}>
-                  <TD className="font-mono text-xs text-ink-500">
-                    {b.tombamento}
-                  </TD>
-                  <TD className="font-medium text-ink-900">{b.descricao}</TD>
-                  <TD className="text-right whitespace-nowrap">
-                    {formatBRL(b.valorAquisicao)}
-                  </TD>
-                  <TD className="text-right whitespace-nowrap">
-                    {formatBRL(b.valorAtual)}
-                  </TD>
-                  <TD className="text-right whitespace-nowrap">
-                    {formatBRL(depreciacao)}
-                  </TD>
-                  <TD>
-                    <div className="flex items-center gap-2">
-                      <ProgressBar valor={pct} tone={tone} className="w-24" />
-                      <span className="text-xs text-ink-600">
-                        {pct.toFixed(0)}%
-                      </span>
-                    </div>
-                  </TD>
-                </TR>
-              );
-            })}
+            {linhas.map((b) => (
+              <TR key={b.id}>
+                <TD className="font-mono text-xs text-ink-500">
+                  {b.tombamento}
+                </TD>
+                <TD className="font-medium text-ink-900">{b.descricao}</TD>
+                <TD className="text-right whitespace-nowrap">
+                  {formatBRL(b.valorAquisicao)}
+                </TD>
+                <TD className="text-right whitespace-nowrap">
+                  {formatBRL(b.valorAtual)}
+                </TD>
+                <TD className="text-right whitespace-nowrap">
+                  {formatBRL(b.depreciacao)}
+                </TD>
+                <TD>
+                  <div className="flex items-center gap-2">
+                    <ProgressBar valor={b.pct} tone={b.tone} className="w-24" />
+                    <span className="text-xs text-ink-600">
+                      {b.pct.toFixed(0)}%
+                    </span>
+                  </div>
+                </TD>
+              </TR>
+            ))}
           </TBody>
         </Table>
       </Card>

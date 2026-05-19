@@ -1,21 +1,40 @@
 import type { Metadata } from "next";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { FadeIn } from "@/components/motion";
-import { BENS, ESTADO_LABEL, type EstadoBem } from "@/lib/data/patrimonio";
 import { formatBRL, formatData } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Inventário de bens" };
 
-const ESTADO_TONE: Record<EstadoBem, BadgeTone> = {
-  novo: "sucesso",
-  bom: "info",
-  regular: "alerta",
+const ESTADO_TONE: Record<string, BadgeTone> = {
+  ativo: "sucesso",
+  disponivel: "info",
+  em_manutencao: "alerta",
   inservivel: "perigo",
+  baixado: "neutro",
 };
 
-export default function InventarioPage() {
+const ESTADO_LABEL: Record<string, string> = {
+  ativo: "Ativo",
+  disponivel: "Disponível",
+  em_manutencao: "Em manutenção",
+  inservivel: "Inservível",
+  baixado: "Baixado",
+};
+
+export default async function InventarioPage() {
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+
+  const bens = await prisma.bemPatrimonial.findMany({
+    where: { tenantId, ativo: true },
+    orderBy: { criadoEm: "desc" },
+    take: 50,
+  });
+
   return (
     <FadeIn>
       <Card>
@@ -34,26 +53,26 @@ export default function InventarioPage() {
             </TR>
           </THead>
           <TBody>
-            {BENS.map((b) => (
+            {bens.map((b) => (
               <TR key={b.id}>
                 <TD className="font-mono text-xs text-ink-500">
-                  {b.tombamento}
+                  {b.numeroTombamento}
                 </TD>
                 <TD>
                   <span className="font-medium text-ink-900">
                     {b.descricao}
                   </span>
-                  <span className="block text-xs text-ink-400">
-                    {b.categoria} · adq. {formatData(b.aquisicao)}
+                  <span className="block text-xs text-ink-400 capitalize">
+                    {b.tipo} · adq. {formatData(b.dataAquisicao.toISOString())}
                   </span>
                 </TD>
-                <TD>{b.setor}</TD>
+                <TD>{b.localizacaoAtual ?? "—"}</TD>
                 <TD className="text-right whitespace-nowrap">
-                  {formatBRL(b.valorAtual)}
+                  {formatBRL(Number(b.valorAquisicao))}
                 </TD>
                 <TD>
-                  <Badge tone={ESTADO_TONE[b.estado]}>
-                    {ESTADO_LABEL[b.estado]}
+                  <Badge tone={ESTADO_TONE[b.situacao] ?? "neutro"}>
+                    {ESTADO_LABEL[b.situacao] ?? b.situacao}
                   </Badge>
                 </TD>
               </TR>

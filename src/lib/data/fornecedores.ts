@@ -56,3 +56,17 @@ export async function atualizarFornecedor(id: string, dados: any, tenantId: stri
 export async function excluirFornecedor(id: string, tenantId: string) {
   return prisma.fornecedor.updateMany({ where: { id, tenantId }, data: { ativo: false } });
 }
+
+export async function resumoFornecedores(tenantId: string) {
+  const [total, ativos, inativos] = await Promise.all([
+    prisma.fornecedor.count({ where: { tenantId } }),
+    prisma.fornecedor.count({ where: { tenantId, ativo: true } }),
+    prisma.fornecedor.count({ where: { tenantId, ativo: false } }),
+  ]);
+  return {
+    total,
+    ativos,
+    inativos,
+    percentualHabilitados: total > 0 ? Math.round((ativos / total) * 100) : 0,
+  };
+}

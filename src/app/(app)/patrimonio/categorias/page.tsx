@@ -1,14 +1,35 @@
 import type { Metadata } from "next";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { FadeIn } from "@/components/motion";
-import { bensPorCategoria } from "@/lib/data/patrimonio";
 
 export const metadata: Metadata = { title: "Bens por categoria" };
 
-export default function CategoriasPage() {
-  const categorias = bensPorCategoria();
-  const maxCat = Math.max(...categorias.map((c) => c.total));
+const TIPO_LABEL: Record<string, string> = {
+  movel: "Móveis",
+  imovel: "Imóveis",
+  intangivel: "Intangíveis",
+  semovente: "Semoventes",
+};
+
+export default async function CategoriasPage() {
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+
+  const bens = await prisma.bemPatrimonial.groupBy({
+    by: ["tipo"],
+    where: { tenantId, ativo: true },
+    _count: { id: true },
+  });
+
+  const categorias = bens.map((b) => ({
+    categoria: TIPO_LABEL[b.tipo] ?? b.tipo,
+    total: b._count.id,
+  }));
+
+  const maxCat = Math.max(1, ...categorias.map((c) => c.total));
 
   return (
     <FadeIn>

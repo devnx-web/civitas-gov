@@ -1,4 +1,5 @@
 import { Truck, CheckCircle2, Ban, Gauge, Plus } from "lucide-react";
+import { auth } from "@/auth";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -6,12 +7,14 @@ import { Stagger } from "@/components/motion";
 import { resumoFornecedores } from "@/lib/data/fornecedores";
 import { formatPercent } from "@/lib/utils";
 
-export default function FornecedoresLayout({
+export default async function FornecedoresLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const r = resumoFornecedores();
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+  const r = await resumoFornecedores(tenantId);
 
   return (
     <div>
@@ -34,21 +37,21 @@ export default function FornecedoresLayout({
         />
         <StatCard
           icon={<CheckCircle2 className="h-[18px] w-[18px]" />}
-          label="Situação regular"
-          valor={String(r.regulares)}
+          label="Habilitados"
+          valor={String(r.ativos)}
           tone="sucesso"
         />
         <StatCard
           icon={<Ban className="h-[18px] w-[18px]" />}
-          label="Suspensos"
-          valor={String(r.suspensos)}
-          detalhe="Impedidos de contratar"
+          label="Inabilitados / suspensos"
+          valor={String(r.inativos)}
           tone="perigo"
         />
         <StatCard
           icon={<Gauge className="h-[18px] w-[18px]" />}
-          label="Desempenho médio"
-          valor={formatPercent(r.desempenhoMedio)}
+          label="Índice de habilitação"
+          valor={formatPercent(r.percentualHabilitados / 100)}
+          tone={r.percentualHabilitados >= 80 ? "sucesso" : "alerta"}
         />
       </Stagger>
 

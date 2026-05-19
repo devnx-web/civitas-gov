@@ -1,61 +1,61 @@
 import type { Metadata } from "next";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { ShieldAlert } from "lucide-react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { FadeIn } from "@/components/motion";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
-import {
-  FORNECEDORES,
-  SITUACAO_LABEL,
-  type SituacaoFornecedor,
-} from "@/lib/data/fornecedores";
 
 export const metadata: Metadata = { title: "Pendências" };
 
-const TONE_SIT: Record<SituacaoFornecedor, BadgeTone> = {
-  regular: "sucesso",
-  pendente: "alerta",
-  suspenso: "perigo",
+const TONE_ATIVO: Record<string, BadgeTone> = {
+  true: "sucesso",
+  false: "perigo",
 };
 
-export default function PendenciasFornecedoresPage() {
-  const fornecedores = FORNECEDORES.filter((f) => !f.habilitacaoValida);
+export default async function PendenciasFornecedoresPage() {
+  const session = await auth();
+  const tenantId = session?.user?.tenantId ?? "";
+
+  const fornecedores = await prisma.fornecedor.findMany({
+    where: { tenantId, ativo: false },
+    orderBy: { nome: "asc" },
+    include: { _count: { select: { documentos: true } } },
+  });
 
   return (
     <FadeIn>
       <Card>
         <CardHeader
-          title="Pendências de habilitação"
-          subtitle="Fornecedores com documentação irregular ou vencida"
+          title="Pendências"
+          subtitle="Fornecedores com documentação irregular ou suspensos"
         />
         <Table>
           <THead>
             <TR>
-              <TH>Razão social</TH>
-              <TH>CNPJ</TH>
-              <TH>Município</TH>
+              <TH>Fornecedor</TH>
+              <TH>Documentos pendentes</TH>
               <TH>Situação</TH>
-              <TH>Habilitação</TH>
             </TR>
           </THead>
           <TBody>
             {fornecedores.map((f) => (
               <TR key={f.id}>
-                <TD className="font-medium text-ink-900">{f.razaoSocial}</TD>
-                <TD className="font-mono text-xs text-ink-500">{f.cnpj}</TD>
-                <TD className="whitespace-nowrap">
-                  {f.cidade}/{f.uf}
+                <TD>
+                  <span className="font-medium text-ink-900">{f.nome}</span>
+                  <span className="block text-xs text-ink-400">{f.cpfCnpj}</span>
                 </TD>
                 <TD>
-                  <Badge tone={TONE_SIT[f.situacao]}>
-                    {SITUACAO_LABEL[f.situacao]}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="h-4 w-4 text-amber-500" />
+                    <span className="text-xs text-ink-500">
+                      {f._count.documentos} documento(s)
+                    </span>
+                  </div>
                 </TD>
                 <TD>
-                  <span className="flex items-center gap-1 text-xs font-medium text-rose-600">
-                    <ShieldAlert className="h-4 w-4" />
-                    Irregular
-                  </span>
+                  <Badge tone="perigo">Suspenso</Badge>
                 </TD>
               </TR>
             ))}
