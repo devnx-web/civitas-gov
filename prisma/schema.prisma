@@ -73,6 +73,9 @@ model Tenant {
   receitas                   Receita[]
   registrosTratamento        RegistroAtividadeTratamento[]
   agentesContratacao         AgenteContratacao[]
+  logAcesso                  LogAcesso[]
+  notificacoes               Notificacao[]
+  preferenciasNotificacao    PreferenciaNotificacao[]
 
   @@map("tenants")
 }
@@ -127,18 +130,23 @@ enum AcaoAuditoria {
 }
 
 /// Registro imutável de operação auditável — trilha completa com before/after.
+/// Fase 11 (B4): colunas `prevHash`/`currentHash` formam a cadeia SHA-256
+/// imutável (REQ-NF-016). Ambas são nullable na fundação — a constraint
+/// `@unique` em `currentHash` só entra após o backfill (plano 11-04).
 model Auditoria {
-  id         String        @id @default(cuid())
-  tenantId   String
-  usuarioId  String?
-  acao       AcaoAuditoria
-  entidade   String
-  entidadeId String
-  antes      Json?
-  depois     Json?
-  ip         String?
-  userAgent  String?
-  criadoEm   DateTime      @default(now())
+  id          String        @id @default(cuid())
+  tenantId    String
+  usuarioId   String?
+  acao        AcaoAuditoria
+  entidade    String
+  entidadeId  String
+  antes       Json?
+  depois      Json?
+  ip          String?
+  userAgent   String?
+  prevHash    String?
+  currentHash String?
+  criadoEm    DateTime      @default(now())
 
   @@index([tenantId, criadoEm(sort: Desc)])
   @@index([tenantId, entidade, entidadeId])
@@ -148,6 +156,11 @@ model Auditoria {
 // ─── RBAC granular ────────────────────────────────────────────────────────────
 
 /// Módulo/área do sistema ao qual a permissão se aplica.
+/// Fase 11: os 8 valores finais (notificacoes..ia) são adicionados na
+/// migração `v05_fundacao` via `ALTER TYPE ... ADD VALUE` consolidado
+/// (única operação possível fora de transação no Postgres). Apenas
+/// `notificacoes` e `jobs` serão usados em RBAC nesta fase; os outros
+/// 6 ficam declarados aguardando Fases 12+/15+ (decisão B4 do plano).
 enum Escopo {
   licitacoes
   contratos
@@ -161,6 +174,14 @@ enum Escopo {
   relatorios
   orcamento
   financeiro
+  notificacoes
+  jobs
+  helpdesk
+  tce_es
+  webhooks
+  api
+  bi
+  ia
 }
 
 /// Operação controlada pela permissão.
@@ -2589,4 +2610,87 @@ model AgenteContratacao {
 
   @@index([tenantId, ativo])
   @@map("agentes_contratacao")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FASE 11 — Fundação v0.5: LogAcesso (B3), Notificações (B8)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Evento de acesso registrado em `LogAcesso` (REQ-NF-013).
+enum EventoAcesso {
+  LOGIN_SUCESSO
+  LOGIN_FALHA
+  LOGOUT
+  REFRESH_TOKEN
+  TOTP_OK
+  TOTP_FALHA
+  SENHA_RECUPERACAO_SOLICITADA
+  SENHA_RECUPERACAO_USADA
+}
+
+/// Categoria de notificação para a central persistente (REQ-NF-072, REQ-ALEM-023).
+enum CategoriaNotificacao {
+  CHAMADO
+  CONTRATO
+  RELATORIO
+  DOCUMENTO
+  AUDITORIA
+  SISTEMA
+}
+
+/// Trilha dedicada de login/logout/refresh — REQ-NF-013 (B3).
+/// Independente de `Auditoria`: trilha de identidade não passa por hash chain
+/// (auditar a trilha gera loop). `usuarioId` nullable porque login falho pode
+/// não ter usuário resolvido.
+model LogAcesso {
+  id        String       @id @default(cuid())
+  tenantId  String
+  usuarioId String?
+  evento    EventoAcesso
+  ip        String?
+  userAgent String?
+  sistema   String?
+  ocorreuEm DateTime     @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, ocorreuEm(sort: Desc)])
+  @@index([tenantId, usuarioId])
+  @@index([tenantId, evento])
+  @@map("log_acesso")
+}
+
+/// Central persistente de notificações in-app — sino na topbar (B8).
+/// Polling a cada 30s no client; sem WebSocket no PoC.
+model Notificacao {
+  id        String               @id @default(cuid())
+  tenantId  String
+  usuarioId String
+  categoria CategoriaNotificacao
+  titulo    String
+  corpo     String
+  link      String?
+  lida      Boolean              @default(false)
+  lidaEm    DateTime?
+  criadoEm  DateTime             @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, usuarioId, lida])
+  @@index([tenantId, criadoEm(sort: Desc)])
+  @@map("notificacoes")
+}
+
+/// Opt-in/opt-out por categoria de notificação (NOTIF-04).
+model PreferenciaNotificacao {
+  id         String               @id @default(cuid())
+  tenantId   String
+  usuarioId  String
+  categoria  CategoriaNotificacao
+  habilitada Boolean              @default(true)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, usuarioId, categoria])
+  @@map("preferencias_notificacao")
 }
