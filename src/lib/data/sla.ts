@@ -1,33 +1,19 @@
 /**
  * Dados do módulo SLA — Help Desk.
+ * Constantes e tipos estão em ./sla-shared para uso seguro em client components.
  */
 
 import { prisma } from "@/lib/prisma";
+import {
+  type NivelSLA,
+  type StatusSLA,
+  type RelatorioSLA,
+  PRAZO_PADRAO,
+} from "./sla-shared";
 
-export type NivelSLA = "critico" | "alto" | "medio" | "baixo";
-export type StatusSLA = "dentro_prazo" | "em_risco" | "vencido";
-
-// Prazo padrão por nível (em horas)
-export const PRAZO_PADRAO: Record<NivelSLA, number> = {
-  critico: 3,
-  alto: 12,
-  medio: 24,
-  baixo: 48,
-};
-
-export const NIVEL_SLA_LABEL: Record<NivelSLA, string> = {
-  critico: "Crítico",
-  alto: "Alto",
-  medio: "Médio",
-  baixo: "Baixo",
-};
-
-export const NIVEL_SLA_COR: Record<NivelSLA, string> = {
-  critico: "bg-red-100 text-red-700",
-  alto: "bg-orange-100 text-orange-700",
-  medio: "bg-yellow-100 text-yellow-700",
-  baixo: "bg-blue-100 text-blue-700",
-};
+export type { NivelSLA, StatusSLA, RelatorioSLA };
+export { PRAZO_PADRAO };
+export { NIVEL_SLA_LABEL, NIVEL_SLA_COR } from "./sla-shared";
 
 interface ConfigSLARow {
   id: string;
@@ -44,7 +30,6 @@ export async function listarConfiguracoesSLA(tenantId: string) {
     orderBy: { nivel: "asc" },
   })) as ConfigSLARow[];
 
-  // Garantir que todos os 4 níveis existam (com defaults)
   const niveis: NivelSLA[] = ["critico", "alto", "medio", "baixo"];
   return niveis.map((nivel) => {
     const encontrado = configs.find((c: ConfigSLARow) => c.nivel === nivel);
@@ -77,17 +62,8 @@ export function calcularStatusSLA(
   const diffHoras = diffMs / (1000 * 60 * 60);
 
   if (diffMs < 0) return "vencido";
-  if (diffHoras <= 2) return "em_risco"; // menos de 2h restantes = em risco
+  if (diffHoras <= 2) return "em_risco";
   return "dentro_prazo";
-}
-
-export interface RelatorioSLA {
-  nivel: NivelSLA;
-  total: number;
-  dentroPrazo: number;
-  emRisco: number;
-  vencidos: number;
-  percentualCumprimento: number;
 }
 
 interface TicketSLARow {
@@ -101,10 +77,7 @@ interface TicketSLARow {
 
 export async function obterRelatorioSLA(tenantId: string): Promise<RelatorioSLA[]> {
   const tickets = (await prisma.ticketSuporte.findMany({
-    where: {
-      tenantId,
-      nivelSLA: { not: null },
-    },
+    where: { tenantId, nivelSLA: { not: null } },
     select: {
       nivelSLA: true,
       statusSLA: true,
@@ -122,30 +95,18 @@ export async function obterRelatorioSLA(tenantId: string): Promise<RelatorioSLA[
     const total = doNivel.length;
 
     if (total === 0) {
-      return {
-        nivel,
-        total: 0,
-        dentroPrazo: 0,
-        emRisco: 0,
-        vencidos: 0,
-        percentualCumprimento: 100,
-      };
+      return { nivel, total: 0, dentroPrazo: 0, emRisco: 0, vencidos: 0, percentualCumprimento: 100 };
     }
 
     const agora = new Date();
-
     let dentroPrazo = 0;
     let emRisco = 0;
     let vencidos = 0;
 
     for (const ticket of doNivel) {
       const prazo = ticket.prazoResolucao;
-      if (!prazo) {
-        dentroPrazo++;
-        continue;
-      }
+      if (!prazo) { dentroPrazo++; continue; }
 
-      // Se resolvido/fechado, verifica se foi dentro do prazo
       if (ticket.status === "resolvido" || ticket.status === "fechado") {
         const resolucao = ticket.dataResolucao ?? agora;
         if (resolucao <= prazo) dentroPrazo++;

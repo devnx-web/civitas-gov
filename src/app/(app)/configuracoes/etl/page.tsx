@@ -3,12 +3,8 @@
 import { useState, useRef, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  processarETLAction,
-  getColunasMapeamento,
-  type EntidadeETL,
-  type ResultadoETL,
-} from "./actions";
+import { processarETLAction } from "./actions";
+import { getColunasMapeamento, type EntidadeETL, type ResultadoETL } from "./etl-utils";
 
 const ENTIDADES: { value: EntidadeETL; label: string }[] = [
   { value: "Fornecedor", label: "Fornecedores" },

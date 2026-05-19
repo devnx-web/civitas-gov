@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { NIVEL_SLA_LABEL, NIVEL_SLA_COR, type RelatorioSLA, type NivelSLA } from "@/lib/data/sla";
+import { NIVEL_SLA_LABEL, NIVEL_SLA_COR, type RelatorioSLA, type NivelSLA } from "@/lib/data/sla-shared";
 import {
   salvarConfiguracoesSLABatchAction,
   listarConfiguracoesSLAAction,
