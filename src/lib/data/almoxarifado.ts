@@ -12,11 +12,14 @@ export async function resumoAlmoxarifado(tenantId: string) {
       where: { tenantId },
       _sum: { precoMedio: true },
     }),
-    prisma.estoque.count({
-      where: { tenantId, quantidade: { lt: prisma.estoque.fields.estoqueMinimo } },
-    }).catch(() => 0),
-    // Requisições pendentes — se houver modelo no futuro
-    Promise.resolve(0),
+    prisma.estoque
+      .count({
+        where: { tenantId, quantidade: { lt: prisma.estoque.fields.estoqueMinimo } },
+      })
+      .catch(() => 0),
+    prisma.requisicaoMaterial.count({
+      where: { tenantId, status: "enviada" },
+    }),
   ]);
 
   return {
