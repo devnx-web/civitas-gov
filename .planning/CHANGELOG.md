@@ -6,6 +6,47 @@
 
 ---
 
+## 2026-05-19 — Wave 6 (execução paralela com 4 agentes Sonnet)
+
+### Wave 6A — Inventário, e-SIC, Receitas (`feat(inventario-esic-receita)`)
+
+- **Fase 3 — Inventário formal**: `InventarioPatrimonial` + `ItemInventario`. Comissão de inventário. UI de listagem, lançamento e encerramento em `/patrimonio/inventario`.
+- **Fase 5 — e-SIC com persistência real**: `SolicitacaoESIC` com `StatusSolicitacaoSIC`. Workflow de resposta. Prazo 20 dias úteis LAI Art. 11. Endpoint `POST /api/esic`. Fila pública em `/transparencia/e-sic`.
+- **Fase 5 — Receitas**: `Receita` + enums `TipoReceita`, `StatusReceita`. CRUD. Endpoint público `/api/transparencia/receitas`. Página `/siafic/receitas`.
+- Migração: `20260519070000_inventario_esic_receita`
+
+**Impacto:** Fases 3, 5 avançam para ~90–95%.
+
+### Wave 6B — Backup S3, Sentry, ETL, WCAG (`feat(operacao)`)
+
+- **Backup automático**: `.github/workflows/backup.yml` — pg_dump diário → S3 STANDARD_IA, retenção 30 dias. `scripts/restore-backup.sh` + `scripts/test-restore.sh`. `docs/backup.md`.
+- **Sentry**: `sentry.{client,server,edge}.config.ts` + `withSentryConfig` no `next.config.ts`. Logger centralizado em `src/lib/logger.ts` com captura Sentry em erros.
+- **ETL / Migração CSV**: Painel `/configuracoes/etl` para importar Fornecedor, Material, BemPatrimonial, Usuário via CSV com preview de 5 linhas e relatório de erros por linha.
+- **WCAG 2.1 AA**: Skip link "Pular para o conteúdo principal" no layout. `Button` com `aria-disabled`. `Table` com `role="table"` e `scope="col"`. Declaração de Acessibilidade em `/configuracoes/acessibilidade`. Link Swagger UI para API docs.
+
+**Impacto:** Risco "Sem backup" (Alta) e "Sem Sentry" resolvidos. Fase 9 ~35% → ~85%. Fase 10 ~65% → ~90%.
+
+### Wave 6C — Claude API + OpenAPI (`feat(ia)`)
+
+- **Claude API integrada**: `src/lib/ai/client.ts` com `claude-sonnet-4-6` + prompt caching (`cache_control: ephemeral`).
+- **Classificador CATMAT**: `src/lib/ai/classificador-catmat.ts` — sugere código CATMAT e unidade de medida a partir de descrição. Endpoint `POST /api/ai/classificar-material`.
+- **Copiloto de licitações**: `src/lib/ai/copiloto-licitacoes.ts` — assistente contextualizado na Lei 14.133/2021. Endpoint `POST /api/ai/copiloto`. UI em `/licitacoes/ia`.
+- **OpenAPI spec**: `GET /api/openapi` com Swagger UI em `/transparencia/api-docs`.
+
+**Impacto:** Fase 8 (IA) de 0% → ~85%.
+
+### Wave 6D — 2FA TOTP, Lotes/Validade, LGPD RoPA, AgenteContratacao (`feat(auth-alm-lgpd)`)
+
+- **2FA TOTP**: `src/lib/totp.ts` com `otplib` v13. Gera secret + QR code, confirma com código de 6 dígitos. `/configuracoes/seguranca` + `/verificar-totp` na rota pública.
+- **Lotes e Validade almoxarifado**: `LoteEstoque` com data de fabricação/validade. `/almoxarifado/lotes` com alertas visuais (<7 dias = vermelho, <30 = amarelo).
+- **LGPD RoPA (Art. 37)**: `RegistroAtividadeTratamento` com enums `BaseLegalLGPD`, `CategoriasDadosTratados`. UI em `/lgpd/ropa`.
+- **AgenteContratacao**: Lei 14.133/2021, Art. 8° — designação por portaria com vigência. CRUD em `/configuracoes/agentes-contratacao`.
+- Migração: `20260519080000_2fa_lotes_ropa`
+
+**Impacto:** Fases 0 (2FA), 2 (Lotes), 7 (RoPA), 1 (Agente) avançam. Riscos "Sem 2FA", "Sem RoPA" resolvidos.
+
+---
+
 ## 2026-05-19 — Wave 3 + Wave 4 + Wave 5 (execução paralela com agentes Sonnet)
 
 ### Wave 3 — Licitações & Contratos completo (`feat(licitacoes)`)
