@@ -44,15 +44,12 @@ export const registrarIncidenteAction = defineFormAction(registrarSchema, async 
     },
   });
 
-  logger.info(
-    {
-      incidenteId: incidente.id,
-      tenantId: tenant.id,
-      gravidade: input.gravidade,
-      prazoAnpd72h: prazoAnpd72h.toISOString(),
-    },
-    "lgpd:incidente-registrado"
-  );
+  logger.info("lgpd:incidente-registrado", {
+    incidenteId: incidente.id,
+    tenantId: tenant.id,
+    gravidade: input.gravidade,
+    prazoAnpd72h: prazoAnpd72h.toISOString(),
+  });
 
   revalidatePath("/lgpd/incidentes");
   return incidente;

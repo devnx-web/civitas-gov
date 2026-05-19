@@ -91,7 +91,7 @@ async function gravarAuditoria(params: {
   depois?: object;
 }) {
   const { ctx, acao, model, entidadeId, antes, depois } = params;
-  logger.info({ modelo: model, operacao: acao, usuarioId: ctx.usuarioId, entidadeId }, "auditoria");
+  logger.info("auditoria", { modelo: model, operacao: acao, usuarioId: ctx.usuarioId, entidadeId });
   await prisma.auditoria.create({
     data: {
       tenantId: ctx.tenantId,
