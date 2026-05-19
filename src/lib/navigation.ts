@@ -128,6 +128,14 @@ export const NAV: NavGroup[] = [
               { label: "Por categoria", href: "/patrimonio/categorias" },
             ],
           },
+          {
+            label: "Documentos",
+            submenus: [
+              { label: "Termos de guarda", href: "/patrimonio/termos" },
+              { label: "Transferências", href: "/patrimonio/transferencias" },
+              { label: "Etiquetas", href: "/patrimonio/etiquetas" },
+            ],
+          },
         ],
       },
       {
