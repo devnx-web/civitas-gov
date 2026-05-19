@@ -21,10 +21,10 @@ export const authConfig = {
     /** Protege todas as rotas internas e gerencia o redirecionamento. */
     authorized({ auth, request: { nextUrl } }) {
       const logado = !!auth?.user;
-      const naTelaLogin = nextUrl.pathname.startsWith("/login");
+      const rotasPublicas = ["/login", "/recuperar-senha", "/nova-senha"];
+      const ehPublica = rotasPublicas.some((rota) => nextUrl.pathname.startsWith(rota));
 
-      // Rotas públicas — Portal da Transparência (LAI/LC 131), APIs de dados abertos
-      // e cotação online de fornecedores (sem login — acessada via token UUID)
+      // Portal da Transparência, APIs abertas e cotação online — sem autenticação
       const ePublica =
         nextUrl.pathname.startsWith("/transparencia") ||
         nextUrl.pathname.startsWith("/api/transparencia") ||
@@ -33,8 +33,8 @@ export const authConfig = {
 
       if (ePublica) return true;
 
-      if (naTelaLogin) {
-        if (logado) {
+      if (ehPublica) {
+        if (logado && nextUrl.pathname.startsWith("/login")) {
           return Response.redirect(new URL("/dashboard", nextUrl));
         }
         return true;

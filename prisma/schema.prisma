@@ -88,14 +88,27 @@ model Usuario {
 
   tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   permissoes UsuarioPermissao[]
+  tokensRecuperacao TokenRecuperacaoSenha[]
 
   @@index([tenantId])
   @@map("usuarios")
 }
 
-// Nota: as relações inversas em Usuario para TermoGuardaResponsabilidade e TransferenciaPatrimonial
-// são gerenciadas via campo String (responsavelId) sem FK explícita — design flexível para
-// acomodar responsáveis externos ao sistema (ex: gestores sem login).
+/// Token de recuperação de senha — gerado ao solicitar o reset.
+model TokenRecuperacaoSenha {
+  id        String    @id @default(cuid())
+  usuarioId String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  criadoEm  DateTime  @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([usuarioId])
+  @@map("tokens_recuperacao_senha")
+}
 
 // ─── Auditoria ────────────────────────────────────────────────────────────────
 
