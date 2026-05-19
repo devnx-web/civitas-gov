@@ -22,6 +22,7 @@ import {
   Sparkles,
   FileSignature,
   Package,
+  FileBarChart2,
   type LucideIcon,
 } from "lucide-react";
 import type { Role } from "@/types/next-auth";
@@ -349,6 +350,14 @@ export const NAV: NavGroup[] = [
   {
     titulo: "Administração",
     itens: [
+      {
+        label: "Relatórios",
+        href: "/relatorios",
+        icon: FileBarChart2,
+        descricao:
+          "Exportar relatórios Excel dos módulos: estoque, patrimônio, licitações e transparência",
+        roles: ["admin", "gestor", "operador"],
+      },
       {
         label: "Configurações",
         href: "/configuracoes",
