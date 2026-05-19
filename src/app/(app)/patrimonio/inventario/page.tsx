@@ -1,84 +1,105 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
+import { listarInventarios } from "@/lib/data/inventarios";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { FadeIn } from "@/components/motion";
-import { formatBRL, formatData } from "@/lib/utils";
+import { formatData } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Inventário de bens" };
+export const metadata: Metadata = { title: "Inventários Patrimoniais" };
 
-const ESTADO_TONE: Record<string, BadgeTone> = {
-  ativo: "sucesso",
-  disponivel: "info",
-  em_manutencao: "alerta",
-  inservivel: "perigo",
-  baixado: "neutro",
+const STATUS_TONE: Record<string, BadgeTone> = {
+  aberto: "info",
+  em_contagem: "alerta",
+  em_conciliacao: "alerta",
+  encerrado: "sucesso",
+  cancelado: "perigo",
 };
 
-const ESTADO_LABEL: Record<string, string> = {
-  ativo: "Ativo",
-  disponivel: "Disponível",
-  em_manutencao: "Em manutenção",
-  inservivel: "Inservível",
-  baixado: "Baixado",
+const STATUS_LABEL: Record<string, string> = {
+  aberto: "Aberto",
+  em_contagem: "Em contagem",
+  em_conciliacao: "Em conciliação",
+  encerrado: "Encerrado",
+  cancelado: "Cancelado",
 };
 
-export default async function InventarioPage() {
+export default async function InventariosPage() {
   const session = await auth();
   const tenantId = session?.user?.tenantId ?? "";
 
-  const bens = await prisma.bemPatrimonial.findMany({
-    where: { tenantId, ativo: true },
-    orderBy: { criadoEm: "desc" },
-    take: 50,
-  });
+  const inventarios = await listarInventarios(tenantId);
 
   return (
     <FadeIn>
       <Card>
         <CardHeader
-          title="Inventário de bens"
-          subtitle="Acervo patrimonial da autarquia"
+          title="Inventários Patrimoniais"
+          subtitle="Processos formais de contagem e conciliação do acervo — Lei 4.320/1964 art. 94"
+          action={
+            <Link
+              href="/patrimonio/inventario/novo"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              + Novo inventário
+            </Link>
+          }
         />
-        <Table>
-          <THead>
-            <TR>
-              <TH>Tombamento</TH>
-              <TH>Descrição</TH>
-              <TH>Setor</TH>
-              <TH className="text-right">Valor atual</TH>
-              <TH>Estado</TH>
-            </TR>
-          </THead>
-          <TBody>
-            {bens.map((b) => (
-              <TR key={b.id}>
-                <TD className="font-mono text-xs text-ink-500">
-                  {b.numeroTombamento}
-                </TD>
-                <TD>
-                  <span className="font-medium text-ink-900">
-                    {b.descricao}
-                  </span>
-                  <span className="block text-xs text-ink-400 capitalize">
-                    {b.tipo} · adq. {formatData(b.dataAquisicao.toISOString())}
-                  </span>
-                </TD>
-                <TD>{b.localizacaoAtual ?? "—"}</TD>
-                <TD className="text-right whitespace-nowrap">
-                  {formatBRL(Number(b.valorAquisicao))}
-                </TD>
-                <TD>
-                  <Badge tone={ESTADO_TONE[b.situacao] ?? "neutro"}>
-                    {ESTADO_LABEL[b.situacao] ?? b.situacao}
-                  </Badge>
-                </TD>
+        {inventarios.length === 0 ? (
+          <div className="px-6 py-12 text-center text-sm text-ink-400">
+            Nenhum inventário cadastrado. Clique em &ldquo;Novo inventário&rdquo; para iniciar.
+          </div>
+        ) : (
+          <Table>
+            <THead>
+              <TR>
+                <TH>Número / Exercício</TH>
+                <TH>Abertura</TH>
+                <TH>Comissão</TH>
+                <TH className="text-right">Progresso</TH>
+                <TH>Status</TH>
+                <TH></TH>
               </TR>
-            ))}
-          </TBody>
-        </Table>
+            </THead>
+            <TBody>
+              {inventarios.map((inv) => {
+                const pct =
+                  inv.totalItens > 0 ? Math.round((inv.totalConferidos / inv.totalItens) * 100) : 0;
+                return (
+                  <TR key={inv.id}>
+                    <TD>
+                      <span className="font-mono font-semibold text-ink-900">{inv.numero}</span>
+                      <span className="ml-1 text-xs text-ink-400">/ {inv.exercicio}</span>
+                    </TD>
+                    <TD>{formatData(inv.dataAbertura.toISOString())}</TD>
+                    <TD>{inv.comissao?.nome ?? "—"}</TD>
+                    <TD className="text-right">
+                      <span className="text-sm font-medium text-ink-900">
+                        {inv.totalConferidos}/{inv.totalItens}
+                      </span>
+                      <span className="ml-1 text-xs text-ink-400">({pct}%)</span>
+                    </TD>
+                    <TD>
+                      <Badge tone={STATUS_TONE[inv.status] ?? "neutro"}>
+                        {STATUS_LABEL[inv.status] ?? inv.status}
+                      </Badge>
+                    </TD>
+                    <TD>
+                      <Link
+                        href={`/patrimonio/inventario/${inv.id}`}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Ver detalhes
+                      </Link>
+                    </TD>
+                  </TR>
+                );
+              })}
+            </TBody>
+          </Table>
+        )}
       </Card>
     </FadeIn>
   );

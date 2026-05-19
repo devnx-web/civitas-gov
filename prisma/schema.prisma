@@ -68,6 +68,9 @@ model Tenant {
   ocorrenciasFiscalizacao    OcorrenciaFiscalizacao[]
   medicoes                   MedicaoContrato[]
   gruposMaterial             GrupoMaterial[]
+  inventariosPatrimoniais    InventarioPatrimonial[]
+  solicitacoesESIC           SolicitacaoESIC[]
+  receitas                   Receita[]
 
   @@map("tenants")
 }
@@ -487,9 +490,10 @@ model BemPatrimonial {
   ativo                      Boolean                    @default(true)
   criadoEm                   DateTime                   @default(now())
   atualizadoEm               DateTime                   @updatedAt
-  tenant                     Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  termos                     BemTermo[]
-  transferencias             TransferenciaPatrimonial[]
+  tenant           Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  termos           BemTermo[]
+  transferencias   TransferenciaPatrimonial[]
+  itensInventario  ItemInventario[]
 
   @@index([tenantId])
   @@index([tenantId, situacao])
@@ -1286,8 +1290,9 @@ model Comissao {
   criadoEm       DateTime     @default(now())
   atualizadoEm   DateTime     @updatedAt
 
-  tenant  Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  membros MembroComissao[]
+  tenant      Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membros     MembroComissao[]
+  inventarios InventarioPatrimonial[]
 
   @@index([tenantId])
   @@index([tenantId, ativo])
@@ -2363,4 +2368,151 @@ model MedicaoContrato {
   @@unique([contratoId, numero])
   @@index([tenantId, contratoId])
   @@map("medicoes_contrato")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WAVE 6A — INVENTÁRIO PATRIMONIAL FORMAL, e-SIC LAI, RECEITAS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── Inventário Patrimonial ──────────────────────────────────────────────────
+
+/// Status do processo de inventário patrimonial formal.
+enum StatusInventario {
+  aberto
+  em_contagem
+  em_conciliacao
+  encerrado
+  cancelado
+}
+
+/// Resultado da conferência de um item no inventário.
+enum ResultadoItemInventario {
+  confirmado
+  nao_localizado
+  divergencia_valor
+  excedente
+}
+
+/// Inventário patrimonial formal — processo anual obrigatório (Lei 4.320/1964 art. 94).
+model InventarioPatrimonial {
+  id               String           @id @default(cuid())
+  tenantId         String
+  exercicio        Int
+  numero           String
+  dataAbertura     DateTime
+  dataEncerramento DateTime?
+  status           StatusInventario @default(aberto)
+  comissaoId       String?
+  observacoes      String?
+  criadoPorId      String
+  criadoEm         DateTime         @default(now())
+  atualizadoEm     DateTime         @updatedAt
+
+  tenant   Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  comissao Comissao?             @relation(fields: [comissaoId], references: [id], onDelete: SetNull)
+  itens    ItemInventario[]
+
+  @@unique([tenantId, numero, exercicio])
+  @@index([tenantId, status])
+  @@map("inventarios_patrimoniais")
+}
+
+/// Item de inventário — resultado da conferência de um bem patrimonial.
+model ItemInventario {
+  id                    String                   @id @default(cuid())
+  inventarioId          String
+  bemPatrimonialId      String
+  localizacaoEsperada   String?
+  localizacaoEncontrada String?
+  valorContabil         Decimal                  @db.Decimal(18, 2)
+  resultado             ResultadoItemInventario?
+  observacoes           String?
+  conferidoPorId        String?
+  conferidoEm           DateTime?
+
+  inventario     InventarioPatrimonial @relation(fields: [inventarioId], references: [id], onDelete: Cascade)
+  bemPatrimonial BemPatrimonial        @relation(fields: [bemPatrimonialId], references: [id])
+
+  @@unique([inventarioId, bemPatrimonialId])
+  @@index([inventarioId])
+  @@map("itens_inventario")
+}
+
+// ─── e-SIC — Sistema Eletrônico de Informações ao Cidadão ───────────────────
+
+/// Status da solicitação e-SIC conforme LAI 12.527/2011.
+enum StatusSolicitacaoSIC {
+  recebida
+  em_tramitacao
+  respondida
+  prorrogada
+  negada
+  encaminhada
+}
+
+/// Solicitação e-SIC — pedido de acesso à informação via LAI 12.527/2011.
+model SolicitacaoESIC {
+  id               String               @id @default(cuid())
+  tenantId         String
+  protocolo        String               @unique
+  solicitanteNome  String
+  solicitanteEmail String
+  solicitanteCpf   String?
+  descricao        String
+  status           StatusSolicitacaoSIC @default(recebida)
+  resposta         String?
+  dataResposta     DateTime?
+  prazoLegal       DateTime
+  prorrogadoAte    DateTime?
+  responsavelId    String?
+  criadoEm         DateTime             @default(now())
+  atualizadoEm     DateTime             @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([protocolo])
+  @@map("solicitacoes_esic")
+}
+
+// ─── Receitas ────────────────────────────────────────────────────────────────
+
+/// Tipo de receita conforme classificação orçamentária pública.
+enum TipoReceita {
+  tributaria
+  patrimonial
+  de_servicos
+  transferencias_correntes
+  operacoes_credito
+  outras
+}
+
+/// Status da receita no ciclo orçamentário.
+enum StatusReceita {
+  prevista
+  lancada
+  arrecadada
+  cancelada
+}
+
+/// Receita pública — previsão e arrecadação mensal por natureza e fonte.
+model Receita {
+  id              String        @id @default(cuid())
+  tenantId        String
+  exercicio       Int
+  mes             Int
+  tipo            TipoReceita
+  natureza        String
+  descricao       String
+  valorPrevisto   Decimal       @db.Decimal(18, 2)
+  valorArrecadado Decimal?      @db.Decimal(18, 2)
+  status          StatusReceita @default(prevista)
+  fonte           String?
+  criadoEm        DateTime      @default(now())
+  atualizadoEm    DateTime      @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, exercicio, mes])
+  @@map("receitas")
 }
