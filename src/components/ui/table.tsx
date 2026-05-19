@@ -18,18 +18,12 @@ export function THead({ children }: { children: ReactNode }) {
   );
 }
 
-export function TH({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+export function TH({ children, className }: { children?: ReactNode; className?: string }) {
   return (
     <th
       className={cn(
         "px-5 py-3 text-[11px] font-semibold tracking-wider text-ink-400 uppercase dark:text-ink-500",
-        className,
+        className
       )}
     >
       {children}

@@ -1,6 +1,7 @@
 import "server-only";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // ── Contexto de auditoria ─────────────────────────────────────────────────────
 
@@ -90,6 +91,7 @@ async function gravarAuditoria(params: {
   depois?: object;
 }) {
   const { ctx, acao, model, entidadeId, antes, depois } = params;
+  logger.info({ modelo: model, operacao: acao, usuarioId: ctx.usuarioId, entidadeId }, "auditoria");
   await prisma.auditoria.create({
     data: {
       tenantId: ctx.tenantId,

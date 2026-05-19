@@ -6,6 +6,67 @@
 
 ---
 
+## 2026-05-19 — Wave 3 + Wave 4 + Wave 5 (execução paralela com agentes Sonnet)
+
+### Wave 3 — Licitações & Contratos completo (`feat(licitacoes)`)
+
+Fase 4 saltou de ~25% para ~90%. 13 sub-módulos entregues com schema, migrations, server actions, páginas e E2E:
+
+- **Sub-fase 4a (PCA):** Plano de Contratações Anual com CRUD e aprovação
+- **Sub-fase 4b (Pregão):** Editais, sessões de pregão, atas de registro de preço
+- **Sub-fase 4b (Recursos/Impugnações):** Workflows de impugnação e recurso administrativo
+- **Sub-fase 4b (Pesquisa de preços):** Cotações e mapa de preços
+- **Sub-fase 4c (Garantias):** Garantias de proposta e contrato (ambas perspectivas)
+- **Sub-fase 4d (Convênios):** Convênios com contrapartes e repasses
+- **Sub-fase 4d (Fiscalização):** Fiscais de contrato com ocorrências
+- **Sub-fase 4d (Cláusulas-modelo):** Biblioteca de cláusulas reutilizáveis
+- **Cross-cutting:** Restos a pagar, sanções a fornecedores
+- Migração: `20260519020000_fase_4_completa`
+- E2E: `licitacoes-fase4a.spec.ts`, `licitacoes-fase4c.spec.ts`, `licitacoes-fase4d.spec.ts`
+
+**Impacto:** Fase 4 ~25% → ~90%. Bloqueador de ~250 requisitos do TR destravado.
+
+### Wave 4A — Cadastros auxiliares + GrupoMaterial (`feat(nucleo-comum)`)
+
+- CRUDs com UI completa: CentroCusto, Setor, UnidadeGestora, Comissao
+- GrupoMaterial / ClasseMaterial / SubclasseMaterial (Portaria STN 448/2002)
+- Solicitações de compra com workflow de aprovação
+
+**Impacto:** Fase 1 ~60% → ~80%.
+
+### Wave 4B — LGPD incidente + Reversibilidade (`feat(lgpd)`)
+
+- `IncidenteLGPD` com prazo ANPD 72h automático a partir da data de detecção
+- Dashboard DPO com indicadores de conformidade
+- Export total reversibilidade (JSON + CSV + XML) com dicionário de dados
+- Solicitação por titular conforme LGPD Art. 18
+
+**Impacto:** Fase 7 consolidada em ~75%.
+
+### Wave 4C — SLA + Configurações + Cotação online (`feat(helpdesk,config)`)
+
+- SLA Help Desk: 4 níveis (crítico 3h / alto 12h / médio 24h / baixo 48h) configuráveis por tenant
+- Relatório SLA mensal com percentual de cumprimento
+- Configurações do sistema via banco: logo, tema, SMTP, CNPJ, endereço
+- Portal cotação-online público para fornecedores responderem pesquisa de preços
+
+**Impacto:** Fase 9 avança; risco "Configuracao hardcoded" resolvido.
+
+### Wave 5C — Vitest + Pino logging + Correções TSC (`feat(quality)`)
+
+- **Vitest 4.x**: 47 testes unitários passando em 4 arquivos:
+  - `precoMedioNPonderado.test.ts` — 6 testes da lógica PM ponderado do almoxarifado
+  - `calcSLA.test.ts` — 11 testes de `calcularPrazoTicket` e `calcularStatusSLA`
+  - `lgpdPrazo.test.ts` — 9 testes do prazo ANPD 72h e `isIncidenteVencidoAnpd`
+  - `formatadores.test.ts` — 21 testes de `formatBRL`, `formatNumero`, `formatData`, `formatPercent`, `iniciais`
+- **Pino structured logging**: `src/lib/logger.ts` + uso em `auditoria.ts` e `incidentes-lgpd.ts`
+- **Correções TSC**: `@types/qrcode` instalado; `TH.children` tornado opcional (2 erros eliminados)
+- Scripts npm: `test`, `test:watch`, `test:coverage`
+
+**Impacto:** Fase 10 ~45% → ~65%. Risco "Sem Vitest" e "Sem observabilidade (Pino)" resolvidos.
+
+---
+
 ## 2026-05-19 — Wave 1 + Wave 2 (execução paralela com agentes Sonnet)
 
 Bootstrap GSD retroativo + 6 ondas de execução no mesmo dia.

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getTenant } from "@/lib/tenant";
 import { defineFormAction, defineAction, AppError } from "@/lib/actions";
+import { logger } from "@/lib/logger";
 import type { StatusIncidenteLGPD, GravidadeIncidente } from "@/generated/prisma/enums";
 
 const registrarSchema = z.object({
@@ -42,6 +43,16 @@ export const registrarIncidenteAction = defineFormAction(registrarSchema, async 
       medidasAdotadas: input.medidasAdotadas || null,
     },
   });
+
+  logger.info(
+    {
+      incidenteId: incidente.id,
+      tenantId: tenant.id,
+      gravidade: input.gravidade,
+      prazoAnpd72h: prazoAnpd72h.toISOString(),
+    },
+    "lgpd:incidente-registrado"
+  );
 
   revalidatePath("/lgpd/incidentes");
   return incidente;
