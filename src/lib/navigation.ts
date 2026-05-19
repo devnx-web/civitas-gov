@@ -19,6 +19,7 @@ import {
   AlertOctagon,
   BookOpen,
   History,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import type { Role } from "@/types/next-auth";
@@ -182,6 +183,10 @@ export const NAV: NavGroup[] = [
               { label: "Sanções", href: "/licitacoes/sancoes" },
             ],
           },
+          {
+            label: "Assistente IA",
+            submenus: [{ label: "Copiloto de Licitações", href: "/licitacoes/ia" }],
+          },
         ],
       },
       {
@@ -241,6 +246,15 @@ export const NAV: NavGroup[] = [
         icon: LandmarkIcon,
         descricao: "Execução orçamentária: dotação, empenho, liquidação e pagamento",
         roles: ["admin", "gestor"],
+        menus: [
+          {
+            label: "Orçamento",
+            submenus: [
+              { label: "Execução", href: "/siafic" },
+              { label: "Receitas", href: "/siafic/receitas" },
+            ],
+          },
+        ],
       },
       {
         label: "LGPD",
@@ -248,6 +262,16 @@ export const NAV: NavGroup[] = [
         icon: Shield,
         descricao: "Gestão de dados pessoais, consentimentos e registros",
         roles: ["admin", "gestor"],
+        menus: [
+          {
+            label: "Privacidade",
+            submenus: [
+              { label: "Incidentes LGPD", href: "/lgpd/incidentes" },
+              { label: "DPO", href: "/lgpd/dpo" },
+              { label: "e-SIC", href: "/lgpd/esic" },
+            ],
+          },
+        ],
       },
       {
         label: "Reversibilidade",

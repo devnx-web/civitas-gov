@@ -16,6 +16,7 @@ import {
   MessageSquare,
   BookOpen,
   ChevronRight,
+  Code2,
 } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { AccessibilityControls } from "./acessibilidade-controls";
@@ -98,6 +99,14 @@ const CARDS_NAVEGACAO = [
     descricao: "Sistema Eletrônico de Informações ao Cidadão",
     cor: "text-indigo-600",
     bg: "bg-indigo-50 dark:bg-indigo-900/20",
+  },
+  {
+    href: "/transparencia/api-docs",
+    icon: Code2,
+    titulo: "API Docs",
+    descricao: "Documentação interativa dos endpoints REST",
+    cor: "text-gray-700",
+    bg: "bg-gray-100 dark:bg-gray-800",
   },
 ];
 

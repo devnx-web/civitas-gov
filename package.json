@@ -23,12 +23,8 @@
       "prettier --write"
     ]
   },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,md,yml,yaml,css}": [
-      "prettier --write"
-    ]
-  },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.0",
     "@aws-sdk/client-s3": "^3.1048.0",
     "@aws-sdk/s3-request-presigner": "^3.1048.0",
     "@prisma/adapter-pg": "^7.8.0",
@@ -63,6 +59,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
+    "@types/swagger-ui-react": "^5.18.0",
     "@vitest/coverage-v8": "^4.1.6",
     "dotenv": "^17.4.2",
     "eslint": "^9.19.0",
@@ -71,6 +68,7 @@
     "lint-staged": "^17.0.5",
     "postcss": "^8.5.1",
     "prettier": "^3.8.3",
+    "swagger-ui-react": "^5.32.6",
     "tailwindcss": "^4.0.1",
     "tsx": "^4.22.2",
     "typescript": "^5.7.3",

@@ -56,6 +56,7 @@ export default function TransparenciaLayout({ children }: { children: ReactNode 
               { href: "/transparencia/almoxarifado", label: "Almoxarifado" },
               { href: "/transparencia/dados-abertos", label: "Dados Abertos" },
               { href: "/transparencia/e-sic", label: "e-SIC" },
+              { href: "/transparencia/api-docs", label: "API Docs" },
             ].map((item) => (
               <li key={item.href}>
                 <Link
