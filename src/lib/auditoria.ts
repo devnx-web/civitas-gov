@@ -15,13 +15,50 @@ export const auditoriaStorage = new AsyncLocalStorage<AuditoriaCtx>();
 
 // ── Configuração dos modelos auditados ────────────────────────────────────────
 
-const MODELOS_AUDITADOS = new Set(["Usuario"]);
+const MODELOS_AUDITADOS = new Set([
+  "Usuario",
+  "Fornecedor",
+  "Material",
+  "Contrato",
+  "Aditamento",
+  "Empenho",
+  "Liquidacao",
+  "Pagamento",
+  "BemPatrimonial",
+  "ProcessoLicitatorio",
+  "Configuracao",
+  "Permissao",
+  "RolePermissao",
+  "UsuarioPermissao",
+]);
 
 type Campos = Record<string, unknown>;
+
+/**
+ * Mascara CPF de pessoa física mantendo apenas 3 primeiros e 2 últimos dígitos
+ * (somente dígitos, ignora formatação). Retorna valor original se não for PF ou
+ * se o campo estiver ausente.
+ */
+function mascararCpf(valor: unknown): string {
+  if (typeof valor !== "string") return String(valor ?? "");
+  const digitos = valor.replace(/\D/g, "");
+  if (digitos.length === 11) {
+    // CPF: mantém 3 primeiros e 2 últimos, resto vira *
+    return digitos.slice(0, 3) + "*".repeat(6) + digitos.slice(9);
+  }
+  return valor;
+}
 
 const SANITIZAR: Record<string, (d: Campos) => Campos> = {
   // Remove hash de senha antes de gravar na trilha.
   Usuario: ({ senhaHash: _, ...rest }) => rest,
+
+  // Mascara CPF de fornecedor pessoa física (tipo === "pf").
+  Fornecedor: ({ cpfCnpj, tipo, ...rest }) => ({
+    ...rest,
+    tipo,
+    cpfCnpj: tipo === "pf" ? mascararCpf(cpfCnpj) : cpfCnpj,
+  }),
 };
 
 function sanitizar(model: string, dados: unknown): object | undefined {
@@ -34,10 +71,7 @@ function toCamel(str: string) {
   return str.charAt(0).toLowerCase() + str.slice(1);
 }
 
-type DynClient = Record<
-  string,
-  { findUnique: (a: { where: unknown }) => Promise<unknown> }
->;
+type DynClient = Record<string, { findUnique: (a: { where: unknown }) => Promise<unknown> }>;
 
 async function fetchAntes(model: string, where: unknown): Promise<unknown> {
   try {
@@ -189,9 +223,6 @@ export const prismaAuditado = prisma.$extends({
  *     prismaAuditado.usuario.update({ where: { id }, data })
  *   );
  */
-export async function comAuditoria<T>(
-  ctx: AuditoriaCtx,
-  fn: () => Promise<T>,
-): Promise<T> {
+export async function comAuditoria<T>(ctx: AuditoriaCtx, fn: () => Promise<T>): Promise<T> {
   return auditoriaStorage.run(ctx, fn);
 }
