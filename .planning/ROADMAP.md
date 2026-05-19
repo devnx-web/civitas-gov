@@ -456,9 +456,15 @@ ativo com verificação de integridade; auditoria estendida a 6 novas entidades.
 - Worker pg-boss embutido no processo Next.js é anti-pattern — worker roda em
   container/processo separado, com heartbeat de monitoramento.
 
+**Plans:** 5 plans
+
 Plans:
 
-- [ ] 11-01: TBD (definido no planejamento da fase)
+- [ ] 11-01-PLAN.md — Migração v05_fundacao (schema novo) + pg-boss + worker em processo separado
+- [ ] 11-02-PLAN.md — B3 LogAcesso: helper, listeners NextAuth, tela de consulta filtrável
+- [ ] 11-03-PLAN.md — B8 Central de notificações: sino funcional, painel, preferências, dispatcher
+- [ ] 11-04-PLAN.md — B4 Hash chain SHA-256: canonicalJSON determinístico, backfill, constraint @unique, integridade
+- [ ] 11-05-PLAN.md — B10 Auditoria estendida: Empenho/Liquidação/Pagamento/Aditamento/Ata/Contrato
 
 ---
 
@@ -738,7 +744,7 @@ Plans:
 
 | Fase                              | Planos Concluídos | Status       | Concluída |
 | --------------------------------- | ----------------- | ------------ | --------- |
-| 11. Fundação v0.5 + Infra cruzada | 0/0               | Não iniciada | -         |
+| 11. Fundação v0.5 + Infra cruzada | 0/5               | Planejada    | -         |
 | 12. Verticais de negócio PoC      | 0/0               | Não iniciada | -         |
 | 13. Polimento UX                  | 0/0               | Não iniciada | -         |
 | 14. Operacional para produção     | 0/0               | Não iniciada | -         |
