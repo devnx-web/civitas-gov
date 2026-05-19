@@ -234,6 +234,16 @@ export const NAV: NavGroup[] = [
         icon: Settings,
         descricao: "Usuários, papéis de acesso e parâmetros",
         roles: ["admin"],
+        menus: [
+          {
+            label: "Sistema",
+            submenus: [
+              { label: "Parâmetros gerais", href: "/configuracoes" },
+              { label: "ETL / Migração", href: "/configuracoes/etl" },
+              { label: "Acessibilidade", href: "/configuracoes/acessibilidade" },
+            ],
+          },
+        ],
       },
     ],
   },

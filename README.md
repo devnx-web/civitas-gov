@@ -140,4 +140,42 @@ civitas-gov/
 
 ---
 
+## Backup & Restore
+
+O Civitas Gov possui backup automatizado diário do banco de dados PostgreSQL via GitHub Actions.
+
+### Backup automático
+
+O workflow `.github/workflows/backup.yml` executa às **23:00 BRT** (02:00 UTC) todos os dias, fazendo `pg_dump` e enviando para um bucket S3. Backups com mais de 30 dias são removidos automaticamente.
+
+**Secrets necessários no repositório GitHub:**
+
+| Secret             | Descrição                                |
+| ------------------ | ---------------------------------------- |
+| `DATABASE_URL`     | URL de conexão PostgreSQL                |
+| `PGPASSWORD`       | Senha do banco                           |
+| `BACKUP_S3_KEY`    | AWS Access Key ID                        |
+| `BACKUP_S3_SECRET` | AWS Secret Access Key                    |
+| `BACKUP_S3_BUCKET` | Nome do bucket S3                        |
+
+### Restaurar um backup
+
+```bash
+# Baixar o dump do S3
+aws s3 cp s3://<bucket>/backups/civitas_backup_YYYYMMDD_HHMMSS.dump ./civitas.dump
+
+# Restaurar
+./scripts/restore-backup.sh ./civitas.dump "$DATABASE_URL"
+```
+
+### Testar integridade do restore
+
+```bash
+./scripts/test-restore.sh "$DATABASE_URL"
+```
+
+Documentação completa em [`docs/backup.md`](docs/backup.md).
+
+---
+
 _POC desenvolvida como exploração técnica — Civitas Tecnologia._
