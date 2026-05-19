@@ -5,19 +5,19 @@
 > qualidade. Cada fase entrega valor e rastreia requisitos do TR.
 > Estimativas são **relativas** (P/M/G/GG), não prazos.
 
-| Fase | Título | Tamanho | Requisitos |
-|---|---|---|---|
-| 0 | Fundação técnica | G | REQ-NF (técnicos) |
-| 1 | Núcleo comum | G | Fornecedores, materiais/CATMAT, cadastros base |
-| 2 | Sistema Almoxarifado | G | ~117 (Sistema 2) |
-| 3 | Sistema Patrimônio | G | ~117 (Sistema 3) |
-| 4 | Sistema Licitações & Contratos | GG | ~384 (Sistema 1) |
-| 5 | Portal da Transparência | M | ~65 (Sistema 4) |
-| 6 | Integrações | G | Integrações dos 4 sistemas |
-| 7 | Conformidade & prestação de contas | G | Prestação de contas, LGPD, reversibilidade |
-| 8 | Camada de IA | M | REQ-ALEM (IA) |
-| 9 | Implantação & operação | M | Help Desk, SLA, migração, treinamento |
-| 10 | Qualidade & acessibilidade | M | Testes, observabilidade, WCAG AA |
+| Fase | Título                             | Tamanho | Requisitos                                     |
+| ---- | ---------------------------------- | ------- | ---------------------------------------------- |
+| 0    | Fundação técnica                   | G       | REQ-NF (técnicos)                              |
+| 1    | Núcleo comum                       | G       | Fornecedores, materiais/CATMAT, cadastros base |
+| 2    | Sistema Almoxarifado               | G       | ~117 (Sistema 2)                               |
+| 3    | Sistema Patrimônio                 | G       | ~117 (Sistema 3)                               |
+| 4    | Sistema Licitações & Contratos     | GG      | ~384 (Sistema 1)                               |
+| 5    | Portal da Transparência            | M       | ~65 (Sistema 4)                                |
+| 6    | Integrações                        | G       | Integrações dos 4 sistemas                     |
+| 7    | Conformidade & prestação de contas | G       | Prestação de contas, LGPD, reversibilidade     |
+| 8    | Camada de IA                       | M       | REQ-ALEM (IA)                                  |
+| 9    | Implantação & operação             | M       | Help Desk, SLA, migração, treinamento          |
+| 10   | Qualidade & acessibilidade         | M       | Testes, observabilidade, WCAG AA               |
 
 **Dependências:** 0 → 1 → {2, 3, 4} → 5 → 6 → 7; 8/9/10 dependem de núcleo
 estável (≥ Fase 4). Fases 2, 3 e 4 podem correr em paralelo após a Fase 1, mas
@@ -31,6 +31,7 @@ recomenda-se sequência por aprendizado acumulado.
 produto: dados reais, segurança de verdade, multi-tenancy e pipeline de entrega.
 
 **Escopo:**
+
 - Banco de dados PostgreSQL + ORM (Prisma ou Drizzle — decisão na fase).
 - Modelagem multi-tenant (isolamento lógico por órgão/tenant).
 - Migrações e _seed_ versionados.
@@ -65,6 +66,7 @@ decisão deve ser deliberada e documentada (ADR).
 evitando retrabalho e garantindo a "base de dados única/integrada" do TR.
 
 **Escopo:**
+
 - **Cadastro de materiais/produtos** com classificação (consumo/permanente/
   serviço/obra), grupos/classes/subclasses padrão Portaria STN 448/2002, vínculo
   CATMAT/CATSER, campos personalizáveis, imagens, rol de itens.
@@ -96,6 +98,7 @@ de modelo, salvo e reexecutado.
 **Objetivo:** entregar o Sistema 2 completo e utilizável.
 
 **Escopo:**
+
 - Estoque multi-almoxarifado, endereçamento físico, controle de localização.
 - Movimentações: entradas (NF-e, ordem de compra), saídas, transferências,
   baixa automática por consumo imediato; atualização automática de saldo.
@@ -122,6 +125,7 @@ movimentação; curva ABC é gerada.
 **Objetivo:** entregar o Sistema 3 completo e utilizável.
 
 **Escopo:**
+
 - Cadastro de bens móveis, imóveis, intangíveis e semoventes; tombamento;
   campos personalizáveis; imagens; placa anterior (auditoria).
 - Incorporação via empenho/ordem de compra; incorporação múltipla;
@@ -150,22 +154,26 @@ de almoxarifado).
 **Objetivo:** entregar o Sistema 1 — o maior — completo. Fatiado em 4 sub-fases.
 
 ### 4a — Compras e PCA
+
 Planejamento de compras (previsão de consumo por setor), oficialização de
 demanda, Plano de Contratações Anual (PCA), solicitações de compra com
 pré-autorização, reserva orçamentária, intenções de licitação compartilháveis.
 
 ### 4b — Pesquisa de preços, Licitação e Pregão
+
 Cotação/pesquisa de preços (preenchimento on-line pelo fornecedor), mapa
 comparativo, processo licitatório com **workflow visual por etapas**, todas as
 modalidades da Lei 14.133, modelos de edital, atas, impugnações, recursos,
 homologação/adjudicação, pregão eletrônico e presencial, integração PNCP.
 
 ### 4c — Contratos, Aditivos e Empenhos
+
 Cadastro único de contratos, cláusulas-modelo, aditivos/apostilamentos/
 reajustes, reequilíbrio econômico-financeiro, cronograma físico-financeiro,
 empenhos (AE/AF/AL) e estornos, restos a pagar, garantias contratuais.
 
 ### 4d — Convênios e Fiscalização de contratos
+
 Convênios (repasse, contrapartida, prestação de contas), fiscalização de
 contratos com painel do fiscal/gestor, formulários de fiscalização, registro
 de ocorrências, sanções administrativas.
@@ -186,6 +194,7 @@ respeita os limites legais; o fiscal registra fiscalização no painel.
 **Objetivo:** entregar o Sistema 4 — portal **público, sem login**.
 
 **Escopo:**
+
 - Publicação (manual e automática via agendador) de licitações, contratos,
   dispensas, ordens de compra, despesas/receitas, orçamento, bens patrimoniais,
   movimentações de almoxarifado, folha de pagamento dos servidores.
@@ -210,6 +219,7 @@ não-proprietário.
 **Objetivo:** conectar os 4 sistemas aos sistemas externos exigidos.
 
 **Escopo:**
+
 - Integração contábil **SIAFIC** — exportação de empenhos, liquidações,
   contratos, convênios, reserva/dotação orçamentária.
 - Integração com sistema de **protocolo/processo digital**.
@@ -234,6 +244,7 @@ schema-validado.
 público de fato.
 
 **Escopo:**
+
 - **Prestação de contas TCE-ES** — geração dos arquivos da IN 43/2017:
   INVIMO/INVMOV/INVINT/INVALM (XML), tabelas 14–17, tabela 39; relatório de
   inconsistências.
@@ -261,6 +272,7 @@ toda a sua base em formato aberto.
 estratégia de produto.
 
 **Escopo:**
+
 - Copiloto de licitações (apoio à montagem de processos, sugestão de modelos).
 - Classificação automática CATMAT/CATSER de materiais.
 - Análise de risco de contratos e detecção de inconsistências.
@@ -284,6 +296,7 @@ auditáveis (com fonte).
 além do produto.
 
 **Escopo:**
+
 - Portal de **Help Desk** — chamados com protocolo único, rastreamento,
   notificações, painel do fiscal.
 - Gestão de **SLA** — 4 níveis de severidade (3h/12h/24h/48h), relatório mensal
@@ -309,6 +322,7 @@ nível; o relatório mensal de SLA é gerado; uma carga de dados legados valida.
 **Objetivo:** garantir que o produto se sustenta em produção e é auditável.
 
 **Escopo:**
+
 - Testes unitários (Vitest) e E2E (Playwright) — cobertura dos fluxos críticos.
 - ESLint + Prettier no pré-commit.
 - Observabilidade — métricas, alertas, monitoramento de disponibilidade (SLA
@@ -340,3 +354,369 @@ consolida aqui.
 - A **PoC do edital** exige 100% dos obrigatórios — a classificação
   Obrigatório/Essencial/Desejável é feita na PoC e deve ser revisada a cada
   fase contra o catálogo de requisitos.
+
+---
+
+# Milestone v0.5 — PoC ready + Diferenciais
+
+> Fases 11–15. Continuam a numeração das Waves 1–6 (fases 0–10, já entregues —
+> **não renumerar**). Cobrem **apenas as 72 features novas** do milestone v0.5
+> catalogadas em [`REQUIREMENTS.md`](REQUIREMENTS.md). Estrutura espelha os 4
+> sprints do diagnóstico, com a Sprint 1 subdividida (infra sequencial +
+> verticais paralelos).
+
+| Fase | Título                        | Tamanho | Requisitos                                                         |
+| ---- | ----------------------------- | ------- | ------------------------------------------------------------------ |
+| 11   | Fundação v0.5 + Infra cruzada | G       | AUDIT-01..05, NOTIF-01..05 (10)                                    |
+| 12   | Verticais de negócio PoC      | GG      | HELP-01..07, REPORT-01..05, TCEVAL-01..04, HELPDESK-01..03 (19)    |
+| 13   | Polimento UX                  | M       | UX-01..06 (6)                                                      |
+| 14   | Operacional para produção     | M       | OPS-01..06 (6)                                                     |
+| 15   | Diferenciais competitivos     | GG      | AUTH-GOVBR, SIGN, PWA, API, BI, AICHAT, EMAIL, THEME, SANDBOX (31) |
+
+**Dependências:** 10 → 11 → 12 → {13, 14} → 15. A Fase 11 é sequencial e
+destrava todo o resto (pg-boss + sino são hub cross-feature). Fases 13 e 14
+podem correr em paralelo após a 12. A Fase 15 só inicia com infra (11) e UX-05
+(13) prontos.
+
+**Critério de "PoC pronta":** Fases 11+12+13+14 entregues e validadas em
+produção real HTTPS. A Fase 15 é diferencial competitivo — **não bloqueia** a
+aprovação da PoC.
+
+**Ação externa — dia 1 do milestone (fora do roadmap de código):** protocolar
+solicitação do Client ID gov.br via processo SGD e do XSD oficial do TCE-ES —
+ambos têm timeline externa de até 30 dias úteis. Registrado como risco nas
+Fases 15 e 14 respectivamente.
+
+---
+
+## Fase 11 — Fundação v0.5 + Infra cruzada
+
+**Objetivo:** estabelecer a infraestrutura transversal que destrava todas as
+features do milestone — fila de jobs, central de notificações e trilha de
+auditoria endurecida — entregue de forma sequencial porque cada peça é
+pré-requisito da seguinte.
+
+**Escopo:**
+
+- Migração consolidada `v05_fundacao`: colunas nullable + 8 novos `Escopo` de
+  RBAC + enums de apoio (notificação, evento de auditoria, job).
+- `pg-boss` (job queue Postgres-backed) com singleton de conexão e **worker em
+  processo separado** (`pnpm jobs:worker`) — sem Redis, zero infra adicional.
+- **B3** — tabela `LogAcesso` dedicada: registro de cada login, logout e
+  renovação de sessão com data/hora, IP, user-agent e sistema acessado; tela de
+  consulta filtrável para o administrador.
+- **B8** — central de notificações: sino na barra superior com contador de não
+  lidas, painel de notificações, marcação individual/em massa, preferências de
+  categoria, geração por eventos do sistema.
+- **B4** — hash chain SHA-256 imutável na trilha de auditoria: cada registro
+  encadeia o hash do anterior, com `pg_advisory_xact_lock` por tenant,
+  `canonical_json` determinístico, backfill dos registros existentes e
+  verificação de integridade.
+- **B10** — extensão da auditoria para Empenho, Liquidação, Pagamento,
+  Aditamento, Ata e Contrato — executada **após** o hash chain estar ativo.
+
+**Requisitos cobertos:** AUDIT-01, AUDIT-02, AUDIT-03, AUDIT-04, AUDIT-05,
+NOTIF-01, NOTIF-02, NOTIF-03, NOTIF-04, NOTIF-05.
+
+**Entregáveis:** migração `v05_fundacao` aplicada; pg-boss + worker rodando;
+`LogAcesso` gravando e consultável; sino de notificações funcional; hash chain
+ativo com verificação de integridade; auditoria estendida a 6 novas entidades.
+
+**Critérios de sucesso (o que deve ser VERDADE):**
+
+1. Cada login/logout gera um registro em `LogAcesso` com IP e user-agent, e o
+   administrador consegue filtrar o log por usuário, período e tipo de evento.
+2. O usuário vê no sino o contador de notificações não lidas, abre o painel com
+   horário relativo, marca como lida (individual ou tudo) e escolhe categorias.
+3. Uma alteração em Empenho, Liquidação, Pagamento, Aditamento, Ata ou Contrato
+   gera registro de auditoria encadeado na cadeia de hash.
+4. A verificação de integridade detecta qualquer adulteração na cadeia de
+   auditoria e aponta o registro afetado.
+
+**Riscos:**
+
+- Hash chain quebrada por escrita concorrente ou `canonical_json` não
+  determinístico — mitigação: lock advisório por tenant, pinning explícito de
+  tipos (Date→ISO truncado, Decimal→precisão fixa) e suíte de 30+ testes de
+  snapshot.
+- **B10 antes de B4 é proibido** — extensão de modelos auditados sem hash chain
+  ativo deixa entradas permanentemente fora da cadeia. Ordem hard:
+  migração → B4 (com backfill) → constraint `@unique` → B10.
+- Worker pg-boss embutido no processo Next.js é anti-pattern — worker roda em
+  container/processo separado, com heartbeat de monitoramento.
+
+**Dependências:** Fase 10 (produto estável pós-Wave 6).
+
+---
+
+## Fase 12 — Verticais de negócio PoC
+
+**Objetivo:** entregar os bloqueadores obrigatórios do TR que dependem da
+infra da Fase 11 — cada feature é um vertical independente, paralelizável em
+quatro lanes após a fila de jobs e o sino existirem.
+
+**Escopo:**
+
+- **B1+B5** — ajuda online contextual e treinamento: painel de ajuda por rota,
+  busca por palavra-chave com índice, conteúdo em Markdown versionado no
+  repositório, trilhas de treinamento sequenciais por sistema, progresso do
+  usuário, emissão de certificado PDF de conclusão, material didático para
+  download.
+- **B2** — gerenciador de relatórios: criação a partir de modelos com filtros e
+  colunas, salvar configuração, agendar execução (única/recorrente) processada
+  em segundo plano via pg-boss, download em PDF/XLSX/CSV, acompanhamento de
+  status de fila.
+- **B7** — pré-validador TCE-ES: execução sobre os dados de prestação de contas
+  (INVIMO/INVMOV/INVINT/INVALM), relatório de inconsistências classificadas por
+  severidade, distinção visual entre validação preliminar e oficial, bloqueio
+  da geração do XML enquanto houver erros bloqueantes.
+- **B9** — encerramento de chamado com homologação: confirmação explícita do
+  solicitante para fechar chamado, notificação ao solicitante quando resolvido,
+  encerramento automático por inatividade após N dias.
+
+**Requisitos cobertos:** HELP-01, HELP-02, HELP-03, HELP-04, HELP-05, HELP-06,
+HELP-07, REPORT-01, REPORT-02, REPORT-03, REPORT-04, REPORT-05, TCEVAL-01,
+TCEVAL-02, TCEVAL-03, TCEVAL-04, HELPDESK-01, HELPDESK-02, HELPDESK-03.
+
+**Entregáveis:** painel de ajuda contextual + base pesquisável; trilhas de
+treinamento com certificados PDF; gerenciador de relatórios agendados;
+pré-validador TCE-ES com relatório de inconsistências; workflow de homologação
+de chamados.
+
+**Critérios de sucesso (o que deve ser VERDADE):**
+
+1. De qualquer tela, o usuário abre um painel de ajuda com os artigos da rota
+   atual e pesquisa a base por palavra-chave.
+2. O usuário completa uma trilha de treinamento, acompanha seu progresso e
+   recebe um certificado PDF de conclusão com órgão e data.
+3. O usuário cria um relatório de um modelo, salva a configuração, agenda a
+   execução em segundo plano e baixa o resultado em PDF/XLSX/CSV.
+4. O pré-validador aponta inconsistências por severidade e impede a geração do
+   XML final enquanto houver erro bloqueante.
+5. Um chamado só passa para "fechado" após o "OK" do solicitante, ou é
+   encerrado automaticamente por inatividade com registro do motivo.
+
+**Riscos:**
+
+- Pré-validador sem o XSD oficial do TCE-ES pode dar "OK falso" — mitigação:
+  status explícito `VALIDACAO_PRELIMINAR` (regras internas) vs
+  `VALIDACAO_OFICIAL` (XSD), nunca marcar "OK" oficial sem o XSD. A validação
+  oficial é concluída na Fase 14 (OPS-03).
+- HELPDESK-03 (encerramento automático) depende da fila de jobs da Fase 11.
+
+**Dependências:** Fase 11 (pg-boss para B2/B7/HELPDESK-03; sino para B9).
+
+**UI hint**: yes
+
+---
+
+## Fase 13 — Polimento UX
+
+**Objetivo:** elevar a interface ao padrão de mercado 2026 — estados de
+carregamento, tratamento de erro, navegação contextual, acessibilidade global
+e cobertura de testes — features sem dependência entre si, em paralelo total.
+
+**Escopo:**
+
+- **U1+U2+U6** — `loading.tsx` com skeletons e `error.tsx` com reporte ao
+  Sentry e "tentar novamente" em todos os módulos (~42 arquivos).
+- **U3** — breadcrumbs automáticos baseados no pathname em telas internas.
+- **U4** — `AcessibilidadeControls` (tamanho de fonte, alto contraste)
+  disponível em todas as telas, autenticadas e públicas, com preferência
+  persistida.
+- **U5** — filtros do dashboard por exercício, período e órgão, com o estado
+  refletido na URL via `nuqs` (compartilhável). **Precede a Fase 15 (BI)** —
+  ambos compartilham os parsers de URL-state.
+- **U7** — suíte E2E ampliada de 16 para ~40 specs, com fluxos completos e
+  caminhos negativos, executando no CI.
+
+**Requisitos cobertos:** UX-01, UX-02, UX-03, UX-04, UX-05, UX-06.
+
+**Entregáveis:** loading/error/skeletons por rota; breadcrumbs automáticos;
+controles de acessibilidade globais; filtros de dashboard URL-state; ~40 specs
+Playwright no CI.
+
+**Critérios de sucesso (o que deve ser VERDADE):**
+
+1. Ao navegar para qualquer módulo, o usuário vê um skeleton enquanto os dados
+   carregam, sem tela em branco; erros de renderização mostram tela amigável
+   com reporte ao Sentry e botão "tentar novamente".
+2. O usuário vê breadcrumbs refletindo a hierarquia da rota em telas internas.
+3. Os controles de acessibilidade aparecem em todas as telas (autenticadas e
+   públicas) e a preferência persiste entre sessões.
+4. O usuário filtra o dashboard por exercício/período/órgão e a URL resultante
+   é compartilhável e reaplicável.
+5. A suíte E2E cobre ~40 cenários, incluindo caminhos negativos, e roda no CI.
+
+**Riscos:**
+
+- `loading.tsx` mal posicionado pode bloquear a navegação — usar Suspense
+  boundaries granulares.
+- Hidratação inconsistente com `nuqs` — usar `<NuqsAdapter>` no layout e
+  parsers tipados; testar SSR/CSR.
+
+**Dependências:** Fase 12 (módulos de negócio finalizados para receber
+loading/error). Pode correr em paralelo com a Fase 14.
+
+**UI hint**: yes
+
+---
+
+## Fase 14 — Operacional para produção
+
+**Objetivo:** levar o produto a produção real — secrets, telemetria, validação
+fiscal oficial, deploy HTTPS e monitoramento — sequência DevOps interna em que
+cada passo habilita o seguinte.
+
+**Escopo:**
+
+- **O1** — secrets do GitHub Actions (`AWS_*`, `S3_BUCKET_BACKUP`,
+  `DATABASE_URL` de produção) para o backup automático pg_dump → S3 funcionar.
+- **O2** — `NEXT_PUBLIC_SENTRY_DSN` configurado em produção, capturando erros
+  reais.
+- **O3** — validação TCE-ES contra o **XSD oficial** do TCE-ES — conclui a
+  validação "oficial" iniciada como preliminar no pré-validador da Fase 12.
+- **O6** — deploy real com HTTPS em domínio próprio (Hostinger VPS + Docker +
+  Caddy).
+- **O5** — monitor de uptime (BetterStack/UptimeRobot) com página de status
+  pública e relatório mensal de disponibilidade e atendimento de SLA.
+
+**Requisitos cobertos:** OPS-01, OPS-02, OPS-03, OPS-04, OPS-05, OPS-06.
+
+**Entregáveis:** backup automático ativo em produção; Sentry capturando erros
+de produção; validação TCE-ES contra XSD oficial; aplicação no ar com HTTPS e
+domínio próprio; monitor de uptime + página de status + relatório mensal.
+
+**Critérios de sucesso (o que deve ser VERDADE):**
+
+1. O backup pg_dump → S3 executa em produção com os secrets configurados, e um
+   restore de teste é validado.
+2. Erros de produção aparecem no painel do Sentry com o DSN do ambiente.
+3. O pré-validador valida o XML contra o XSD oficial do TCE-ES, marcando a
+   validação como "oficial".
+4. A aplicação está acessível por domínio próprio com HTTPS.
+5. A página pública de status mostra a disponibilidade e o sistema gera o
+   relatório mensal de uptime e SLA.
+
+**Riscos:**
+
+- Backup PostgreSQL não testado pós-deploy VPS — mitigação: backup local via
+  systemd timer + teste de restore mensal automatizado.
+- **XSD oficial do TCE-ES depende de solicitação formal** com timeline externa
+  de até 30 dias — protocolar no dia 1 do milestone. Plano B: manter status
+  `VALIDACAO_PRELIMINAR` da Fase 12 até o XSD chegar.
+- Secrets logados acidentalmente — redaction no logger; nunca ecoar secrets em
+  steps do CI.
+
+**Dependências:** Fase 12 (O3 conclui o pré-validador TCEVAL). Pode correr em
+paralelo com a Fase 13.
+
+---
+
+## Fase 15 — Diferenciais competitivos
+
+**Objetivo:** entregar os diferenciais que separam o Civitas Gov dos
+concorrentes desktop-legado — login gov.br, assinatura ICP-Brasil, PWA mobile,
+API pública, BI, IA e personalização — agrupados em 4 waves por afinidade
+técnica para maximizar paralelismo. **Não bloqueia a aprovação da PoC.**
+
+**Escopo:**
+
+### Wave A — gov.br + tema + sandbox (tocam `Usuario`/`Tenant`)
+
+- **★1** — login gov.br: OAuth 2.0 com PKCE além de credenciais, vínculo da
+  conta gov.br ao usuário do tenant por CPF (com desambiguação explícita),
+  registro do selo de confiabilidade (bronze/prata/ouro).
+- **★9** — modo escuro: alternância claro/escuro/seguir-o-sistema, preferência
+  persistida por usuário, aplicada sem flash.
+- **★11** — sandbox por tenant: clone de um tenant-modelo com dados de
+  demonstração isolados, aviso persistente + bloqueio de operações sensíveis,
+  prazo de validade com remoção automática.
+
+### Wave B — webhooks/API + email (consomem pg-boss + sino)
+
+- **★4** — webhooks + API pública: cadastro de endpoints com seleção de
+  eventos, entrega com assinatura HMAC-SHA256 + retentativas + DLQ, histórico
+  de entregas com reenvio manual, API versionada `/api/v1/*` documentada via
+  OpenAPI, rate limiting e autenticação por tenant.
+- **★6** — notificações por e-mail: envio de notificações "importantes" por
+  e-mail conforme preferência, modelos visuais consistentes, camada abstraída
+  por provider.
+
+### Wave C — ICP-Brasil + PWA (pesados independentes)
+
+- **★2** — assinatura ICP-Brasil: assinatura de `DocumentoAssinavel` com
+  certificado A1 (PKCS#7/CAdES-BES), verificação de validade (assinante,
+  cadeia, integridade), material sensível nunca persistido no banco.
+- **★3** — PWA inventário offline: interface mobile-first instalável, leitura
+  de QR/código de barras pela câmera, registro de conferência offline com fila
+  local, sincronização sem perda/duplicação, isolamento de dados por tenant.
+
+### Wave D — BI + chat IA + detecção (compartilham `src/lib/ai/` e U5)
+
+- **★5** — dashboard BI: gráficos de execução orçamentária, top fornecedores e
+  materiais críticos, drill-down, respeito aos filtros da Fase 13 e ao RBAC.
+- **★7** — assistente legal IA: chat com streaming citando Lei 14.133/2021 e
+  IN 43/2017 por artigo, histórico persistido por usuário/tenant, registro de
+  custo/latência/tokens.
+- **★8** — detecção de inconsistências: análise de empenhos/liquidações
+  sinalizando valores divergentes, datas incoerentes e dotação insuficiente.
+
+**Requisitos cobertos:** AUTH-GOVBR-01, AUTH-GOVBR-02, AUTH-GOVBR-03, SIGN-01,
+SIGN-02, SIGN-03, PWA-01, PWA-02, PWA-03, PWA-04, PWA-05, API-01, API-02,
+API-03, API-04, API-05, BI-01, BI-02, BI-03, AICHAT-01, AICHAT-02, AICHAT-03,
+AICHAT-04, EMAIL-01, EMAIL-02, EMAIL-03, THEME-01, THEME-02, SANDBOX-01,
+SANDBOX-02, SANDBOX-03.
+
+**Entregáveis:** login gov.br operacional; dark mode persistido; sandbox por
+tenant com expiração; webhooks + API v1 documentada; e-mail transacional;
+assinatura ICP-Brasil A1; PWA de inventário offline; dashboard BI com
+drill-down; chat IA legal; detector de inconsistências em empenhos.
+
+**Critérios de sucesso (o que deve ser VERDADE):**
+
+1. O usuário faz login via gov.br (PKCE), tem a conta vinculada ao seu usuário
+   do tenant por CPF, e o administrador vê o selo de confiabilidade.
+2. O usuário alterna o tema (claro/escuro/sistema), a preferência persiste sem
+   flash, e um administrador cria um sandbox isolado que expira sozinho.
+3. Um webhook é entregue com assinatura HMAC e retentativa em falha, e a API
+   pública `/api/v1/*` responde com rate limiting e autenticação por tenant.
+4. O usuário assina um documento com certificado ICP-Brasil A1 e verifica a
+   assinatura; no PWA, lê QR offline e sincroniza ao reconectar sem duplicar.
+5. O usuário vê gráficos de BI com drill-down respeitando filtros e RBAC,
+   conversa com o assistente legal citando artigos, e o sistema sinaliza
+   inconsistências em empenhos/liquidações.
+
+**Riscos:**
+
+- **★1 gov.br** depende de Client ID emitido via processo SGD com timeline
+  externa de até 30 dias úteis — **protocolar a solicitação no dia 1 do
+  milestone**, com owner único. Plano B: UI mock "Em homologação".
+- **★8 (AICHAT-03)** depende da auditoria de Empenho/Liquidação entregue na
+  Fase 11 (AUDIT-05) — sem ela, não há trilha para analisar.
+- **★5 (BI)** depende de UX-05 (Fase 13) — compartilham os parsers `nuqs` de
+  URL-state.
+- ICP-Brasil: política CAdES-BES brasileira em `node-forge` pode exigir
+  trabalho não previsto; PFX nunca no banco (storage cifrado), whitelist
+  SHA-256+, senha jamais em log. Plano B: API de assinatura gov.br.
+- Resend com PII fora do Brasil conflita com a premissa LGPD — revisão jurídica
+  antes da Wave B; payload minimizado; abstração de provider permite trocar
+  para SES sa-east-1.
+- PWA + Service Worker tem comportamento errático em iOS Safari — testar em
+  dispositivo real ao fim da Wave C.
+
+**Dependências:** Fase 11 (pg-boss + sino + AUDIT-05) e Fase 13 (UX-05 para BI).
+
+**UI hint**: yes
+
+---
+
+## Progresso — Milestone v0.5
+
+| Fase                              | Planos Concluídos | Status       | Concluída |
+| --------------------------------- | ----------------- | ------------ | --------- |
+| 11. Fundação v0.5 + Infra cruzada | 0/0               | Não iniciada | -         |
+| 12. Verticais de negócio PoC      | 0/0               | Não iniciada | -         |
+| 13. Polimento UX                  | 0/0               | Não iniciada | -         |
+| 14. Operacional para produção     | 0/0               | Não iniciada | -         |
+| 15. Diferenciais competitivos     | 0/0               | Não iniciada | -         |

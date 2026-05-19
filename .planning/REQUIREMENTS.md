@@ -176,19 +176,94 @@ Exclusões explícitas, documentadas para prevenir scope creep. Anti-features da
 
 ## Traceability
 
-Mapa de fases × requisitos. Preenchido durante a criação do roadmap.
+Mapa de fases × requisitos. Preenchido na criação do roadmap (2026-05-19).
 
-| Requirement                       | Phase | Status  |
-| --------------------------------- | ----- | ------- |
-| (a preencher pelo gsd-roadmapper) | —     | Pending |
+| Requirement   | Phase   | Status  |
+| ------------- | ------- | ------- |
+| HELP-01       | Fase 12 | Pending |
+| HELP-02       | Fase 12 | Pending |
+| HELP-03       | Fase 12 | Pending |
+| HELP-04       | Fase 12 | Pending |
+| HELP-05       | Fase 12 | Pending |
+| HELP-06       | Fase 12 | Pending |
+| HELP-07       | Fase 12 | Pending |
+| REPORT-01     | Fase 12 | Pending |
+| REPORT-02     | Fase 12 | Pending |
+| REPORT-03     | Fase 12 | Pending |
+| REPORT-04     | Fase 12 | Pending |
+| REPORT-05     | Fase 12 | Pending |
+| AUDIT-01      | Fase 11 | Pending |
+| AUDIT-02      | Fase 11 | Pending |
+| AUDIT-03      | Fase 11 | Pending |
+| AUDIT-04      | Fase 11 | Pending |
+| AUDIT-05      | Fase 11 | Pending |
+| TCEVAL-01     | Fase 12 | Pending |
+| TCEVAL-02     | Fase 12 | Pending |
+| TCEVAL-03     | Fase 12 | Pending |
+| TCEVAL-04     | Fase 12 | Pending |
+| NOTIF-01      | Fase 11 | Pending |
+| NOTIF-02      | Fase 11 | Pending |
+| NOTIF-03      | Fase 11 | Pending |
+| NOTIF-04      | Fase 11 | Pending |
+| NOTIF-05      | Fase 11 | Pending |
+| HELPDESK-01   | Fase 12 | Pending |
+| HELPDESK-02   | Fase 12 | Pending |
+| HELPDESK-03   | Fase 12 | Pending |
+| UX-01         | Fase 13 | Pending |
+| UX-02         | Fase 13 | Pending |
+| UX-03         | Fase 13 | Pending |
+| UX-04         | Fase 13 | Pending |
+| UX-05         | Fase 13 | Pending |
+| UX-06         | Fase 13 | Pending |
+| OPS-01        | Fase 14 | Pending |
+| OPS-02        | Fase 14 | Pending |
+| OPS-03        | Fase 14 | Pending |
+| OPS-04        | Fase 14 | Pending |
+| OPS-05        | Fase 14 | Pending |
+| OPS-06        | Fase 14 | Pending |
+| AUTH-GOVBR-01 | Fase 15 | Pending |
+| AUTH-GOVBR-02 | Fase 15 | Pending |
+| AUTH-GOVBR-03 | Fase 15 | Pending |
+| SIGN-01       | Fase 15 | Pending |
+| SIGN-02       | Fase 15 | Pending |
+| SIGN-03       | Fase 15 | Pending |
+| PWA-01        | Fase 15 | Pending |
+| PWA-02        | Fase 15 | Pending |
+| PWA-03        | Fase 15 | Pending |
+| PWA-04        | Fase 15 | Pending |
+| PWA-05        | Fase 15 | Pending |
+| API-01        | Fase 15 | Pending |
+| API-02        | Fase 15 | Pending |
+| API-03        | Fase 15 | Pending |
+| API-04        | Fase 15 | Pending |
+| API-05        | Fase 15 | Pending |
+| BI-01         | Fase 15 | Pending |
+| BI-02         | Fase 15 | Pending |
+| BI-03         | Fase 15 | Pending |
+| AICHAT-01     | Fase 15 | Pending |
+| AICHAT-02     | Fase 15 | Pending |
+| AICHAT-03     | Fase 15 | Pending |
+| AICHAT-04     | Fase 15 | Pending |
+| EMAIL-01      | Fase 15 | Pending |
+| EMAIL-02      | Fase 15 | Pending |
+| EMAIL-03      | Fase 15 | Pending |
+| THEME-01      | Fase 15 | Pending |
+| THEME-02      | Fase 15 | Pending |
+| SANDBOX-01    | Fase 15 | Pending |
+| SANDBOX-02    | Fase 15 | Pending |
+| SANDBOX-03    | Fase 15 | Pending |
 
 **Coverage:**
 
 - v1 requirements: 72 total
-- Mapped to phases: 0 (pendente — roadmap)
-- Unmapped: 72 ⚠️
+- Mapped to phases: 72 ✓
+- Unmapped: 0 ✓
+
+Distribuição por fase: Fase 11 — 10 (AUDIT, NOTIF) · Fase 12 — 19 (HELP,
+REPORT, TCEVAL, HELPDESK) · Fase 13 — 6 (UX) · Fase 14 — 6 (OPS) · Fase 15 — 31
+(AUTH-GOVBR, SIGN, PWA, API, BI, AICHAT, EMAIL, THEME, SANDBOX).
 
 ---
 
 _Requirements defined: 2026-05-19_
-_Last updated: 2026-05-19 after initial definition (milestone v0.5)_
+_Last updated: 2026-05-19 — traceability preenchida pelo gsd-roadmapper (Fases 11-15)_

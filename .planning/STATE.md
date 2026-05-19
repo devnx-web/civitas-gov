@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v0.5
 milestone_name: PoC ready + Diferenciais
-status: planning
-last_updated: "2026-05-19T18:33:48.099Z"
+status: roadmapped
+last_updated: "2026-05-19T20:01:17.000Z"
 last_activity: 2026-05-19
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -117,9 +117,48 @@ O projeto atingiu ~95% do TR. Os itens residuais são operacionais/de produção
 
 Veja também [`auditoria/AUDIT-resumo.md`](auditoria/AUDIT-resumo.md).
 
+## Roadmap v0.5 — Fases 11-15
+
+Roadmap criado em 2026-05-19. 72 requisitos v1 mapeados a 5 fases (cobertura
+100%). Detalhe completo em [`ROADMAP.md`](ROADMAP.md), seção "Milestone v0.5".
+
+| #   | Fase                          | Tam. | Requisitos                           | Status       |
+| --- | ----------------------------- | ---- | ------------------------------------ | ------------ |
+| 11  | Fundação v0.5 + Infra cruzada | G    | AUDIT-01..05, NOTIF-01..05 (10)      | Não iniciada |
+| 12  | Verticais de negócio PoC      | GG   | HELP, REPORT, TCEVAL, HELPDESK (19)  | Não iniciada |
+| 13  | Polimento UX                  | M    | UX-01..06 (6)                        | Não iniciada |
+| 14  | Operacional para produção     | M    | OPS-01..06 (6)                       | Não iniciada |
+| 15  | Diferenciais competitivos     | GG   | gov.br, SIGN, PWA, API, BI, IA… (31) | Não iniciada |
+
+**Dependências:** 10 → 11 → 12 → {13, 14} → 15. Fase 11 sequencial (infra hub).
+13 e 14 paralelas após a 12. Fase 15 só inicia com infra (11) + UX-05 (13).
+
+**Critério de "PoC pronta":** Fases 11+12+13+14 entregues e validadas em
+produção HTTPS. Fase 15 é diferencial — não bloqueia a PoC.
+
+### Dependências hard registradas
+
+- **B4 antes de B10** (dentro da Fase 11): hash chain deve estar ativo antes de
+  estender a auditoria a Empenho/Liquidação/etc — senão entradas ficam fora da
+  cadeia permanentemente.
+- **UX-05 antes de BI** (Fase 13 → Fase 15): compartilham parsers `nuqs`.
+- **AUDIT-05 antes de AICHAT-03** (Fase 11 → Fase 15): detecção de
+  inconsistências precisa da auditoria de Empenho/Liquidação.
+- **TCEVAL (Fase 12) → OPS-03 (Fase 14)**: validação preliminar concluída como
+  oficial quando o XSD do TCE-ES chegar.
+
+### Ação externa — dia 1 do milestone
+
+Protocolar **fora do roadmap de código**, pois têm timeline externa de até 30
+dias úteis:
+
+1. Solicitação do Client ID gov.br via processo SGD (bloqueia ★1 na Fase 15).
+2. Solicitação do XSD oficial do TCE-ES (bloqueia OPS-03 na Fase 14).
+
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Fase 11 — Fundação v0.5 + Infra cruzada (não iniciada)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-19 — Milestone v0.5 started
+Status: Roadmap criado — pronto para planejamento de fase
+Last activity: 2026-05-19 — Roadmap v0.5 criado (Fases 11-15, 72 requisitos)
+Next: `/gsd-plan-phase 11`
