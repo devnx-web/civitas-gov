@@ -39,6 +39,7 @@ model Tenant {
   planosReversao  PlanoReversao[]
   ticketsSuporte  TicketSuporte[]
   artigosBaseConhecimento ArtigoBaseConhecimento[]
+  configuracoesSLA ConfiguracaoSLA[]
 
   @@map("tenants")
 }
@@ -913,6 +914,35 @@ model ItemReversao {
 
 // ── Help Desk ────────────────────────────────────────────────────────────────
 
+// ── SLA ──────────────────────────────────────────────────────────────────────
+
+enum NivelSLA {
+  critico
+  alto
+  medio
+  baixo
+}
+
+enum StatusSLA {
+  dentro_prazo
+  em_risco
+  vencido
+}
+
+model ConfiguracaoSLA {
+  id           String   @id @default(cuid())
+  tenantId     String
+  nivel        NivelSLA
+  prazoHoras   Int
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, nivel])
+  @@map("configuracoes_sla")
+}
+
 enum StatusTicket {
   aberto
   em_andamento
@@ -944,6 +974,9 @@ model TicketSuporte {
   categoria       CategoriaTicket
   prioridade      PrioridadeTicket @default(media)
   status          StatusTicket @default(aberto)
+  nivelSLA        NivelSLA?
+  prazoResolucao  DateTime?
+  statusSLA       StatusSLA?
   solicitanteId   String
   responsavelId   String?
   dataResolucao   DateTime?

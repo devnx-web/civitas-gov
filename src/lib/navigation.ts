@@ -222,6 +222,16 @@ export const NAV: NavGroup[] = [
         icon: Headphones,
         descricao: "Suporte técnico e base de conhecimento",
         roles: ["admin", "gestor", "operador"],
+        menus: [
+          {
+            label: "Suporte",
+            submenus: [{ label: "Tickets", href: "/help-desk" }],
+          },
+          {
+            label: "Gestão",
+            submenus: [{ label: "SLA", href: "/help-desk/sla" }],
+          },
+        ],
       },
     ],
   },
@@ -242,7 +252,7 @@ export const NAV: NavGroup[] = [
 /** Retorna o NavItem (módulo) correspondente a um pathname. */
 export function navItemAtual(pathname: string): NavItem | undefined {
   return NAV.flatMap((g) => g.itens).find(
-    (i) => pathname === i.href || pathname.startsWith(i.href + "/"),
+    (i) => pathname === i.href || pathname.startsWith(i.href + "/")
   );
 }
 
