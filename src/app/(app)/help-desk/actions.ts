@@ -7,6 +7,9 @@ import { StatusTicket } from "@/generated/prisma/enums";
 import {
   criarTicket,
   listarTickets,
+  listarTicketsPaginado,
+  obterTicketPorId,
+  contarTicketsPorStatus,
   adicionarMensagem,
   atualizarStatusTicket,
   criarArtigoBase,
@@ -24,12 +27,29 @@ export async function abrirTicket(data: {
   const solicitanteId = session?.user?.id ?? "";
   const ticket = await criarTicket({ tenantId: tenant.id, solicitanteId, ...data });
   revalidatePath("/(app)/help-desk");
-  return { sucesso: true, ticket };
+  return { sucesso: true, ticketId: ticket.id };
 }
 
 export async function listarTicketsAction(filtros?: { status?: StatusTicket }) {
   const tenant = await getTenant();
   return listarTickets(tenant.id, filtros);
+}
+
+export async function listarTicketsPaginadoAction(
+  filtros?: Parameters<typeof listarTicketsPaginado>[1]
+) {
+  const tenant = await getTenant();
+  return listarTicketsPaginado(tenant.id, filtros);
+}
+
+export async function obterTicketAction(ticketId: string) {
+  const tenant = await getTenant();
+  return obterTicketPorId(tenant.id, ticketId);
+}
+
+export async function contarTicketsAction() {
+  const tenant = await getTenant();
+  return contarTicketsPorStatus(tenant.id);
 }
 
 export async function responderTicket(ticketId: string, mensagem: string, interna?: boolean) {

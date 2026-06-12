@@ -337,7 +337,14 @@ export const NAV: NavGroup[] = [
         menus: [
           {
             label: "Suporte",
-            submenus: [{ label: "Tickets", href: "/help-desk" }],
+            submenus: [
+              { label: "Tickets", href: "/help-desk" },
+              { label: "Novo ticket", href: "/help-desk/novo" },
+            ],
+          },
+          {
+            label: "Conhecimento",
+            submenus: [{ label: "Base de conhecimento", href: "/help-desk/base-de-conhecimento" }],
           },
           {
             label: "Gestão",

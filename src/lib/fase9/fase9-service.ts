@@ -191,6 +191,104 @@ export async function listarTickets(
   });
 }
 
+export interface FiltrosTicket {
+  busca?: string;
+  status?: StatusTicket;
+  prioridade?: string;
+  categoria?: string;
+  pagina?: number;
+  porPagina?: number;
+}
+
+export async function listarTicketsPaginado(
+  tenantId: string,
+  filtros: FiltrosTicket = {}
+): Promise<{ items: any[]; total: number }> {
+  const { busca, status, prioridade, categoria, pagina = 1, porPagina = 15 } = filtros;
+  const where: any = { tenantId };
+
+  if (status) where.status = status;
+  if (prioridade) where.prioridade = prioridade;
+  if (categoria) where.categoria = categoria;
+  if (busca) {
+    where.OR = [
+      { titulo: { contains: busca, mode: "insensitive" } },
+      { descricao: { contains: busca, mode: "insensitive" } },
+    ];
+  }
+
+  const [items, total] = await Promise.all([
+    prisma.ticketSuporte.findMany({
+      where,
+      orderBy: { criadoEm: "desc" },
+      include: {
+        mensagens: { orderBy: { criadoEm: "asc" } },
+      },
+      skip: (pagina - 1) * porPagina,
+      take: porPagina,
+    }),
+    prisma.ticketSuporte.count({ where }),
+  ]);
+
+  const usuarioIds = Array.from(
+    new Set(
+      items.flatMap((t) => [t.solicitanteId, t.responsavelId].filter((id): id is string => !!id))
+    )
+  );
+  const usuarios = usuarioIds.length
+    ? await prisma.usuario.findMany({
+        where: { id: { in: usuarioIds } },
+        select: { id: true, nome: true, email: true },
+      })
+    : [];
+  const usuarioMap = new Map(usuarios.map((u) => [u.id, u]));
+
+  const itemsComUsuario = items.map((t) => ({
+    ...t,
+    solicitante: usuarioMap.get(t.solicitanteId) ?? null,
+    responsavel: t.responsavelId ? (usuarioMap.get(t.responsavelId) ?? null) : null,
+  }));
+
+  return { items: itemsComUsuario, total };
+}
+
+export async function obterTicketPorId(tenantId: string, ticketId: string) {
+  const ticket = await prisma.ticketSuporte.findFirst({
+    where: { id: ticketId, tenantId },
+    include: {
+      mensagens: { orderBy: { criadoEm: "asc" } },
+    },
+  });
+  if (!ticket) return null;
+
+  const usuarioIds = [ticket.solicitanteId, ticket.responsavelId].filter(Boolean) as string[];
+  const usuarios = usuarioIds.length
+    ? await prisma.usuario.findMany({
+        where: { id: { in: usuarioIds } },
+        select: { id: true, nome: true, email: true },
+      })
+    : [];
+  const usuarioMap = new Map(usuarios.map((u) => [u.id, u]));
+
+  return {
+    ...ticket,
+    solicitante: usuarioMap.get(ticket.solicitanteId) ?? null,
+    responsavel: ticket.responsavelId ? (usuarioMap.get(ticket.responsavelId) ?? null) : null,
+  };
+}
+
+export async function contarTicketsPorStatus(tenantId: string) {
+  const [aberto, emAndamento, aguardando, resolvido, fechado, total] = await Promise.all([
+    prisma.ticketSuporte.count({ where: { tenantId, status: "aberto" } }),
+    prisma.ticketSuporte.count({ where: { tenantId, status: "em_andamento" } }),
+    prisma.ticketSuporte.count({ where: { tenantId, status: "aguardando_usuario" } }),
+    prisma.ticketSuporte.count({ where: { tenantId, status: "resolvido" } }),
+    prisma.ticketSuporte.count({ where: { tenantId, status: "fechado" } }),
+    prisma.ticketSuporte.count({ where: { tenantId } }),
+  ]);
+  return { aberto, emAndamento, aguardando, resolvido, fechado, total };
+}
+
 export async function adicionarMensagem(data: {
   ticketId: string;
   autorId: string;
